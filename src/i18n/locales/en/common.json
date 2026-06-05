@@ -1,0 +1,160 @@
+{
+  "app": {
+    "name": "Tibbna",
+    "tagline": "Your Health, Your Way"
+  },
+  "nav": {
+    "profile": "Profile",
+    "appointments": "Appointments",
+    "health": "My Health",
+    "medications": "My Medications",
+    "labs": "Labs",
+    "bodymap": "Body Map",
+    "logout": "Logout"
+  },
+  "login": {
+    "title": "Sign In",
+    "subtitle": "Enter your Patient ID and phone number to continue",
+    "patientId": "Patient ID",
+    "patientIdPlaceholder": "Enter your patient ID",
+    "phone": "Phone Number",
+    "phonePlaceholder": "+964xxxxxxxxxx",
+    "sendOtp": "Send Verification Code",
+    "sending": "Sending...",
+    "otpTitle": "Enter Verification Code",
+    "otpSubtitle": "A 6-digit code was sent to your phone",
+    "otpPlaceholder": "000000",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "resend": "Resend Code",
+    "resendIn": "Resend in {{seconds}}s",
+    "errors": {
+      "invalidCredentials": "Invalid Patient ID or phone number",
+      "invalidOtp": "Invalid or expired verification code",
+      "otpExpired": "Code expired. Please request a new one",
+      "tooManyAttempts": "Too many attempts. Please try again later",
+      "patientNotRegistered": "This Patient ID is not registered in the hospital system",
+      "invalidPatientIdFormat": "Patient ID must be exactly 12 digits",
+      "patientIdHasLetters": "Patient ID must contain numbers only",
+      "patientIdTooLong": "Patient ID cannot exceed 12 digits",
+      "patientIdTooShort": "Patient ID must be exactly 12 digits"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "info": "Personal Information",
+    "settings": "Settings",
+    "help": "Help",
+    "name": "Full Name",
+    "dob": "Date of Birth",
+    "gender": "Gender",
+    "phone": "Phone Number",
+    "address": "Address",
+    "bloodType": "Blood Type",
+    "allergies": "Allergies",
+    "none": "None",
+    "patientId": "Patient ID",
+    "settingsTitle": "Preferences",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "language": "Language",
+    "helpTitle": "Help & Support",
+    "helpContent": "Help and support content coming soon. Please contact your healthcare provider for assistance.",
+    "logout": "Sign Out",
+    "loggingOut": "Signing out..."
+  },
+  "appointments": {
+    "title": "Appointments",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "noUpcoming": "No upcoming appointments",
+    "noPast": "No past appointments",
+    "date": "Date",
+    "time": "Time",
+    "doctor": "Doctor",
+    "hospital": "Hospital",
+    "department": "Department",
+    "type": "Type",
+    "appointment": "Appointment",
+    "operation": "Operation",
+    "status": {
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "cancelled": "Cancelled"
+    }
+  },
+  "health": {
+    "title": "My Health",
+    "diagnoses": "Diagnoses",
+    "vitals": "Vitals",
+    "history": "Medical History",
+    "carePlan": "Care Plan",
+    "noDiagnoses": "No diagnoses on record",
+    "noVitals": "No vitals recorded",
+    "noHistory": "No medical history",
+    "noCarePlan": "No care plan",
+    "status": {
+      "active": "Active",
+      "resolved": "Resolved",
+      "chronic": "Chronic"
+    },
+    "normalRange": "Normal Range",
+    "goals": "Goals"
+  },
+  "medications": {
+    "title": "My Medications",
+    "current": "Current",
+    "past": "Past",
+    "noCurrent": "No current medications",
+    "noPast": "No past medications",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "prescribedBy": "Prescribed By",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "instructions": "Instructions",
+    "requestRenewal": "Request Renewal",
+    "renewalSent": "Renewal request sent to pharmacy",
+    "renewalError": "Failed to send renewal request",
+    "searchPlaceholder": "Search by medication name or date...",
+    "noResults": "No medications match your search",
+    "resultSingular": "result",
+    "resultPlural": "results"
+  },
+  "labs": {
+    "title": "Lab Results",
+    "orderedBy": "Ordered By",
+    "orderDate": "Order Date",
+    "noOrders": "No lab orders found",
+    "testName": "Test",
+    "result": "Result",
+    "normalRange": "Normal Range",
+    "unit": "Unit",
+    "status": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "partial": "Partial"
+    },
+    "abnormal": "Abnormal",
+    "expandOrder": "Show Tests",
+    "collapseOrder": "Hide Tests"
+  },
+  "bodymap": {
+    "title": "Pain Report"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "noData": "No data available",
+    "sessionExpired": "Session expired. Please log in again."
+  }
+}

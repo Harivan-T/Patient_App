@@ -2,26 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #f4f9fb;
+    --foreground: #111827;
+    --tibbna-blue: #6BC9E4;
+    --tibbna-blue-dark: #4AAFC8;
+    --tibbna-gold: #D4A844;
+    --tibbna-light: #EDF8FC;
+  }
+  .dark {
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --tibbna-light: #0f2a33;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    color: #111827;
+  }
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: #f9fafb;
+  }
+  [dir='rtl'] {
+    font-family: 'Segoe UI', 'Noto Sans Arabic', system-ui, sans-serif;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .card {
+    @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700;
+  }
+  .btn-primary {
+    @apply bg-[#6BC9E4] hover:bg-[#4AAFC8] active:bg-[#3A9DB6] text-white font-semibold py-2.5 px-5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-medium py-2.5 px-5 rounded-lg transition-colors;
+  }
+  .btn-danger {
+    @apply bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .input {
+    @apply w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2.5 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#6BC9E4] focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500;
+  }
+  .nav-active {
+    color: #6BC9E4;
+  }
+  .badge-abnormal {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;
+  }
+  .badge-active {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400;
+  }
+  .badge-chronic {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400;
+  }
+  .badge-resolved {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300;
+  }
+  .badge-pending {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
   }
 }

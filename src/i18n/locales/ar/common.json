@@ -1,0 +1,160 @@
+{
+  "app": {
+    "name": "البوابة الصحية",
+    "tagline": "صحتك، بطريقتك"
+  },
+  "nav": {
+    "profile": "الملف الشخصي",
+    "appointments": "المواعيد",
+    "health": "صحتي",
+    "medications": "أدويتي",
+    "labs": "المختبر",
+    "bodymap": "خريطة الجسم",
+    "logout": "تسجيل الخروج"
+  },
+  "login": {
+    "title": "تسجيل الدخول",
+    "subtitle": "أدخل رقم المريض ورقم هاتفك للمتابعة",
+    "patientId": "رقم المريض",
+    "patientIdPlaceholder": "أدخل رقم المريض",
+    "phone": "رقم الهاتف",
+    "phonePlaceholder": "+964xxxxxxxxxx",
+    "sendOtp": "إرسال رمز التحقق",
+    "sending": "جاري الإرسال...",
+    "otpTitle": "أدخل رمز التحقق",
+    "otpSubtitle": "تم إرسال رمز مكون من 6 أرقام إلى هاتفك",
+    "otpPlaceholder": "000000",
+    "verify": "تحقق",
+    "verifying": "جاري التحقق...",
+    "resend": "إعادة الإرسال",
+    "resendIn": "إعادة الإرسال بعد {{seconds}} ث",
+    "errors": {
+      "invalidCredentials": "رقم المريض أو رقم الهاتف غير صحيح",
+      "invalidOtp": "رمز التحقق غير صحيح أو منتهي الصلاحية",
+      "otpExpired": "انتهت صلاحية الرمز. يرجى طلب رمز جديد",
+      "tooManyAttempts": "محاولات كثيرة. يرجى المحاولة لاحقاً",
+      "patientNotRegistered": "رقم المريض هذا غير مسجل في نظام المستشفى",
+      "invalidPatientIdFormat": "يجب أن يتكون رقم المريض من 12 رقماً بالضبط",
+      "patientIdHasLetters": "يجب أن يحتوي رقم المريض على أرقام فقط",
+      "patientIdTooLong": "لا يمكن أن يتجاوز رقم المريض 12 رقماً",
+      "patientIdTooShort": "يجب أن يتكون رقم المريض من 12 رقماً بالضبط"
+    }
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "info": "المعلومات الشخصية",
+    "settings": "الإعدادات",
+    "help": "المساعدة",
+    "name": "الاسم الكامل",
+    "dob": "تاريخ الميلاد",
+    "gender": "الجنس",
+    "phone": "رقم الهاتف",
+    "address": "العنوان",
+    "bloodType": "فصيلة الدم",
+    "allergies": "الحساسية",
+    "none": "لا يوجد",
+    "patientId": "رقم المريض",
+    "settingsTitle": "التفضيلات",
+    "theme": "المظهر",
+    "themeLight": "فاتح",
+    "themeDark": "داكن",
+    "themeSystem": "النظام",
+    "language": "اللغة",
+    "helpTitle": "المساعدة والدعم",
+    "helpContent": "محتوى المساعدة والدعم قريباً. يرجى التواصل مع مزود الرعاية الصحية للمساعدة.",
+    "logout": "تسجيل الخروج",
+    "loggingOut": "جاري تسجيل الخروج..."
+  },
+  "appointments": {
+    "title": "المواعيد",
+    "upcoming": "القادمة",
+    "past": "السابقة",
+    "noUpcoming": "لا توجد مواعيد قادمة",
+    "noPast": "لا توجد مواعيد سابقة",
+    "date": "التاريخ",
+    "time": "الوقت",
+    "doctor": "الطبيب",
+    "hospital": "المستشفى",
+    "department": "القسم",
+    "type": "النوع",
+    "appointment": "موعد",
+    "operation": "عملية",
+    "status": {
+      "upcoming": "قادم",
+      "past": "سابق",
+      "cancelled": "ملغى"
+    }
+  },
+  "health": {
+    "title": "صحتي",
+    "diagnoses": "التشخيصات",
+    "vitals": "العلامات الحيوية",
+    "history": "التاريخ الطبي",
+    "carePlan": "خطة الرعاية",
+    "noDiagnoses": "لا توجد تشخيصات مسجلة",
+    "noVitals": "لا توجد علامات حيوية مسجلة",
+    "noHistory": "لا يوجد تاريخ طبي",
+    "noCarePlan": "لا توجد خطة رعاية",
+    "status": {
+      "active": "نشط",
+      "resolved": "تعافى",
+      "chronic": "مزمن"
+    },
+    "normalRange": "النطاق الطبيعي",
+    "goals": "الأهداف"
+  },
+  "medications": {
+    "title": "أدويتي",
+    "current": "الحالية",
+    "past": "السابقة",
+    "noCurrent": "لا توجد أدوية حالية",
+    "noPast": "لا توجد أدوية سابقة",
+    "dosage": "الجرعة",
+    "frequency": "التكرار",
+    "prescribedBy": "وصف من قبل",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "instructions": "التعليمات",
+    "requestRenewal": "طلب تجديد",
+    "renewalSent": "تم إرسال طلب التجديد إلى الصيدلية",
+    "renewalError": "فشل إرسال طلب التجديد",
+    "searchPlaceholder": "ابحث باسم الدواء أو التاريخ...",
+    "noResults": "لا توجد أدوية تطابق بحثك",
+    "resultSingular": "نتيجة",
+    "resultPlural": "نتائج"
+  },
+  "labs": {
+    "title": "نتائج المختبر",
+    "orderedBy": "طلب من قبل",
+    "orderDate": "تاريخ الطلب",
+    "noOrders": "لا توجد طلبات مختبر",
+    "testName": "الفحص",
+    "result": "النتيجة",
+    "normalRange": "النطاق الطبيعي",
+    "unit": "الوحدة",
+    "status": {
+      "pending": "معلق",
+      "completed": "مكتمل",
+      "partial": "جزئي"
+    },
+    "abnormal": "غير طبيعي",
+    "expandOrder": "عرض الفحوصات",
+    "collapseOrder": "إخفاء الفحوصات"
+  },
+  "bodymap": {
+    "title": "تقرير الألم"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "retry": "حاول مجدداً",
+    "back": "رجوع",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "yes": "نعم",
+    "no": "لا",
+    "noData": "لا توجد بيانات",
+    "sessionExpired": "انتهت الجلسة. يرجى تسجيل الدخول مجدداً."
+  }
+}
