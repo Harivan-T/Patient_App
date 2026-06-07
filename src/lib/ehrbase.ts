@@ -29,7 +29,7 @@ async function runAQL(query: string, params?: Record<string, unknown>): Promise<
     headers: getAuthHeaders(),
     body:    JSON.stringify(body),
     cache:   'no-store',
-    signal:  AbortSignal.timeout(8000),
+    signal:  AbortSignal.timeout(4000),
   });
 
   if (!res.ok) {
