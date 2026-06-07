@@ -242,7 +242,7 @@ export async function getMedicationsFromPharmacy(nationalId: string): Promise<Me
   });
 }
 
-export async function getLabOrders(nationalId: string, _liveEhrId?: string): Promise<LabOrder[]> {
+export async function getLabOrders(nationalId: string): Promise<LabOrder[]> {
   const patient = await getPatientById(nationalId);
   if (!patient) return [];
 
