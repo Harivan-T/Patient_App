@@ -31,8 +31,11 @@ export interface Diagnosis {
   code: string;
   name: string;
   date: string;
+  recordedAt?: string;
   status: 'active' | 'resolved' | 'chronic';
   doctor?: string;
+  description?: string;
+  bodySite?: string;
 }
 
 export interface Vital {
@@ -54,6 +57,10 @@ export interface CarePlan {
   id: string;
   title: string;
   description: string;
+  reason?: string;
+  schedule?: string;
+  comment?: string;
+  doctor?: string;
   startDate: string;
   endDate?: string;
   goals: string[];
@@ -91,6 +98,23 @@ export interface LabTest {
   isAbnormal?: boolean;
   status: 'pending' | 'completed';
   date?: string;
+}
+
+export interface LabAnalyte {
+  name: string;
+  value?: string | number;
+  units?: string;
+  referenceRange?: string;
+  flag?: string;
+  isAbnormal: boolean;
+}
+
+export interface LabResultPanel {
+  id: string;
+  panelName: string;
+  date: string;
+  reportedBy?: string;
+  analytes: LabAnalyte[];
 }
 
 export interface BodyMapAnnotation {

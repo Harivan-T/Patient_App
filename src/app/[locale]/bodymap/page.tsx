@@ -25,22 +25,18 @@ interface PainRecord {
 
 const BRAND = '#6BC9E4';
 
-const SYMPTOMS = ['Pain', 'Burning', 'Swelling', 'Numbness', 'Stiffness', 'Tingling', 'Pressure', 'Throbbing'];
+// Keys into bodymap.symptoms.*
+const SYMPTOM_KEYS = ['pain', 'burning', 'swelling', 'numbness', 'stiffness', 'tingling', 'pressure', 'throbbing'] as const;
 
-const DURATIONS = ['Today', 'A few days', '1–2 weeks', '1+ month', '3+ months', 'Over a year'];
+// Keys into bodymap.durations.*
+const DURATION_KEYS = ['today', 'fewDays', 'oneToTwoWeeks', 'oneMonth', 'threeMonths', 'overYear'] as const;
 
-const QUESTIONS = [
-  { key: 'movementPain',      label: 'Does movement make it worse?' },
-  { key: 'nightPain',         label: 'Is it worse at night?' },
-  { key: 'takingMedication',  label: 'Are you taking medication for it?' },
-  { key: 'hasFever',          label: 'Do you have a fever?' },
-] as const;
+const QUESTION_KEYS = ['movementPain', 'nightPain', 'takingMedication', 'hasFever'] as const;
 
 // ─── SVG Zone Definitions ────────────────────────────────────────────────────
 
 interface ZoneDef {
   id: string;
-  label: string;
   side: 'front' | 'back';
   shape: { type: 'ellipse'; cx: number; cy: number; rx: number; ry: number }
        | { type: 'rect';    x: number;  y: number;  w: number;  h: number; rx?: number };
@@ -48,42 +44,46 @@ interface ZoneDef {
 
 const ZONES: ZoneDef[] = [
   // FRONT
-  { id: 'head',          label: 'Head',           side: 'front', shape: { type: 'ellipse', cx: 100, cy: 28, rx: 22, ry: 26 } },
-  { id: 'neck',          label: 'Neck',           side: 'front', shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
-  { id: 'l-shoulder',    label: 'L. Shoulder',    side: 'front', shape: { type: 'ellipse', cx: 65, cy: 73, rx: 14, ry: 11 } },
-  { id: 'r-shoulder',    label: 'R. Shoulder',    side: 'front', shape: { type: 'ellipse', cx: 135,cy: 73, rx: 14, ry: 11 } },
-  { id: 'chest',         label: 'Chest',          side: 'front', shape: { type: 'rect',    x: 73,  y: 82,  w: 54,  h: 36, rx: 4 } },
-  { id: 'abdomen',       label: 'Abdomen',        side: 'front', shape: { type: 'rect',    x: 73,  y: 118, w: 54,  h: 38, rx: 4 } },
-  { id: 'l-upper-arm',   label: 'L. Upper Arm',   side: 'front', shape: { type: 'rect',    x: 40,  y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'r-upper-arm',   label: 'R. Upper Arm',   side: 'front', shape: { type: 'rect',    x: 138, y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'l-forearm',     label: 'L. Forearm',     side: 'front', shape: { type: 'rect',    x: 36,  y: 118, w: 18,  h: 34, rx: 6 } },
-  { id: 'r-forearm',     label: 'R. Forearm',     side: 'front', shape: { type: 'rect',    x: 146, y: 118, w: 18,  h: 34, rx: 6 } },
-  { id: 'pelvis',        label: 'Pelvis/Hips',    side: 'front', shape: { type: 'rect',    x: 68,  y: 156, w: 64,  h: 22, rx: 4 } },
-  { id: 'l-thigh',       label: 'L. Thigh',       side: 'front', shape: { type: 'rect',    x: 68,  y: 178, w: 24,  h: 48, rx: 6 } },
-  { id: 'r-thigh',       label: 'R. Thigh',       side: 'front', shape: { type: 'rect',    x: 108, y: 178, w: 24,  h: 48, rx: 6 } },
-  { id: 'l-knee',        label: 'L. Knee',        side: 'front', shape: { type: 'ellipse', cx: 79, cy: 233, rx: 12, ry: 10 } },
-  { id: 'r-knee',        label: 'R. Knee',        side: 'front', shape: { type: 'ellipse', cx: 121,cy: 233, rx: 12, ry: 10 } },
-  { id: 'l-shin',        label: 'L. Shin',        side: 'front', shape: { type: 'rect',    x: 66,  y: 244, w: 20,  h: 36, rx: 5 } },
-  { id: 'r-shin',        label: 'R. Shin',        side: 'front', shape: { type: 'rect',    x: 114, y: 244, w: 20,  h: 36, rx: 5 } },
-  { id: 'l-foot',        label: 'L. Foot',        side: 'front', shape: { type: 'ellipse', cx: 72, cy: 285, rx: 12, ry: 7 } },
-  { id: 'r-foot',        label: 'R. Foot',        side: 'front', shape: { type: 'ellipse', cx: 128,cy: 285, rx: 12, ry: 7 } },
+  { id: 'head',          side: 'front', shape: { type: 'ellipse', cx: 100, cy: 28, rx: 22, ry: 26 } },
+  { id: 'neck',          side: 'front', shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
+  { id: 'l-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 65, cy: 73, rx: 14, ry: 11 } },
+  { id: 'r-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 135,cy: 73, rx: 14, ry: 11 } },
+  { id: 'chest',         side: 'front', shape: { type: 'rect',    x: 73,  y: 82,  w: 54,  h: 36, rx: 4 } },
+  { id: 'abdomen',       side: 'front', shape: { type: 'rect',    x: 73,  y: 118, w: 54,  h: 38, rx: 4 } },
+  { id: 'l-upper-arm',   side: 'front', shape: { type: 'rect',    x: 40,  y: 74,  w: 22,  h: 42, rx: 6 } },
+  { id: 'r-upper-arm',   side: 'front', shape: { type: 'rect',    x: 138, y: 74,  w: 22,  h: 42, rx: 6 } },
+  { id: 'l-forearm',     side: 'front', shape: { type: 'rect',    x: 36,  y: 118, w: 18,  h: 34, rx: 6 } },
+  { id: 'r-forearm',     side: 'front', shape: { type: 'rect',    x: 146, y: 118, w: 18,  h: 34, rx: 6 } },
+  { id: 'pelvis',        side: 'front', shape: { type: 'rect',    x: 68,  y: 156, w: 64,  h: 22, rx: 4 } },
+  { id: 'l-thigh',       side: 'front', shape: { type: 'rect',    x: 68,  y: 178, w: 24,  h: 48, rx: 6 } },
+  { id: 'r-thigh',       side: 'front', shape: { type: 'rect',    x: 108, y: 178, w: 24,  h: 48, rx: 6 } },
+  { id: 'l-knee',        side: 'front', shape: { type: 'ellipse', cx: 79, cy: 233, rx: 12, ry: 10 } },
+  { id: 'r-knee',        side: 'front', shape: { type: 'ellipse', cx: 121,cy: 233, rx: 12, ry: 10 } },
+  { id: 'l-shin',        side: 'front', shape: { type: 'rect',    x: 66,  y: 244, w: 20,  h: 36, rx: 5 } },
+  { id: 'r-shin',        side: 'front', shape: { type: 'rect',    x: 114, y: 244, w: 20,  h: 36, rx: 5 } },
+  { id: 'l-foot',        side: 'front', shape: { type: 'ellipse', cx: 72, cy: 285, rx: 12, ry: 7 } },
+  { id: 'r-foot',        side: 'front', shape: { type: 'ellipse', cx: 128,cy: 285, rx: 12, ry: 7 } },
   // BACK
-  { id: 'head-b',        label: 'Head',           side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 28, rx: 22, ry: 26 } },
-  { id: 'neck-b',        label: 'Neck',           side: 'back',  shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
-  { id: 'l-trap',        label: 'L. Trapezius',   side: 'back',  shape: { type: 'ellipse', cx: 73, cy: 74, rx: 16, ry: 11 } },
-  { id: 'r-trap',        label: 'R. Trapezius',   side: 'back',  shape: { type: 'ellipse', cx: 127,cy: 74, rx: 16, ry: 11 } },
-  { id: 'upper-back',    label: 'Upper Back',     side: 'back',  shape: { type: 'rect',    x: 73,  y: 82,  w: 54,  h: 30, rx: 4 } },
-  { id: 'mid-back',      label: 'Mid Back',       side: 'back',  shape: { type: 'rect',    x: 73,  y: 112, w: 54,  h: 26, rx: 4 } },
-  { id: 'lower-back',    label: 'Lower Back',     side: 'back',  shape: { type: 'rect',    x: 73,  y: 138, w: 54,  h: 22, rx: 4 } },
-  { id: 'l-upper-arm-b', label: 'L. Upper Arm',   side: 'back',  shape: { type: 'rect',    x: 40,  y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'r-upper-arm-b', label: 'R. Upper Arm',   side: 'back',  shape: { type: 'rect',    x: 138, y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'l-buttock',     label: 'L. Buttock',     side: 'back',  shape: { type: 'rect',    x: 68,  y: 158, w: 28,  h: 28, rx: 6 } },
-  { id: 'r-buttock',     label: 'R. Buttock',     side: 'back',  shape: { type: 'rect',    x: 104, y: 158, w: 28,  h: 28, rx: 6 } },
-  { id: 'l-back-thigh',  label: 'L. Back Thigh',  side: 'back',  shape: { type: 'rect',    x: 68,  y: 186, w: 24,  h: 50, rx: 6 } },
-  { id: 'r-back-thigh',  label: 'R. Back Thigh',  side: 'back',  shape: { type: 'rect',    x: 108, y: 186, w: 24,  h: 50, rx: 6 } },
-  { id: 'l-calf',        label: 'L. Calf',        side: 'back',  shape: { type: 'rect',    x: 66,  y: 242, w: 20,  h: 36, rx: 5 } },
-  { id: 'r-calf',        label: 'R. Calf',        side: 'back',  shape: { type: 'rect',    x: 114, y: 242, w: 20,  h: 36, rx: 5 } },
+  { id: 'head-b',        side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 28, rx: 22, ry: 26 } },
+  { id: 'neck-b',        side: 'back',  shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
+  { id: 'l-trap',        side: 'back',  shape: { type: 'ellipse', cx: 73, cy: 74, rx: 16, ry: 11 } },
+  { id: 'r-trap',        side: 'back',  shape: { type: 'ellipse', cx: 127,cy: 74, rx: 16, ry: 11 } },
+  { id: 'upper-back',    side: 'back',  shape: { type: 'rect',    x: 73,  y: 82,  w: 54,  h: 30, rx: 4 } },
+  { id: 'mid-back',      side: 'back',  shape: { type: 'rect',    x: 73,  y: 112, w: 54,  h: 26, rx: 4 } },
+  { id: 'lower-back',    side: 'back',  shape: { type: 'rect',    x: 73,  y: 138, w: 54,  h: 22, rx: 4 } },
+  { id: 'l-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 40,  y: 74,  w: 22,  h: 42, rx: 6 } },
+  { id: 'r-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 138, y: 74,  w: 22,  h: 42, rx: 6 } },
+  { id: 'l-buttock',     side: 'back',  shape: { type: 'rect',    x: 68,  y: 158, w: 28,  h: 28, rx: 6 } },
+  { id: 'r-buttock',     side: 'back',  shape: { type: 'rect',    x: 104, y: 158, w: 28,  h: 28, rx: 6 } },
+  { id: 'l-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 68,  y: 186, w: 24,  h: 50, rx: 6 } },
+  { id: 'r-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 108, y: 186, w: 24,  h: 50, rx: 6 } },
+  { id: 'l-calf',        side: 'back',  shape: { type: 'rect',    x: 66,  y: 242, w: 20,  h: 36, rx: 5 } },
+  { id: 'r-calf',        side: 'back',  shape: { type: 'rect',    x: 114, y: 242, w: 20,  h: 36, rx: 5 } },
 ];
+
+function zoneKey(id: string): string {
+  return id.replace(/-b$/, '').replace(/-/g, '_');
+}
 
 function painColor(level: number): string {
   if (level <= 3) return '#22c55e';
@@ -91,57 +91,9 @@ function painColor(level: number): string {
   return '#ef4444';
 }
 
-function painLabel(level: number): string {
-  if (level <= 3) return 'Mild';
-  if (level <= 6) return 'Moderate';
-  return 'Severe';
-}
-
-// ─── Step Indicator ──────────────────────────────────────────────────────────
-
-function StepIndicator({ step, total }: { step: number; total: number }) {
-  const labels = ['Zones', 'Symptoms', 'Pain Scale', 'Questions', 'Review'];
-  return (
-    <div className="flex items-center justify-between mb-6 px-1">
-      {Array.from({ length: total }, (_, i) => (
-        <div key={i} className="flex-1 flex items-center">
-          <div className="flex flex-col items-center gap-1">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-              style={{
-                background: i + 1 <= step ? BRAND : '#e5e7eb',
-                color: i + 1 <= step ? 'white' : '#9ca3af',
-              }}
-            >
-              {i + 1 < step ? (
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-              ) : (
-                i + 1
-              )}
-            </div>
-            <span className="text-[10px] text-gray-400 hidden sm:block">{labels[i]}</span>
-          </div>
-          {i < total - 1 && (
-            <div
-              className="flex-1 h-0.5 mx-1 transition-colors"
-              style={{ background: i + 1 < step ? BRAND : '#e5e7eb' }}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ─── Body SVG ────────────────────────────────────────────────────────────────
 
-function BodySVG({
-  side,
-  selectedZones,
-  onToggle,
-}: {
+function BodySVG({ side, selectedZones, onToggle }: {
   side: 'front' | 'back';
   selectedZones: string[];
   onToggle: (id: string) => void;
@@ -149,17 +101,14 @@ function BodySVG({
   const zones = ZONES.filter((z) => z.side === side);
 
   function renderShape(z: ZoneDef, selected: boolean) {
-    const fill = selected ? BRAND : 'transparent';
-    const fillOpacity = selected ? 0.45 : 0;
-    const stroke = selected ? BRAND : '#94a3b8';
-    const strokeWidth = selected ? 2 : 1;
-
     const sharedProps = {
-      fill, fillOpacity, stroke, strokeWidth,
+      fill: selected ? BRAND : 'transparent',
+      fillOpacity: selected ? 0.45 : 0,
+      stroke: selected ? BRAND : '#94a3b8',
+      strokeWidth: selected ? 2 : 1,
       className: 'cursor-pointer transition-all hover:fill-[#6BC9E4] hover:fill-opacity-20',
       onClick: () => onToggle(z.id),
     };
-
     if (z.shape.type === 'ellipse') {
       return <ellipse key={z.id} cx={z.shape.cx} cy={z.shape.cy} rx={z.shape.rx} ry={z.shape.ry} {...sharedProps} />;
     }
@@ -168,7 +117,6 @@ function BodySVG({
 
   return (
     <svg viewBox="0 0 200 300" className="w-full max-w-[220px] mx-auto select-none">
-      {/* Body outline */}
       <g fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1">
         <ellipse cx="100" cy="28" rx="22" ry="26" />
         <rect x="91" y="52" width="18" height="14" rx="4" />
@@ -180,7 +128,6 @@ function BodySVG({
         <ellipse cx="71" cy="285" rx="11" ry="7" />
         <ellipse cx="129" cy="285" rx="11" ry="7" />
       </g>
-
       {side === 'front' ? (
         <g fill="#94a3b8" stroke="none">
           <circle cx="91" cy="24" r="2.5" />
@@ -196,8 +143,6 @@ function BodySVG({
           <ellipse cx="100" cy="22" rx="20" ry="12" fill="#d1dae5" />
         </g>
       )}
-
-      {/* Clickable zones */}
       {zones.map((z) => renderShape(z, selectedZones.includes(z.id)))}
     </svg>
   );
@@ -207,6 +152,7 @@ function BodySVG({
 
 export default function BodyMapPage({ params }: { params: { locale: string } }) {
   const t = useTranslations('bodymap');
+  const tCommon = useTranslations('common');
   const { locale } = params;
 
   const [step, setStep] = useState(1);
@@ -222,16 +168,31 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
   const [history, setHistory] = useState<PainRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  function getZoneLabel(id: string): string {
+    return t(`zones.${zoneKey(id)}` as Parameters<typeof t>[0]);
+  }
+
+  function painLabel(level: number): string {
+    if (level <= 3) return t('pain.mild');
+    if (level <= 6) return t('pain.moderate');
+    return t('pain.severe');
+  }
+
+  function getSymptomLabel(key: string): string {
+    const lk = key.toLowerCase();
+    return t(`symptoms.${lk}` as Parameters<typeof t>[0]);
+  }
+
+  function getDurationLabel(key: string): string {
+    return t(`durations.${key}` as Parameters<typeof t>[0]);
+  }
+
   function toggleZone(id: string) {
     setZones((prev) => prev.includes(id) ? prev.filter((z) => z !== id) : [...prev, id]);
   }
 
-  function toggleSymptom(s: string) {
-    setSymptoms((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
-  }
-
-  function getZoneLabel(id: string) {
-    return ZONES.find((z) => z.id === id)?.label ?? id;
+  function toggleSymptom(key: string) {
+    setSymptoms((prev) => prev.includes(key) ? prev.filter((x) => x !== key) : [...prev, key]);
   }
 
   async function handleSubmit() {
@@ -242,13 +203,8 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ zones, symptoms, painLevel, duration, ...answers, notes }),
       });
-      if (res.ok) {
-        setSubmitted(true);
-        loadHistory();
-      }
-    } finally {
-      setSubmitting(false);
-    }
+      if (res.ok) { setSubmitted(true); loadHistory(); }
+    } finally { setSubmitting(false); }
   }
 
   async function loadHistory() {
@@ -257,9 +213,7 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
       const res = await fetch('/api/pain-record');
       const data = await res.json();
       setHistory(data.records ?? []);
-    } finally {
-      setLoadingHistory(false);
-    }
+    } finally { setLoadingHistory(false); }
   }
 
   useEffect(() => { loadHistory(); }, []);
@@ -271,32 +225,57 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
     setSubmitted(false);
   }
 
+  const STEP_LABELS = [
+    t('steps.zones'), t('steps.symptoms'), t('steps.painScale'),
+    t('steps.questions'), t('steps.review'),
+  ];
+
   return (
     <AppShell locale={locale} title={t('title')}>
       <div className="max-w-lg mx-auto">
 
         {submitted ? (
-          /* ── Success screen ── */
           <div className="text-center py-8 space-y-4">
             <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{ background: '#d1fae5' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" className="w-8 h-8">
                 <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">Report submitted</h2>
-            <p className="text-sm text-gray-500">Your pain report has been saved.</p>
-            <button onClick={resetForm} className="btn-primary">New Report</button>
+            <h2 className="text-lg font-semibold text-gray-900">{t('success.title')}</h2>
+            <p className="text-sm text-gray-500">{t('success.subtitle')}</p>
+            <button onClick={resetForm} className="btn-primary">{t('buttons.newReport')}</button>
           </div>
         ) : (
-          /* ── Wizard ── */
           <div className="card p-5">
-            <StepIndicator step={step} total={5} />
+            {/* Step indicator */}
+            <div className="flex items-center justify-between mb-6 px-1">
+              {STEP_LABELS.map((label, i) => (
+                <div key={i} className="flex-1 flex items-center">
+                  <div className="flex flex-col items-center gap-1">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                      style={{ background: i + 1 <= step ? BRAND : '#e5e7eb', color: i + 1 <= step ? 'white' : '#9ca3af' }}
+                    >
+                      {i + 1 < step ? (
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                        </svg>
+                      ) : i + 1}
+                    </div>
+                    <span className="text-[10px] text-gray-400 hidden sm:block">{label}</span>
+                  </div>
+                  {i < STEP_LABELS.length - 1 && (
+                    <div className="flex-1 h-0.5 mx-1 transition-colors" style={{ background: i + 1 < step ? BRAND : '#e5e7eb' }} />
+                  )}
+                </div>
+              ))}
+            </div>
 
             {/* Step 1 — Body zones */}
             {step === 1 && (
               <div>
-                <h2 className="font-semibold text-gray-900 mb-1">Where does it hurt?</h2>
-                <p className="text-sm text-gray-500 mb-4">Tap the areas on your body (select all that apply)</p>
+                <h2 className="font-semibold text-gray-900 mb-1">{t('step1.heading')}</h2>
+                <p className="text-sm text-gray-500 mb-4">{t('step1.subtitle')}</p>
 
                 <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-4 w-fit mx-auto">
                   {(['front', 'back'] as const).map((s) => (
@@ -306,7 +285,7 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
                       className="py-1.5 px-5 rounded-lg text-sm font-medium transition-colors"
                       style={side === s ? { background: 'white', color: BRAND, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: '#6b7280' }}
                     >
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                      {s === 'front' ? t('step1.front') : t('step1.back')}
                     </button>
                   ))}
                 </div>
@@ -316,11 +295,7 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
                 {zones.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5 justify-center">
                     {zones.map((id) => (
-                      <span
-                        key={id}
-                        className="text-xs px-2.5 py-1 rounded-full text-white flex items-center gap-1"
-                        style={{ background: BRAND }}
-                      >
+                      <span key={id} className="text-xs px-2.5 py-1 rounded-full text-white flex items-center gap-1" style={{ background: BRAND }}>
                         {getZoneLabel(id)}
                         <button onClick={() => toggleZone(id)} className="opacity-70 hover:opacity-100 leading-none">×</button>
                       </span>
@@ -329,12 +304,8 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
                 )}
 
                 <div className="flex justify-end mt-5">
-                  <button
-                    onClick={() => setStep(2)}
-                    disabled={zones.length === 0}
-                    className="btn-primary"
-                  >
-                    Next →
+                  <button onClick={() => setStep(2)} disabled={zones.length === 0} className="btn-primary">
+                    {t('buttons.next')} →
                   </button>
                 </div>
               </div>
@@ -343,32 +314,28 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
             {/* Step 2 — Symptoms */}
             {step === 2 && (
               <div>
-                <h2 className="font-semibold text-gray-900 mb-1">What does it feel like?</h2>
-                <p className="text-sm text-gray-500 mb-4">Select all that apply</p>
+                <h2 className="font-semibold text-gray-900 mb-1">{t('step2.heading')}</h2>
+                <p className="text-sm text-gray-500 mb-4">{t('step2.subtitle')}</p>
 
                 <div className="grid grid-cols-2 gap-2">
-                  {SYMPTOMS.map((s) => {
-                    const active = symptoms.includes(s);
+                  {SYMPTOM_KEYS.map((key) => {
+                    const active = symptoms.includes(key);
                     return (
                       <button
-                        key={s}
-                        onClick={() => toggleSymptom(s)}
+                        key={key}
+                        onClick={() => toggleSymptom(key)}
                         className="py-3 px-4 rounded-xl border-2 text-sm font-medium text-start transition-all"
-                        style={{
-                          borderColor: active ? BRAND : '#e5e7eb',
-                          background: active ? '#EDF8FC' : 'white',
-                          color: active ? '#0e7490' : '#374151',
-                        }}
+                        style={{ borderColor: active ? BRAND : '#e5e7eb', background: active ? '#EDF8FC' : 'white', color: active ? '#0e7490' : '#374151' }}
                       >
-                        {s}
+                        {t(`symptoms.${key}`)}
                       </button>
                     );
                   })}
                 </div>
 
                 <div className="flex justify-between mt-5">
-                  <button onClick={() => setStep(1)} className="btn-secondary">← Back</button>
-                  <button onClick={() => setStep(3)} disabled={symptoms.length === 0} className="btn-primary">Next →</button>
+                  <button onClick={() => setStep(1)} className="btn-secondary">← {t('buttons.back')}</button>
+                  <button onClick={() => setStep(3)} disabled={symptoms.length === 0} className="btn-primary">{t('buttons.next')} →</button>
                 </div>
               </div>
             )}
@@ -376,77 +343,62 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
             {/* Step 3 — Pain scale + duration */}
             {step === 3 && (
               <div>
-                <h2 className="font-semibold text-gray-900 mb-1">How bad is the pain?</h2>
-                <p className="text-sm text-gray-500 mb-6">Rate your pain and how long you&apos;ve had it</p>
+                <h2 className="font-semibold text-gray-900 mb-1">{t('step3.heading')}</h2>
+                <p className="text-sm text-gray-500 mb-6">{t('step3.subtitle')}</p>
 
-                {/* Pain level */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-500">Pain Level</span>
+                    <span className="text-sm text-gray-500">{t('step3.painLevel')}</span>
                     <span className="text-2xl font-bold" style={{ color: painColor(painLevel) }}>
                       {painLevel} <span className="text-sm font-normal">— {painLabel(painLevel)}</span>
                     </span>
                   </div>
-
-                  <div className="relative">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value={painLevel}
-                      onChange={(e) => setPainLevel(Number(e.target.value))}
-                      className="w-full h-3 rounded-full appearance-none cursor-pointer"
-                      style={{
-                        background: `linear-gradient(to right, #22c55e, #f59e0b, #ef4444)`,
-                        accentColor: painColor(painLevel),
-                      }}
-                    />
-                    <div className="flex justify-between text-xs text-gray-400 mt-1 px-0.5">
-                      {Array.from({ length: 10 }, (_, i) => <span key={i}>{i + 1}</span>)}
-                    </div>
+                  <input
+                    type="range" min="1" max="10" value={painLevel}
+                    onChange={(e) => setPainLevel(Number(e.target.value))}
+                    className="w-full h-3 rounded-full appearance-none cursor-pointer"
+                    style={{ background: 'linear-gradient(to right, #22c55e, #f59e0b, #ef4444)', accentColor: painColor(painLevel) }}
+                  />
+                  <div className="flex justify-between text-xs text-gray-400 mt-1 px-0.5">
+                    {Array.from({ length: 10 }, (_, i) => <span key={i}>{i + 1}</span>)}
                   </div>
                 </div>
 
-                {/* Duration */}
                 <div className="mb-2">
-                  <p className="text-sm font-medium text-gray-700 mb-2">How long have you had this?</p>
+                  <p className="text-sm font-medium text-gray-700 mb-2">{t('step3.duration')}</p>
                   <div className="grid grid-cols-2 gap-2">
-                    {DURATIONS.map((d) => (
+                    {DURATION_KEYS.map((key) => (
                       <button
-                        key={d}
-                        onClick={() => setDuration(d)}
+                        key={key}
+                        onClick={() => setDuration(key)}
                         className="py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition-all"
-                        style={{
-                          borderColor: duration === d ? BRAND : '#e5e7eb',
-                          background: duration === d ? '#EDF8FC' : 'white',
-                          color: duration === d ? '#0e7490' : '#374151',
-                        }}
+                        style={{ borderColor: duration === key ? BRAND : '#e5e7eb', background: duration === key ? '#EDF8FC' : 'white', color: duration === key ? '#0e7490' : '#374151' }}
                       >
-                        {d}
+                        {t(`durations.${key}`)}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="flex justify-between mt-5">
-                  <button onClick={() => setStep(2)} className="btn-secondary">← Back</button>
-                  <button onClick={() => setStep(4)} disabled={!duration} className="btn-primary">Next →</button>
+                  <button onClick={() => setStep(2)} className="btn-secondary">← {t('buttons.back')}</button>
+                  <button onClick={() => setStep(4)} disabled={!duration} className="btn-primary">{t('buttons.next')} →</button>
                 </div>
               </div>
             )}
 
-            {/* Step 4 — Quick questions + notes */}
+            {/* Step 4 — Questions + notes */}
             {step === 4 && (
               <div>
-                <h2 className="font-semibold text-gray-900 mb-1">A few more questions</h2>
-                <p className="text-sm text-gray-500 mb-4">Quick yes/no questions</p>
+                <h2 className="font-semibold text-gray-900 mb-1">{t('step4.heading')}</h2>
+                <p className="text-sm text-gray-500 mb-4">{t('step4.subtitle')}</p>
 
                 <div className="space-y-3 mb-5">
-                  {QUESTIONS.map(({ key, label }) => {
+                  {QUESTION_KEYS.map((key) => {
                     const val = answers[key];
                     return (
                       <div key={key} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50">
-                        <span className="text-sm text-gray-700 pe-4">{label}</span>
+                        <span className="text-sm text-gray-700 pe-4">{t(`questions.${key}`)}</span>
                         <div className="flex gap-2 shrink-0">
                           {([true, false] as const).map((v) => (
                             <button
@@ -459,7 +411,7 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
                                 color: val === v ? (v ? '#16a34a' : '#dc2626') : '#6b7280',
                               }}
                             >
-                              {v ? 'Yes' : 'No'}
+                              {v ? tCommon('yes') : tCommon('no')}
                             </button>
                           ))}
                         </div>
@@ -470,12 +422,12 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Additional notes <span className="text-gray-400 font-normal">(optional)</span>
+                    {t('step4.notes')} <span className="text-gray-400 font-normal">({t('step4.notesOptional')})</span>
                   </label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Any other details about your symptoms..."
+                    placeholder={t('step4.notesPlaceholder')}
                     className="input resize-none"
                     rows={3}
                     maxLength={500}
@@ -483,8 +435,8 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
                 </div>
 
                 <div className="flex justify-between mt-5">
-                  <button onClick={() => setStep(3)} className="btn-secondary">← Back</button>
-                  <button onClick={() => setStep(5)} className="btn-primary">Review →</button>
+                  <button onClick={() => setStep(3)} className="btn-secondary">← {t('buttons.back')}</button>
+                  <button onClick={() => setStep(5)} className="btn-primary">{t('steps.review')} →</button>
                 </div>
               </div>
             )}
@@ -492,10 +444,10 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
             {/* Step 5 — Summary + submit */}
             {step === 5 && (
               <div>
-                <h2 className="font-semibold text-gray-900 mb-4">Review your report</h2>
+                <h2 className="font-semibold text-gray-900 mb-4">{t('step5.heading')}</h2>
 
                 <div className="space-y-3 text-sm">
-                  <SummaryRow label="Affected areas">
+                  <SummaryRow label={t('step5.affectedAreas')}>
                     <div className="flex flex-wrap gap-1 justify-end">
                       {zones.map((id) => (
                         <span key={id} className="text-xs px-2 py-0.5 rounded-full text-white" style={{ background: BRAND }}>
@@ -505,43 +457,45 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
                     </div>
                   </SummaryRow>
 
-                  <SummaryRow label="Symptoms">
+                  <SummaryRow label={t('step5.symptoms')}>
                     <div className="flex flex-wrap gap-1 justify-end">
-                      {symptoms.map((s) => (
-                        <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{s}</span>
+                      {symptoms.map((key) => (
+                        <span key={key} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                          {getSymptomLabel(key)}
+                        </span>
                       ))}
                     </div>
                   </SummaryRow>
 
-                  <SummaryRow label="Pain level">
+                  <SummaryRow label={t('step5.painLevel')}>
                     <span className="font-bold text-base" style={{ color: painColor(painLevel) }}>
                       {painLevel}/10 — {painLabel(painLevel)}
                     </span>
                   </SummaryRow>
 
-                  <SummaryRow label="Duration">
-                    <span className="text-gray-700">{duration}</span>
+                  <SummaryRow label={t('step5.duration')}>
+                    <span className="text-gray-700">{getDurationLabel(duration)}</span>
                   </SummaryRow>
 
-                  {QUESTIONS.map(({ key, label }) => (
-                    <SummaryRow key={key} label={label}>
+                  {QUESTION_KEYS.map((key) => (
+                    <SummaryRow key={key} label={t(`questions.${key}`)}>
                       <span style={{ color: answers[key] ? '#16a34a' : '#dc2626' }}>
-                        {answers[key] ? 'Yes' : 'No'}
+                        {answers[key] ? tCommon('yes') : tCommon('no')}
                       </span>
                     </SummaryRow>
                   ))}
 
                   {notes && (
-                    <SummaryRow label="Notes">
+                    <SummaryRow label={t('step5.notes')}>
                       <span className="text-gray-600 text-xs max-w-[200px] text-end">{notes}</span>
                     </SummaryRow>
                   )}
                 </div>
 
                 <div className="flex justify-between mt-6">
-                  <button onClick={() => setStep(4)} className="btn-secondary">← Edit</button>
+                  <button onClick={() => setStep(4)} className="btn-secondary">← {t('buttons.edit')}</button>
                   <button onClick={handleSubmit} disabled={submitting} className="btn-primary">
-                    {submitting ? 'Submitting...' : 'Submit Report'}
+                    {submitting ? t('buttons.submitting') : t('buttons.submit')}
                   </button>
                 </div>
               </div>
@@ -549,14 +503,14 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
           </div>
         )}
 
-        {/* ── Pain history timeline ── */}
+        {/* Pain history timeline */}
         <div className="mt-8">
-          <h3 className="font-semibold text-gray-900 mb-3">Pain History</h3>
+          <h3 className="font-semibold text-gray-900 mb-3">{t('history.title')}</h3>
 
           {loadingHistory ? (
             <PageLoader />
           ) : history.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6">No records yet</p>
+            <p className="text-sm text-gray-400 text-center py-6">{t('history.noRecords')}</p>
           ) : (
             <div className="space-y-2">
               {history.map((rec) => (
@@ -569,10 +523,7 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
-                        style={{ background: painColor(rec.painLevel) }}
-                      >
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ background: painColor(rec.painLevel) }}>
                         {painLabel(rec.painLevel)}
                       </span>
                       <span className="text-xs text-gray-400">{formatDateTime(rec.recordedAt)}</span>
@@ -581,7 +532,9 @@ export default function BodyMapPage({ params }: { params: { locale: string } }) 
                       {rec.zones.map((id) => getZoneLabel(id)).join(', ')}
                     </p>
                     {rec.symptoms?.length > 0 && (
-                      <p className="text-xs text-gray-400 mt-0.5">{rec.symptoms.join(' · ')}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {rec.symptoms.map((s) => getSymptomLabel(s)).join(' · ')}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -605,8 +558,6 @@ function SummaryRow({ label, children }: { label: string; children: React.ReactN
 
 function formatDateTime(dateStr: string) {
   try {
-    return new Date(dateStr).toLocaleString(undefined, {
-      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-    });
+    return new Date(dateStr).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   } catch { return dateStr; }
 }

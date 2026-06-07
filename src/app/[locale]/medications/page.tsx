@@ -17,6 +17,7 @@ export default function MedicationsPage({ params }: { params: { locale: string }
   const [past, setPast] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [renewalStates, setRenewalStates] = useState<Record<string, 'idle' | 'sending' | 'sent' | 'error'>>({});
 
   useEffect(() => {
@@ -47,6 +48,14 @@ export default function MedicationsPage({ params }: { params: { locale: string }
       return nameMatch || genericMatch || dateMatch;
     });
   }, [list, search]);
+
+  function toggleExpanded(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  }
 
   async function handleRenewal(medicationId: string) {
     setRenewalStates((s) => ({ ...s, [medicationId]: 'sending' }));
@@ -138,9 +147,14 @@ export default function MedicationsPage({ params }: { params: { locale: string }
             )}
             {filtered.map((med) => {
               const state = renewalStates[med.id] ?? 'idle';
+              const isOpen = expanded.has(med.id);
               return (
-                <div key={med.id} className="card p-5">
-                  <div className="flex items-start justify-between gap-4">
+                <div key={med.id} className="card overflow-hidden">
+                  {/* Always-visible header row */}
+                  <button
+                    className="w-full px-5 py-4 flex items-center justify-between gap-4 text-start hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+                    onClick={() => toggleExpanded(med.id)}
+                  >
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900 dark:text-gray-100">
                         {highlightMatch(med.name, search)}
@@ -150,54 +164,73 @@ export default function MedicationsPage({ params }: { params: { locale: string }
                           {highlightMatch(med.genericName, search)}
                         </p>
                       )}
-                      <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                        {med.dosage && (
-                          <>
-                            <span className="text-xs text-gray-400">{t('dosage')}</span>
-                            <span className="text-gray-700 dark:text-gray-300">{med.dosage}</span>
-                          </>
-                        )}
+                      {med.dosage && (
+                        <span className="inline-block mt-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-[#EDF8FC] text-[#6BC9E4]">
+                          {med.dosage}
+                        </span>
+                      )}
+                    </div>
+                    <svg
+                      viewBox="0 0 24 24" fill="currentColor"
+                      className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    >
+                      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+                    </svg>
+                  </button>
+
+                  {/* Expanded details */}
+                  {isOpen && (
+                    <div className="border-t border-gray-100 dark:border-slate-700">
+                      <div className="px-5 py-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                         {med.prescribingDoctor && (
                           <>
-                            <span className="text-xs text-gray-400">{t('prescribedBy')}</span>
+                            <span className="text-xs text-gray-400 self-center">{t('prescribedBy')}</span>
                             <span className="text-gray-700 dark:text-gray-300">{med.prescribingDoctor}</span>
                           </>
                         )}
                         {med.startDate && (
                           <>
-                            <span className="text-xs text-gray-400">{t('startDate')}</span>
+                            <span className="text-xs text-gray-400 self-center">{t('startDate')}</span>
                             <span className="text-gray-700 dark:text-gray-300">{formatDate(med.startDate)}</span>
                           </>
                         )}
                         {med.endDate && (
                           <>
-                            <span className="text-xs text-gray-400">{t('endDate')}</span>
+                            <span className="text-xs text-gray-400 self-center">{t('endDate')}</span>
                             <span className="text-gray-700 dark:text-gray-300">{formatDate(med.endDate)}</span>
                           </>
                         )}
+                        {med.frequency && (
+                          <>
+                            <span className="text-xs text-gray-400 self-center">{t('frequency')}</span>
+                            <span className="text-gray-700 dark:text-gray-300">{med.frequency}</span>
+                          </>
+                        )}
                       </div>
-                      {med.instructions && (
-                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-slate-700 pt-2">
-                          {med.instructions}
-                        </p>
-                      )}
-                    </div>
-                  </div>
 
-                  {med.status === 'current' && med.refillable && (
-                    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
-                      {state === 'sent' ? (
-                        <p className="text-sm text-green-600 dark:text-green-400">✓ {t('renewalSent')}</p>
-                      ) : state === 'error' ? (
-                        <p className="text-sm text-red-500">{t('renewalError')}</p>
-                      ) : (
-                        <button
-                          onClick={() => handleRenewal(med.id)}
-                          disabled={state === 'sending'}
-                          className="btn-secondary text-sm py-2"
-                        >
-                          {state === 'sending' ? '...' : t('requestRenewal')}
-                        </button>
+                      {med.instructions && (
+                        <div className="px-5 pb-4 border-t border-gray-100 dark:border-slate-700 pt-3">
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{t('instructions')}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{med.instructions}</p>
+                        </div>
+                      )}
+
+                      {med.status === 'current' && med.refillable && (
+                        <div className="px-5 pb-4 pt-1">
+                          {state === 'sent' ? (
+                            <p className="text-sm text-green-600 dark:text-green-400">✓ {t('renewalSent')}</p>
+                          ) : state === 'error' ? (
+                            <p className="text-sm text-red-500">{t('renewalError')}</p>
+                          ) : (
+                            <button
+                              onClick={() => handleRenewal(med.id)}
+                              disabled={state === 'sending'}
+                              className="btn-secondary text-sm py-2"
+                            >
+                              {state === 'sending' ? '...' : t('requestRenewal')}
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}

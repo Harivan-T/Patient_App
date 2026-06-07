@@ -101,7 +101,22 @@
       "chronic": "کرۆنیک"
     },
     "normalRange": "ئاستی ئاسایی",
-    "goals": "ئامانجەکان"
+    "goals": "ئامانجەکان",
+    "dateRecorded": "بەرواری تۆمارکردن",
+    "onset": "دەستپێکردنی نیشانەکان",
+    "bodySite": "شوێنی جەسەت",
+    "icdCode": "کۆدی ICD",
+    "doctor": "دکتۆر",
+    "createdBy": "دروستکراوە لەلایەن",
+    "start": "دەستپێکردن",
+    "expires": "کۆتایی",
+    "carePlanDescription": "وەسف",
+    "carePlanReason": "هۆکار",
+    "carePlanSchedule": "خشتە",
+    "doctorNotes": "تێبینیی دکتۆر",
+    "results": "ئەنجام",
+    "searchPlaceholder": "بگەڕێ بە ناو، دکتۆر یان بەروار...",
+    "noResults": "هیچ تشخیصێک لەگەڵ گەڕانەکەت نەگونجا"
   },
   "medications": {
     "title": "دەرمانەکانم",
@@ -139,10 +154,41 @@
     },
     "abnormal": "نائاسایی",
     "expandOrder": "نیشاندانی تاقیکردنەوەکان",
-    "collapseOrder": "شاردنەوەی تاقیکردنەوەکان"
+    "collapseOrder": "شاردنەوەی تاقیکردنەوەکان",
+    "orders": "داواکارییەکان",
+    "results": "ئەنجامەکان",
+    "reportedBy": "ڕاپۆرتکراوە لەلایەن",
+    "tests": "تاقیکردنەوەکان",
+    "resultsFound": "ئەنجام دۆزرایەوە",
+    "searchPlaceholder": "بگەڕێ بە تاقیکردنەوە، دکتۆر یان بەروار...",
+    "noResults": "هیچ دۆزراوەیەک نەدۆزرایەوە",
+    "noResultsYet": "هێشتا هیچ ئەنجامی تاقیگەیەک نییە"
   },
   "bodymap": {
-    "title": "ڕاپۆرتی ئێش"
+    "title": "ڕاپۆرتی ئێش",
+    "steps": { "zones": "ناوچەکان", "symptoms": "نیشانەکان", "painScale": "پێوانەی ئێش", "questions": "پرسیارەکان", "review": "پێداچوونەوە" },
+    "step1": { "heading": "لەکوێ ئێشت هەیە؟", "subtitle": "لەسەر ناوچەکانی ئێشدار بکرتانەوە (دەتوانی زیاتر لە یەک هەڵبژێریت)", "front": "پێشەوە", "back": "پشتەوە" },
+    "step2": { "heading": "چۆن هەستی پێ دەکەیت؟", "subtitle": "هەموو ئەوانە هەڵبژێرە کە دەگونجێن" },
+    "step3": { "heading": "چەند زۆرە ئێشەکە؟", "subtitle": "ئێشەکەت هەڵبسەنج و کاتی بنووسە", "painLevel": "ئاستی ئێش", "duration": "چەند کاتێکە ئێشت هەیە؟", "mild": "سووک", "moderate": "مامناوەند", "severe": "توند" },
+    "step4": { "heading": "چەند پرسیارێکی تر", "subtitle": "پرسیارەکانی خێرا بەبەڵێ/نەخێر", "notes": "تێبینیی زیادە", "notesOptional": "ئارەزووانە", "notesPlaceholder": "هەر وردەکارییەکی تر دەربارەی نیشانەکانت..." },
+    "step5": { "heading": "ڕاپۆرتەکەت پێداچوونەوە بکە", "affectedAreas": "ناوچەکانی کاریگەریکراو", "symptoms": "نیشانەکان", "painLevel": "ئاستی ئێش", "duration": "ماوە", "notes": "تێبینی" },
+    "symptoms": { "pain": "ئێش", "burning": "سووتان", "swelling": "خولەکەوتن", "numbness": "وشکاندن", "stiffness": "ڕووخان", "tingling": "خستخست", "pressure": "پتەمە", "throbbing": "لێکدانی مار" },
+    "durations": { "today": "ئەمڕۆ", "fewDays": "چەند ڕۆژێک", "oneToTwoWeeks": "1-2 هەفتە", "oneMonth": "زیاتر لە مانگێک", "threeMonths": "زیاتر لە 3 مانگ", "overYear": "زیاتر لە ساڵێک" },
+    "questions": { "movementPain": "ئایا جووڵەکردن ئێشەکە زیادتر دەکات؟", "nightPain": "ئایا شەوانە زیادتر دەبێت؟", "takingMedication": "ئایا دەرمانت بۆ دەخۆیت؟", "hasFever": "ئایا گەرمتەوە هەیەت؟" },
+    "buttons": { "next": "داهاتوو", "back": "گەڕانەوە", "edit": "دەستکاری", "submit": "ناردنی ڕاپۆرت", "submitting": "دەنێردرێت…", "newReport": "ڕاپۆرتی نوێ" },
+    "success": { "title": "ڕاپۆرت نێردرا", "subtitle": "ڕاپۆرتی ئێشەکەت پاشەکەوتکرا." },
+    "history": { "title": "مێژووی ئێش", "noRecords": "هیچ تۆمارێک نییە" },
+    "pain": { "mild": "سووک", "moderate": "مامناوەند", "severe": "توند" },
+    "zones": {
+      "head": "سەر", "neck": "مل", "l_shoulder": "پشی چەپ", "r_shoulder": "پشی ڕاست",
+      "chest": "سنگ", "abdomen": "زگ", "l_upper_arm": "باڵای بازوی چەپ", "r_upper_arm": "باڵای بازوی ڕاست",
+      "l_forearm": "خوارەوەی بازوی چەپ", "r_forearm": "خوارەوەی بازوی ڕاست", "pelvis": "ملچ و لووک",
+      "l_thigh": "ڕانی چەپ", "r_thigh": "ڕانی ڕاست", "l_knee": "چۆکی چەپ", "r_knee": "چۆکی ڕاست",
+      "l_shin": "قاچی چەپ", "r_shin": "قاچی ڕاست", "l_foot": "پێی چەپ", "r_foot": "پێی ڕاست",
+      "l_trap": "ماسولکەی چەپ", "r_trap": "ماسولکەی ڕاست", "upper_back": "باڵای پشت",
+      "mid_back": "ناوەڕاستی پشت", "lower_back": "خوارەوەی پشت", "l_buttock": "کون چەپ", "r_buttock": "کون ڕاست",
+      "l_back_thigh": "ڕانی پشتەوەی چەپ", "r_back_thigh": "ڕانی پشتەوەی ڕاست", "l_calf": "چرووی چەپ", "r_calf": "چرووی ڕاست"
+    }
   },
   "common": {
     "loading": "بارکردن...",

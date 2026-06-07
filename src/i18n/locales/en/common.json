@@ -101,7 +101,22 @@
       "chronic": "Chronic"
     },
     "normalRange": "Normal Range",
-    "goals": "Goals"
+    "goals": "Goals",
+    "dateRecorded": "Date Recorded",
+    "onset": "Onset",
+    "bodySite": "Body Site",
+    "icdCode": "ICD Code",
+    "doctor": "Doctor",
+    "createdBy": "Created by",
+    "start": "Start",
+    "expires": "Expires",
+    "carePlanDescription": "Description",
+    "carePlanReason": "Reason",
+    "carePlanSchedule": "Schedule",
+    "doctorNotes": "Doctor's Notes",
+    "results": "results",
+    "searchPlaceholder": "Search by name, doctor or date...",
+    "noResults": "No diagnoses match your search"
   },
   "medications": {
     "title": "My Medications",
@@ -139,10 +154,41 @@
     },
     "abnormal": "Abnormal",
     "expandOrder": "Show Tests",
-    "collapseOrder": "Hide Tests"
+    "collapseOrder": "Hide Tests",
+    "orders": "Orders",
+    "results": "Results",
+    "reportedBy": "Reported By",
+    "tests": "tests",
+    "resultsFound": "results found",
+    "searchPlaceholder": "Search by test, doctor or date...",
+    "noResults": "No matches found",
+    "noResultsYet": "No lab results yet"
   },
   "bodymap": {
-    "title": "Pain Report"
+    "title": "Pain Report",
+    "steps": { "zones": "Zones", "symptoms": "Symptoms", "painScale": "Pain Scale", "questions": "Questions", "review": "Review" },
+    "step1": { "heading": "Where does it hurt?", "subtitle": "Tap the areas on your body (select all that apply)", "front": "Front", "back": "Back" },
+    "step2": { "heading": "What does it feel like?", "subtitle": "Select all that apply" },
+    "step3": { "heading": "How bad is the pain?", "subtitle": "Rate your pain and how long you've had it", "painLevel": "Pain Level", "duration": "How long have you had this?", "mild": "Mild", "moderate": "Moderate", "severe": "Severe" },
+    "step4": { "heading": "A few more questions", "subtitle": "Quick yes/no questions", "notes": "Additional notes", "notesOptional": "optional", "notesPlaceholder": "Any other details about your symptoms..." },
+    "step5": { "heading": "Review your report", "affectedAreas": "Affected areas", "symptoms": "Symptoms", "painLevel": "Pain level", "duration": "Duration", "notes": "Notes" },
+    "symptoms": { "pain": "Pain", "burning": "Burning", "swelling": "Swelling", "numbness": "Numbness", "stiffness": "Stiffness", "tingling": "Tingling", "pressure": "Pressure", "throbbing": "Throbbing" },
+    "durations": { "today": "Today", "fewDays": "A few days", "oneToTwoWeeks": "1–2 weeks", "oneMonth": "1+ month", "threeMonths": "3+ months", "overYear": "Over a year" },
+    "questions": { "movementPain": "Does movement make it worse?", "nightPain": "Is it worse at night?", "takingMedication": "Are you taking medication for it?", "hasFever": "Do you have a fever?" },
+    "buttons": { "next": "Next", "back": "Back", "edit": "Edit", "submit": "Submit Report", "submitting": "Submitting…", "newReport": "New Report" },
+    "success": { "title": "Report submitted", "subtitle": "Your pain report has been saved." },
+    "history": { "title": "Pain History", "noRecords": "No records yet" },
+    "pain": { "mild": "Mild", "moderate": "Moderate", "severe": "Severe" },
+    "zones": {
+      "head": "Head", "neck": "Neck", "l_shoulder": "L. Shoulder", "r_shoulder": "R. Shoulder",
+      "chest": "Chest", "abdomen": "Abdomen", "l_upper_arm": "L. Upper Arm", "r_upper_arm": "R. Upper Arm",
+      "l_forearm": "L. Forearm", "r_forearm": "R. Forearm", "pelvis": "Pelvis / Hips",
+      "l_thigh": "L. Thigh", "r_thigh": "R. Thigh", "l_knee": "L. Knee", "r_knee": "R. Knee",
+      "l_shin": "L. Shin", "r_shin": "R. Shin", "l_foot": "L. Foot", "r_foot": "R. Foot",
+      "l_trap": "L. Trapezius", "r_trap": "R. Trapezius", "upper_back": "Upper Back",
+      "mid_back": "Mid Back", "lower_back": "Lower Back", "l_buttock": "L. Buttock", "r_buttock": "R. Buttock",
+      "l_back_thigh": "L. Back Thigh", "r_back_thigh": "R. Back Thigh", "l_calf": "L. Calf", "r_calf": "R. Calf"
+    }
   },
   "common": {
     "loading": "Loading...",

@@ -101,7 +101,22 @@
       "chronic": "مزمن"
     },
     "normalRange": "النطاق الطبيعي",
-    "goals": "الأهداف"
+    "goals": "الأهداف",
+    "dateRecorded": "تاريخ التسجيل",
+    "onset": "بداية الأعراض",
+    "bodySite": "موضع الجسم",
+    "icdCode": "رمز ICD",
+    "doctor": "الطبيب",
+    "createdBy": "أنشأه",
+    "start": "البدء",
+    "expires": "ينتهي",
+    "carePlanDescription": "الوصف",
+    "carePlanReason": "السبب",
+    "carePlanSchedule": "الجدول الزمني",
+    "doctorNotes": "ملاحظات الطبيب",
+    "results": "نتائج",
+    "searchPlaceholder": "ابحث بالاسم أو الطبيب أو التاريخ...",
+    "noResults": "لا توجد تشخيصات تطابق بحثك"
   },
   "medications": {
     "title": "أدويتي",
@@ -139,10 +154,41 @@
     },
     "abnormal": "غير طبيعي",
     "expandOrder": "عرض الفحوصات",
-    "collapseOrder": "إخفاء الفحوصات"
+    "collapseOrder": "إخفاء الفحوصات",
+    "orders": "الطلبات",
+    "results": "النتائج",
+    "reportedBy": "صدر من قبل",
+    "tests": "فحوصات",
+    "resultsFound": "نتائج وجدت",
+    "searchPlaceholder": "ابحث بالفحص أو الطبيب أو التاريخ...",
+    "noResults": "لا توجد نتائج مطابقة",
+    "noResultsYet": "لا توجد نتائج مختبر بعد"
   },
   "bodymap": {
-    "title": "تقرير الألم"
+    "title": "تقرير الألم",
+    "steps": { "zones": "المناطق", "symptoms": "الأعراض", "painScale": "مقياس الألم", "questions": "أسئلة", "review": "مراجعة" },
+    "step1": { "heading": "أين يؤلمك؟", "subtitle": "اضغط على المناطق المصابة (يمكن اختيار أكثر من منطقة)", "front": "أمامي", "back": "خلفي" },
+    "step2": { "heading": "كيف تصف الشعور؟", "subtitle": "اختر كل ما ينطبق" },
+    "step3": { "heading": "ما شدة الألم؟", "subtitle": "قيّم ألمك ومدة معاناتك", "painLevel": "مستوى الألم", "duration": "منذ متى وأنت تعاني؟", "mild": "خفيف", "moderate": "متوسط", "severe": "شديد" },
+    "step4": { "heading": "بعض الأسئلة الإضافية", "subtitle": "أسئلة سريعة بنعم/لا", "notes": "ملاحظات إضافية", "notesOptional": "اختياري", "notesPlaceholder": "أي تفاصيل أخرى حول أعراضك..." },
+    "step5": { "heading": "مراجعة تقريرك", "affectedAreas": "المناطق المصابة", "symptoms": "الأعراض", "painLevel": "مستوى الألم", "duration": "المدة", "notes": "ملاحظات" },
+    "symptoms": { "pain": "ألم", "burning": "حرقة", "swelling": "تورم", "numbness": "خدر", "stiffness": "تيبس", "tingling": "وخز", "pressure": "ضغط", "throbbing": "نبض" },
+    "durations": { "today": "اليوم", "fewDays": "أيام قليلة", "oneToTwoWeeks": "1–2 أسبوع", "oneMonth": "أكثر من شهر", "threeMonths": "أكثر من 3 أشهر", "overYear": "أكثر من سنة" },
+    "questions": { "movementPain": "هل تزيد الحركة من الألم؟", "nightPain": "هل يشتد الألم ليلاً؟", "takingMedication": "هل تتناول دواء لعلاجه؟", "hasFever": "هل لديك حمى؟" },
+    "buttons": { "next": "التالي", "back": "السابق", "edit": "تعديل", "submit": "إرسال التقرير", "submitting": "جاري الإرسال…", "newReport": "تقرير جديد" },
+    "success": { "title": "تم إرسال التقرير", "subtitle": "تم حفظ تقرير الألم." },
+    "history": { "title": "سجل الألم", "noRecords": "لا توجد سجلات بعد" },
+    "pain": { "mild": "خفيف", "moderate": "متوسط", "severe": "شديد" },
+    "zones": {
+      "head": "الرأس", "neck": "الرقبة", "l_shoulder": "الكتف الأيسر", "r_shoulder": "الكتف الأيمن",
+      "chest": "الصدر", "abdomen": "البطن", "l_upper_arm": "الذراع الأيسر", "r_upper_arm": "الذراع الأيمن",
+      "l_forearm": "الساعد الأيسر", "r_forearm": "الساعد الأيمن", "pelvis": "الحوض والوركان",
+      "l_thigh": "الفخذ الأيسر", "r_thigh": "الفخذ الأيمن", "l_knee": "الركبة اليسرى", "r_knee": "الركبة اليمنى",
+      "l_shin": "الساق اليسرى", "r_shin": "الساق اليمنى", "l_foot": "القدم اليسرى", "r_foot": "القدم اليمنى",
+      "l_trap": "العضلة الشبيهة الأيسر", "r_trap": "العضلة الشبيهة الأيمن", "upper_back": "الظهر العلوي",
+      "mid_back": "الظهر الأوسط", "lower_back": "الظهر السفلي", "l_buttock": "الأرداف الأيسر", "r_buttock": "الأرداف الأيمن",
+      "l_back_thigh": "الفخذ الخلفي الأيسر", "r_back_thigh": "الفخذ الخلفي الأيمن", "l_calf": "بطة الساق اليسرى", "r_calf": "بطة الساق اليمنى"
+    }
   },
   "common": {
     "loading": "جاري التحميل...",

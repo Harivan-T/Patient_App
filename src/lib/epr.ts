@@ -1,5 +1,5 @@
 import { Pool, PoolClient } from 'pg';
-import type { Patient, Appointment, Medication, LabOrder, LabTest, BodyMapAnnotation, Diagnosis, MedicalHistory } from '@/types';
+import type { Patient, Appointment, Medication, LabOrder, LabTest, BodyMapAnnotation, Diagnosis, MedicalHistory, LabResultPanel, LabAnalyte } from '@/types';
 
 let pool: Pool | null = null;
 
@@ -436,6 +436,91 @@ export async function getPainHistory(patientId: string) {
     }));
   } catch {
     // Table doesn't exist yet — return empty until first record is saved
+    return [];
+  }
+}
+
+// ── Lab results from LIMS PostgreSQL tables ──────────────────────────────────
+// Results are in accession_samples + test_results (FK was migrated from samples → accession_samples).
+// Group by labcategory + collectiondate so related samples appear as one panel.
+export async function getLabResultsFromDB(patientUuid: string): Promise<LabResultPanel[]> {
+  try {
+    const rows = await query<{
+      sampleid: string;
+      labcategory: string | null;
+      sampletype: string;
+      samplenumber: string;
+      collectiondate: string;
+      testname: string;
+      resultvalue: string;
+      unit: string | null;
+      referencerange: string | null;
+      referencemin: string | null;
+      referencemax: string | null;
+      flag: string | null;
+      iscritical: boolean;
+    }>(
+      `SELECT
+         s.sampleid,
+         s.labcategory,
+         s.sampletype,
+         s.samplenumber,
+         s.collectiondate::text,
+         tr.testname,
+         tr.resultvalue,
+         tr.unit,
+         tr.referencerange,
+         tr.referencemin::text,
+         tr.referencemax::text,
+         tr.flag,
+         tr.iscritical
+       FROM accession_samples s
+       JOIN test_results tr ON tr.sampleid = s.sampleid
+                           OR tr.accessionsampleid = s.sampleid
+       WHERE s.patientid = $1
+       ORDER BY s.collectiondate DESC, tr.testname`,
+      [patientUuid]
+    );
+
+    // Group by labcategory + date so one panel per category per day
+    const panels = new Map<string, LabResultPanel>();
+
+    for (const r of rows) {
+      const dateDay = r.collectiondate.slice(0, 10);
+      const panelKey = `${r.labcategory ?? 'Lab'}-${dateDay}`;
+
+      const refRange = r.referencerange ??
+        (r.referencemin && r.referencemax ? `${r.referencemin}–${r.referencemax}` : undefined);
+
+      const flag = r.flag && r.flag !== 'normal' ? r.flag : undefined;
+      const isAbnormal = r.iscritical || (!!r.flag && r.flag !== 'normal');
+
+      const numericValue = parseFloat(r.resultvalue);
+      const value: string | number = isNaN(numericValue) ? r.resultvalue : numericValue;
+
+      const analyte: LabAnalyte = {
+        name: r.testname,
+        value,
+        units: r.unit ?? undefined,
+        referenceRange: refRange,
+        flag,
+        isAbnormal,
+      };
+
+      if (!panels.has(panelKey)) {
+        panels.set(panelKey, {
+          id: panelKey,
+          panelName: r.labcategory || r.sampletype || 'Lab Result',
+          date: r.collectiondate,
+          analytes: [],
+        });
+      }
+      panels.get(panelKey)!.analytes.push(analyte);
+    }
+
+    return Array.from(panels.values());
+  } catch (e) {
+    console.error('[DB] getLabResultsFromDB failed:', e);
     return [];
   }
 }

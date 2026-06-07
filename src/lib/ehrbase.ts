@@ -1,4 +1,4 @@
-import type { Diagnosis, Vital, MedicalHistory, CarePlan, Medication } from '@/types';
+import type { Diagnosis, Vital, MedicalHistory, CarePlan, Medication, LabResultPanel, LabAnalyte } from '@/types';
 
 const EHRBASE_URL      = process.env.EHRBASE_URL!;
 const EHRBASE_USER     = process.env.EHRBASE_USER!;
@@ -24,7 +24,7 @@ async function runAQL(query: string, params?: Record<string, unknown>): Promise<
   const body: Record<string, unknown> = { q: query };
   if (params) body['query_parameters'] = params;
 
-  const res = await fetch(`${EHRBASE_URL}/rest/openehr/v1/query/aql`, {
+  const res = await fetch(`${EHRBASE_URL}/ehrbase/rest/openehr/v1/query/aql`, {
     method:  'POST',
     headers: getAuthHeaders(),
     body:    JSON.stringify(body),
@@ -44,7 +44,7 @@ async function runAQL(query: string, params?: Record<string, unknown>): Promise<
 export async function getEhrIdForPatient(subjectId: string): Promise<string | null> {
   try {
     const res = await fetch(
-      `${EHRBASE_URL}/rest/openehr/v1/ehr?subject_id=${encodeURIComponent(subjectId)}&subject_namespace=local`,
+      `${EHRBASE_URL}/ehrbase/rest/openehr/v1/ehr?subject_id=${encodeURIComponent(subjectId)}&subject_namespace=local`,
       { headers: getAuthHeaders(), cache: 'no-store', signal: AbortSignal.timeout(8000) }
     );
     if (!res.ok) return null;
@@ -63,24 +63,32 @@ export async function getDiagnoses(ehrId: string): Promise<Diagnosis[]> {
   try {
     const rows = await runAQL(`
       SELECT
-        c/uid/value                                                              AS composition_id,
-        eval/data[at0001]/items[at0002]/value/defining_code/code_string         AS code,
-        eval/data[at0001]/items[at0002]/value/value                             AS name,
-        eval/data[at0001]/items[at0003]/value/value                             AS date_added,
-        eval/data[at0001]/items[at0005]/value/defining_code/code_string         AS status
+        c/uid/value                                                                    AS id,
+        eval/data[at0001]/items[at0002]/value/value                                   AS name,
+        eval/data[at0001]/items[at0002]/value/defining_code/code_string               AS code,
+        eval/data[at0001]/items[at0009]/value/value                                   AS description,
+        eval/data[at0001]/items[at0003]/value/value                                   AS date_onset,
+        eval/data[at0001]/items[at0012]/value/value                                   AS body_site,
+        eval/data[at0001]/items[at0030]/value/defining_code/code_string               AS status_code,
+        c/context/start_time/value                                                    AS recorded_at,
+        c/composer/name                                                                AS doctor
       FROM EHR e
         CONTAINS COMPOSITION c
         CONTAINS EVALUATION eval[openEHR-EHR-EVALUATION.problem_diagnosis.v1]
       WHERE e/ehr_id/value = $ehrId
-      ORDER BY eval/data[at0001]/items[at0003]/value/value DESC
+      ORDER BY c/context/start_time/value DESC
     `, { ehrId });
 
     return (rows as unknown[][]).map((row, i) => ({
-      id:     String(row[0] ?? i),
-      code:   String(row[1] ?? ''),
-      name:   String(row[2] ?? 'Unknown'),
-      date:   String(row[3] ?? ''),
-      status: mapStatus(String(row[4] ?? '')),
+      id:          String(row[0] ?? i),
+      name:        String(row[1] ?? 'Unknown'),
+      code:        row[2] ? String(row[2]) : '',
+      description: row[3] ? String(row[3]) : '',
+      date:        String(row[4] ?? row[7] ?? ''),
+      bodySite:    row[5] ? String(row[5]) : '',
+      status:      mapStatus(String(row[6] ?? '')),
+      recordedAt:  row[7] ? String(row[7]) : '',
+      doctor:      row[8] ? String(row[8]) : '',
     }));
   } catch (e) {
     console.error('[EHRbase] getDiagnoses failed:', e);
@@ -92,64 +100,81 @@ export async function getDiagnoses(ehrId: string): Promise<Diagnosis[]> {
 
 export async function getVitals(ehrId: string): Promise<Vital[]> {
   try {
-    const vitals: Vital[] = [];
-
-    const bpRows = await runAQL(`
+    // Fetch all vital sign items — each row is one ELEMENT (one measurement)
+    const rows = await runAQL(`
       SELECT
-        obs/data[at0001]/origin/value                                            AS date,
-        obs/data[at0001]/events[at0006]/data[at0003]/items[at0004]/value/magnitude AS systolic,
-        obs/data[at0001]/events[at0006]/data[at0003]/items[at0005]/value/magnitude AS diastolic,
-        obs/data[at0001]/events[at0006]/data[at0003]/items[at0004]/value/units   AS units
+        obs/data[at0001]/events[at0002]/data[at0003]/items AS item,
+        c/context/start_time/value                          AS date
       FROM EHR e
         CONTAINS COMPOSITION c
-        CONTAINS OBSERVATION obs[openEHR-EHR-OBSERVATION.blood_pressure.v2]
+        CONTAINS OBSERVATION obs[openEHR-EHR-OBSERVATION.vital_signs.v1]
       WHERE e/ehr_id/value = $ehrId
-      ORDER BY obs/data[at0001]/origin/value DESC LIMIT 1
+      ORDER BY c/context/start_time/value DESC
+      LIMIT 30
     `, { ehrId });
 
-    if (bpRows.length > 0) {
-      const r = bpRows[0] as unknown[];
+    if (rows.length === 0) return [];
+
+    // Only use the most recent recording session (same timestamp)
+    const mostRecentDate = (rows[0] as unknown[])[1] as string;
+    const recent = (rows as unknown[][]).filter((r) => r[1] === mostRecentDate);
+
+    // Parse each ELEMENT item
+    type ItemEl = { name?: { value?: string }; value?: { magnitude?: number; units?: string } };
+    const parsed = recent.map((r) => {
+      const el = r[0] as ItemEl;
+      return {
+        name:  el?.name?.value ?? '',
+        mag:   el?.value?.magnitude ?? null,
+        unit:  el?.value?.units ?? '',
+        date:  String(r[1] ?? ''),
+      };
+    });
+
+    // Find systolic + diastolic to combine into Blood Pressure
+    const sys = parsed.find((p) => p.name.toLowerCase().includes('systolic'));
+    const dia = parsed.find((p) => p.name.toLowerCase().includes('diastolic'));
+
+    const vitals: Vital[] = [];
+
+    if (sys && dia && sys.mag !== null && dia.mag !== null) {
       vitals.push({
-        type:        'Blood Pressure',
-        value:       `${r[1]}/${r[2]}`,
-        unit:        String(r[3] ?? 'mmHg'),
-        date:        String(r[0] ?? ''),
-        normalRange: '90/60 - 120/80',
+        type: 'Blood Pressure',
+        value: `${sys.mag}/${dia.mag}`,
+        unit: 'mmHg',
+        date: sys.date,
+        normalRange: '90/60 – 120/80',
       });
     }
 
-    const weightRows = await runAQL(`
-      SELECT
-        obs/data[at0002]/origin/value                                            AS date,
-        obs/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value/magnitude AS weight,
-        obs/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value/units   AS units
-      FROM EHR e
-        CONTAINS COMPOSITION c
-        CONTAINS OBSERVATION obs[openEHR-EHR-OBSERVATION.body_weight.v2]
-      WHERE e/ehr_id/value = $ehrId
-      ORDER BY obs/data[at0002]/origin/value DESC LIMIT 1
-    `, { ehrId });
+    // All other vitals by name keyword
+    const VITAL_MAP: Array<{ keyword: string; label: string; normalRange?: string }> = [
+      { keyword: 'heart rate',   label: 'Heart Rate',        normalRange: '60 – 100 bpm' },
+      { keyword: 'pulse',        label: 'Heart Rate',        normalRange: '60 – 100 bpm' },
+      { keyword: 'temperature',  label: 'Body Temperature',  normalRange: '36.1 – 37.2' },
+      { keyword: 'spo2',         label: 'SpO2',              normalRange: '95 – 100%' },
+      { keyword: 'oxygen',       label: 'SpO2',              normalRange: '95 – 100%' },
+      { keyword: 'respiratory',  label: 'Respiratory Rate',  normalRange: '12 – 20 /min' },
+      { keyword: 'respiration',  label: 'Respiratory Rate',  normalRange: '12 – 20 /min' },
+      { keyword: 'weight',       label: 'Body Weight' },
+      { keyword: 'height',       label: 'Height' },
+    ];
 
-    if (weightRows.length > 0) {
-      const r = weightRows[0] as unknown[];
-      vitals.push({ type: 'Body Weight', value: Number(r[1]), unit: String(r[2] ?? 'kg'), date: String(r[0] ?? '') });
-    }
+    for (const p of parsed) {
+      if (!p.name || p.mag === null) continue;
+      const lower = p.name.toLowerCase();
+      if (lower.includes('systolic') || lower.includes('diastolic')) continue; // already handled
 
-    const tempRows = await runAQL(`
-      SELECT
-        obs/data[at0002]/origin/value                                            AS date,
-        obs/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value/magnitude AS temp,
-        obs/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value/units   AS units
-      FROM EHR e
-        CONTAINS COMPOSITION c
-        CONTAINS OBSERVATION obs[openEHR-EHR-OBSERVATION.body_temperature.v2]
-      WHERE e/ehr_id/value = $ehrId
-      ORDER BY obs/data[at0002]/origin/value DESC LIMIT 1
-    `, { ehrId });
-
-    if (tempRows.length > 0) {
-      const r = tempRows[0] as unknown[];
-      vitals.push({ type: 'Body Temperature', value: Number(r[1]), unit: String(r[2] ?? '°C'), date: String(r[0] ?? ''), normalRange: '36.1 - 37.2' });
+      const match = VITAL_MAP.find((m) => lower.includes(m.keyword));
+      if (match && !vitals.find((v) => v.type === match.label)) {
+        vitals.push({
+          type: match.label,
+          value: Number(p.mag),
+          unit: p.unit,
+          date: p.date,
+          normalRange: match.normalRange,
+        });
+      }
     }
 
     return vitals;
@@ -189,32 +214,57 @@ export async function getMedicalHistory(ehrId: string): Promise<MedicalHistory[]
 }
 
 // ── Care plan ─────────────────────────────────────────────────────────────────
-// Template: template_care_plan_v1 uses openEHR-EHR-COMPOSITION.care_plan.v0
+// Composition: openEHR-EHR-COMPOSITION.care_plan.v0 (template_care_plan_v1)
+// Fields live in goal.v1 EVALUATION; schedule in service_request.v1 INSTRUCTION
 
 export async function getCarePlan(ehrId: string): Promise<CarePlan | null> {
   try {
-    const rows = await runAQL(`
+    const goalRows = await runAQL(`
       SELECT
-        c/uid/value                                              AS id,
-        inst/description[at0001]/items[at0002]/value/value       AS title,
-        inst/description[at0001]/items[at0044]/value/value       AS description,
-        c/context/start_time/value                               AS start_date,
-        c/context/end_time/value                                 AS end_date
+        c/uid/value                                       AS id,
+        goal/data[at0001]/items[at0002]/value/value       AS title,
+        goal/data[at0001]/items[at0012]/value/value       AS description,
+        goal/data[at0001]/items[at0010]/value/value       AS reason,
+        goal/data[at0001]/items[at0004]/value/value       AS end_date,
+        goal/data[at0001]/items[at0022]/value/value       AS comment,
+        c/context/start_time/value                        AS start_date,
+        c/context/end_time/value                          AS expire_date,
+        c/composer/name                                   AS doctor
       FROM EHR e
         CONTAINS COMPOSITION c[openEHR-EHR-COMPOSITION.care_plan.v0]
-        CONTAINS INSTRUCTION inst[openEHR-EHR-INSTRUCTION.care_plan.v0]
+        CONTAINS EVALUATION goal[openEHR-EHR-EVALUATION.goal.v1]
+      WHERE e/ehr_id/value = $ehrId
+      ORDER BY c/context/start_time/value DESC
+      LIMIT 1
+    `, { ehrId });
+
+    if (goalRows.length === 0) return null;
+    const r = goalRows[0] as unknown[];
+
+    // Schedule lives in the service_request description field
+    const schedRows = await runAQL(`
+      SELECT inst/activities[at0001]/description[at0002]/items[at0011]/value/value AS schedule
+      FROM EHR e
+        CONTAINS COMPOSITION c[openEHR-EHR-COMPOSITION.care_plan.v0]
+        CONTAINS INSTRUCTION inst[openEHR-EHR-INSTRUCTION.service_request.v1]
       WHERE e/ehr_id/value = $ehrId
       LIMIT 1
     `, { ehrId });
 
-    if (rows.length === 0) return null;
-    const r = rows[0] as unknown[];
+    const schedule = schedRows.length > 0
+      ? String((schedRows[0] as unknown[])[0] ?? '')
+      : '';
+
     return {
       id:          String(r[0] ?? ''),
       title:       String(r[1] ?? 'Care Plan'),
       description: String(r[2] ?? ''),
-      startDate:   String(r[3] ?? ''),
-      endDate:     r[4] ? String(r[4]) : undefined,
+      reason:      r[3] ? String(r[3]) : undefined,
+      endDate:     r[4] ? String(r[4]) : (r[7] ? String(r[7]) : undefined),
+      comment:     r[5] ? String(r[5]) : undefined,
+      startDate:   String(r[6] ?? ''),
+      schedule:    schedule || undefined,
+      doctor:      r[8] ? String(r[8]) : undefined,
       goals:       [],
     };
   } catch (e) {
@@ -293,6 +343,150 @@ export async function getMedicationsFromEHR(ehrId: string): Promise<Medication[]
     }));
   } catch (e) {
     console.error('[EHRbase] getMedicationsFromEHR failed:', e);
+    return [];
+  }
+}
+
+// ── Lab orders (service requests) ────────────────────────────────────────────
+
+export async function getLabOrdersFromEHR(ehrId: string) {
+  try {
+    const rows = await runAQL(`
+      SELECT
+        c/uid/value                                                                    AS id,
+        inst/activities[at0001]/description[at0002]/items[at0003]/value/value         AS service_name,
+        inst/activities[at0001]/description[at0002]/items[at0011]/value/value         AS description,
+        inst/activities[at0001]/description[at0002]/items[at0012]/value/value         AS indication,
+        inst/activities[at0001]/description[at0002]/items[at0017]/value/value         AS requested_date,
+        inst/activities[at0001]/description[at0002]/items[at0018]/value/value         AS requesting_provider,
+        inst/activities[at0001]/description[at0002]/items[at0019]/value/value         AS receiving_provider,
+        inst/narrative/value                                                           AS narrative,
+        c/context/start_time/value                                                    AS date,
+        c/composer/name                                                                AS ordered_by
+      FROM EHR e
+        CONTAINS COMPOSITION c
+        CONTAINS INSTRUCTION inst[openEHR-EHR-INSTRUCTION.service_request.v1]
+      WHERE e/ehr_id/value = $ehrId
+      ORDER BY c/context/start_time/value DESC
+    `, { ehrId });
+
+    return (rows as unknown[][]).map((r, i) => {
+      const description  = String(r[2] ?? '');
+      const narrative    = String(r[7] ?? '');
+      const serviceName  = String(r[1] ?? 'Service Request');
+      const date         = String(r[4] ?? r[8] ?? '');
+      const doctor       = String(r[5] ?? r[9] ?? '');
+      const labName      = String(r[6] ?? '');
+      const indication   = String(r[3] ?? '');
+
+      // Parse status from description text
+      const statusMatch = description.match(/Status:\s*([^|]+)/i);
+      const urgencyMatch = (description + narrative).match(/Urgency:\s*([^|]+)/i);
+      const rawStatus = statusMatch?.[1]?.trim().toLowerCase() ?? 'pending';
+      const status = rawStatus.includes('complet') ? 'completed'
+                   : rawStatus.includes('cancel')  ? 'cancelled'
+                   : 'pending';
+
+      // Parse individual tests from "Selected Tests (N): test1, test2, ..."
+      const testsMatch = description.match(/Selected Tests[^:]*:\s*([^|]+)/i);
+      const testNames: string[] = testsMatch
+        ? testsMatch[1].split(',').map((t) => t.trim()).filter(Boolean)
+        : [serviceName];
+
+      const urgency = urgencyMatch?.[1]?.trim() ?? '';
+
+      return {
+        id:          String(r[0] ?? i),
+        orderDate:   date,
+        doctorName:  doctor,
+        hospitalName: labName || serviceName,
+        status,
+        indication,
+        urgency,
+        tests: testNames.map((name, j) => ({
+          id:          `${r[0]}-${j}`,
+          name,
+          result:      '',
+          unit:        '',
+          normalRange: '',
+          isAbnormal:  false,
+          status:      'pending' as const,
+          date,
+        })),
+      };
+    });
+  } catch (e) {
+    console.error('[EHRbase] getLabOrdersFromEHR failed:', e);
+    return [];
+  }
+}
+
+// ── Lab results ───────────────────────────────────────────────────────────────
+// Standard archetype: openEHR-EHR-OBSERVATION.laboratory_test_result.v1
+// CLUSTER without at-code constraint to handle histopathology and custom templates.
+// Analyte name from items[at0001] (DV_TEXT field), fallback to cluster runtime name.
+
+export async function getLabResults(ehrId: string): Promise<LabResultPanel[]> {
+  try {
+    // Query per-analyte rows — one row per analyte cluster per result composition.
+    // items[at0001] = analyte name (DV_TEXT); items[at0024] = result (DV_QUANTITY or DV_TEXT)
+    const rows = await runAQL(`
+      SELECT
+        c/uid/value                                                          AS comp_id,
+        obs/name/value                                                       AS panel_name,
+        analyte/items[at0001]/value/value                                    AS analyte_name,
+        analyte/name/value                                                   AS cluster_node_name,
+        analyte/items[at0024]/value/magnitude                                AS value_num,
+        analyte/items[at0024]/value/units                                    AS units,
+        analyte/items[at0024]/value/value                                    AS value_text,
+        analyte/items[at0004]/value/value                                    AS ref_range,
+        analyte/items[at0028]/value/defining_code/code_string                AS flag,
+        c/context/start_time/value                                           AS date,
+        c/composer/name                                                      AS reported_by
+      FROM EHR e
+        CONTAINS COMPOSITION c
+        CONTAINS OBSERVATION obs[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]
+        CONTAINS CLUSTER analyte
+      WHERE e/ehr_id/value = $ehrId
+      ORDER BY c/context/start_time/value DESC
+      LIMIT 200
+    `, { ehrId });
+
+    // Group rows by composition UID → one LabResultPanel per composition
+    const panels = new Map<string, LabResultPanel>();
+
+    for (const raw of rows as unknown[][]) {
+      const compId         = String(raw[0] ?? '');
+      const panelName      = String(raw[1] ?? 'Lab Result');
+      // Prefer the DV_TEXT analyte name field; fall back to the cluster's runtime name
+      const analyteName    = String(raw[2] || raw[3] || '');
+      const valueNum       = raw[4] != null ? Number(raw[4]) : undefined;
+      const units          = raw[5] ? String(raw[5]) : undefined;
+      const valueText      = raw[6] ? String(raw[6]) : undefined;
+      const refRange       = raw[7] ? String(raw[7]) : undefined;
+      const flag           = raw[8] ? String(raw[8]) : undefined;
+      const date           = String(raw[9] ?? '');
+      const reportedBy     = raw[10] ? String(raw[10]) : undefined;
+
+      // Prefer numeric value; fall back to text (handles DV_TEXT results like "Negative")
+      const value: string | number | undefined = valueNum !== undefined ? valueNum : valueText;
+
+      const upperFlag = (flag ?? '').toUpperCase();
+      const isAbnormal = upperFlag === 'H' || upperFlag === 'L' || upperFlag === 'C'
+        || upperFlag.includes('HIGH') || upperFlag.includes('LOW') || upperFlag.includes('CRIT')
+        || upperFlag === 'A' || upperFlag === 'AA';
+
+      const analyte: LabAnalyte = { name: analyteName, value, units, referenceRange: refRange, flag, isAbnormal };
+
+      if (!panels.has(compId)) {
+        panels.set(compId, { id: compId, panelName, date, reportedBy, analytes: [] });
+      }
+      panels.get(compId)!.analytes.push(analyte);
+    }
+
+    return Array.from(panels.values());
+  } catch (e) {
+    console.error('[EHRbase] getLabResults failed:', e);
     return [];
   }
 }
