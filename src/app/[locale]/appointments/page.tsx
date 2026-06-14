@@ -35,9 +35,9 @@ export default function AppointmentsPage({ params }: { params: { locale: string 
     if (!['ar', 'ku'].includes(locale)) return;
     const all = [...upcoming, ...past];
     if (!all.length) return;
-    const texts = [...new Set(
+    const texts = Array.from(new Set(
       all.flatMap((a) => [a.doctorName, a.hospitalName, a.department, a.notes].filter(Boolean) as string[])
-    )];
+    ));
     fetch('/api/translate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
