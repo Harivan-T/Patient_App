@@ -37,11 +37,11 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
   useEffect(() => {
     if (!['ar', 'ku'].includes(locale)) return;
     const cp = data.carePlan;
-    const texts = [...new Set([
+    const texts = Array.from(new Set([
       ...data.diagnoses.flatMap((d) => [d.name, d.description, d.bodySite, d.doctor].filter(Boolean) as string[]),
       ...data.vitals.map((v) => v.type).filter(Boolean),
       ...(cp ? [cp.title, cp.description, cp.reason, cp.comment, ...cp.goals].filter(Boolean) as string[] : []),
-    ])];
+    ]));
     if (!texts.length) return;
     fetch('/api/translate', {
       method: 'POST',
