@@ -575,7 +575,7 @@ async function _getLabOrders(nationalId: string, ehrId?: string): Promise<LabOrd
     standaloneGroupMap.set(key, g);
   }
 
-  for (const [groupKey, groupSamples] of standaloneGroupMap) {
+  standaloneGroupMap.forEach((groupSamples, groupKey) => {
     const groupSampleIds     = new Set(groupSamples.map((s) => s.sampleid));
     const groupResults       = sampleResults.filter((r) => groupSampleIds.has(r.sample_id));
     const samplesWithResults = new Set(groupResults.map((r) => r.sample_id));
@@ -615,7 +615,7 @@ async function _getLabOrders(nationalId: string, ehrId?: string): Promise<LabOrd
       pendingTests,
       completedTests,
     });
-  }
+  });
 
   return output.sort((a, b) =>
     new Date(b.orderDate ?? 0).getTime() - new Date(a.orderDate ?? 0).getTime()
