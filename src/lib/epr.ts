@@ -343,10 +343,10 @@ async function _getLabOrders(nationalId: string, ehrId?: string): Promise<LabOrd
     [knownIds]
   ).catch(() => [] as { subjectidentifier: string }[]);
 
-  const identifiers = [...new Set([
+  const identifiers = Array.from(new Set([
     ...knownIds,
     ...discoveredRows.map((r) => r.subjectidentifier).filter(Boolean),
-  ])];
+  ]));
 
   // ── Step 1: All lims_orders for this patient ─────────────────────────────
   // Match by subjectidentifier OR the ehrid column (LIMS stores EHRbase EHR ID there).
@@ -452,10 +452,10 @@ async function _getLabOrders(nationalId: string, ehrId?: string): Promise<LabOrd
   ).catch(() => []);
 
   // ── Step 5: test_results for all samples ─────────────────────────────────
-  const uniqueSampleIds = [...new Set([
+  const uniqueSampleIds = Array.from(new Set([
     ...samplesForOrders.map((s) => s.sampleid),
     ...standaloneSamples.map((s) => s.sampleid),
-  ])];
+  ]));
 
   const sampleResults = uniqueSampleIds.length > 0
     ? await query<LabTest & { sample_id: string; sampleType: string }>(
@@ -548,8 +548,8 @@ async function _getLabOrders(nationalId: string, ehrId?: string): Promise<LabOrd
         ? 'completed' as const
         : 'partial' as const;
 
-    const sampleTypes = [...new Set(orderSamples.map((s) => s.sampletype).filter(Boolean))].join(', ');
-    const category    = [...new Set(orderSamples.map((s) => s.labcategory).filter(Boolean))].join(', ');
+    const sampleTypes = Array.from(new Set(orderSamples.map((s) => s.sampletype).filter(Boolean))).join(', ');
+    const category    = Array.from(new Set(orderSamples.map((s) => s.labcategory).filter(Boolean))).join(', ');
     const hospitalName = category
       ? `${category}${sampleTypes ? ` — ${sampleTypes}` : ''}`
       : sampleTypes || lo.clinicalIndication || '';
@@ -602,7 +602,7 @@ async function _getLabOrders(nationalId: string, ehrId?: string): Promise<LabOrd
         ? 'completed' as const
         : 'partial' as const;
 
-    const sampleTypes = [...new Set(groupSamples.map((s) => s.sampletype).filter(Boolean))].join(', ');
+    const sampleTypes = Array.from(new Set(groupSamples.map((s) => s.sampletype).filter(Boolean))).join(', ');
     const category    = groupSamples[0].labcategory;
 
     output.push({
