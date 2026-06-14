@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'HealthPortal',
-  description: 'Your personal patient portal',
+  title: 'Tibbna',
+  description: 'Tibbna Patient Portal',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

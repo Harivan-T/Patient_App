@@ -81,10 +81,10 @@ export default function ProfilePage({ params }: { params: { locale: string } }) 
               onClick={() => setTab(id)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                 tab === id
-                  ? 'bg-white dark:bg-slate-800 shadow-sm'
+                  ? 'bg-[#3B66DD] text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400'
               }`}
-              style={tab === id ? { color: '#6BC9E4' } : {}}
+              
             >
               {t(id)}
             </button>
@@ -130,7 +130,7 @@ export default function ProfilePage({ params }: { params: { locale: string } }) 
                     onClick={() => applyTheme(th)}
                     className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
                       theme === th
-                        ? 'border-[#6BC9E4] bg-[#EDF8FC] dark:bg-[#0f2a33] text-[#6BC9E4]'
+                        ? 'border-[var(--color-primary)] bg-[var(--tibbna-light)] dark:bg-[#0f2a33] text-[var(--color-primary)]'
                         : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300'
                     }`}
                   >
@@ -149,7 +149,7 @@ export default function ProfilePage({ params }: { params: { locale: string } }) 
                     onClick={() => switchLocale(code)}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border transition-colors ${
                       locale === code
-                        ? 'border-[#6BC9E4] bg-[#EDF8FC] dark:bg-[#0f2a33] text-[#6BC9E4]'
+                        ? 'border-[var(--color-primary)] bg-[var(--tibbna-light)] dark:bg-[#0f2a33] text-[var(--color-primary)]'
                         : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300'
                     }`}
                   >

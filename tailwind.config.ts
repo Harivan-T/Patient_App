@@ -10,19 +10,25 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: 'var(--background)',
+        // Design tokens — reference CSS variables
+        primary:    'var(--color-primary)',
+        background: 'var(--color-bg)',
+        surface:    'var(--color-surface)',
+        heading:    'var(--color-heading)',
+        muted:      'var(--color-muted)',
+        border:     'var(--color-border)',
         foreground: 'var(--foreground)',
-        // Tibbna brand colors — matched from logo
+        // Legacy aliases
         tibbna: {
-          blue:   '#6BC9E4',   // primary sky-blue (circles + V)
-          blueDark: '#4AAFC8', // darker shade for hover
-          gold:   '#D4A844',   // accent amber (diamond)
-          light:  '#EDF8FC',   // very light blue background tint
-          muted:  '#B8E4F2',   // muted blue for borders/dividers
+          blue:     'var(--tibbna-blue)',
+          blueDark: 'var(--tibbna-blue-dark)',
+          gold:     '#D4A844',
+          light:    'var(--tibbna-light)',
+          muted:    '#B8D4F8',
         },
       },
       fontFamily: {
-        sans: ['Segoe UI', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],
       },
     },
   },

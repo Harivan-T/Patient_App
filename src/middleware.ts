@@ -8,7 +8,7 @@ const intlMiddleware = createMiddleware({
   localePrefix: 'always',
 });
 
-const PUBLIC_PATHS = ['/login'];
+const PUBLIC_PATHS = ['/login', '/splash'];
 
 // Edge-runtime JWT verification using Web Crypto (no Node.js APIs)
 async function isValidToken(token: string): Promise<boolean> {
@@ -64,9 +64,8 @@ export async function middleware(req: NextRequest) {
   if (!isPublic) {
     const token = req.cookies.get('hp_token')?.value;
     if (!token || !(await isValidToken(token))) {
-      const loginUrl = new URL(`/${locale}/login`, req.url);
-      loginUrl.searchParams.set('from', pathname);
-      return NextResponse.redirect(loginUrl);
+      const splashUrl = new URL(`/${locale}/splash`, req.url);
+      return NextResponse.redirect(splashUrl);
     }
   }
 

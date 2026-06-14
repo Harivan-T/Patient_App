@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Navigation } from './Navigation';
+import { isRTL } from '@/i18n/config';
 
 interface UserInfo {
   firstName: string;
@@ -31,40 +32,44 @@ export function AppShell({
   const fullName = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') : '';
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-slate-900">
-      {/* Top header — fixed height h-14 (3.5rem) for sidebar offset math */}
-      <header className="sticky top-0 z-40 h-14 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 md:px-8 flex items-center gap-3">
-        <Link
-          href={`/${locale}/profile`}
-          className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
-        >
-          <div className="flex flex-col items-center gap-0">
-            <Image src="/tibbna-logo.png" alt="Tibbna" width={32} height={32} className="object-contain" />
-            <span className="text-[9px] font-bold text-[#6BC9E4] leading-tight tracking-wide">Tibbna</span>
-          </div>
+    <div className="flex flex-col min-h-screen bg-background dark:bg-slate-900">
+      {/* Top header — fixed height h-16 (4rem) for sidebar offset math */}
+      <header dir="ltr" className="sticky top-0 z-40 h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 md:px-8 flex items-center gap-3">
+        <Link href={`/${locale}/dashboard`} className="flex items-center gap-3 shrink-0 cursor-pointer">
+          <Image src="/tibbna-logo.png" alt="Tibbna" width={34} height={34} className="object-contain" />
           {fullName && (
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                {fullName}
-              </span>
-              <span className="text-[11px] text-gray-400 dark:text-gray-500 font-mono tracking-wide">
-                {user?.nationalId}
-              </span>
-            </div>
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{fullName}</span>
           )}
+        </Link>
+        <Link
+          href={`/${locale}/settings`}
+          className="ml-auto shrink-0 p-1.5 rounded-lg text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+          aria-label="Settings"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.01 7.01 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.37 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.47.47 0 0 0-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z" />
+          </svg>
         </Link>
       </header>
 
-      {/* Body: sidebar on md+, stacked on mobile */}
-      <div className="flex flex-1 min-h-0">
+      {/* Body: sidebar on md+, stacked on mobile. dir="ltr" keeps sidebar on left in all locales. */}
+      <div dir="ltr" className="flex flex-1 min-h-0">
 
         {/* Sidebar — tablet and desktop only */}
-        <aside className="hidden md:flex flex-col w-56 lg:w-64 shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-white dark:bg-slate-800 border-e border-gray-200 dark:border-slate-700 overflow-y-auto">
+        <aside className="hidden md:flex flex-col w-56 lg:w-64 shrink-0 sticky top-16 h-[calc(100vh-4rem)] bg-white dark:bg-slate-800 border-e border-gray-200 dark:border-slate-700 overflow-y-auto">
+          <Link href={`/${locale}/dashboard`} className="flex flex-col items-center gap-2 px-4 py-5 border-b border-gray-100 dark:border-slate-700 cursor-pointer w-full">
+            <Image src="/tibbna-logo.png" alt="Tibbna" width={48} height={48} className="object-contain" />
+            {fullName && (
+              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 text-center leading-tight">
+                {fullName}
+              </span>
+            )}
+          </Link>
           <Navigation locale={locale} variant="sidebar" />
         </aside>
 
-        {/* Main content */}
-        <main className="flex-1 overflow-auto pb-24 md:pb-8">
+        {/* Main content — RTL text direction for Arabic/Kurdish */}
+        <main dir={isRTL(locale) ? 'rtl' : 'ltr'} className="flex-1 overflow-auto pb-24 md:pb-8">
           <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
             {children}
           </div>

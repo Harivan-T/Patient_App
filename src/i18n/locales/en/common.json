@@ -4,12 +4,13 @@
     "tagline": "Your Health, Your Way"
   },
   "nav": {
+    "dashboard": "Home",
     "profile": "Profile",
-    "appointments": "Appointments",
-    "health": "My Health",
-    "medications": "My Medications",
+    "appointments": "Visits",
+    "health": "Health",
+    "medications": "Meds",
     "labs": "Labs",
-    "bodymap": "Body Map",
+    "bodymap": "My Doctor",
     "logout": "Logout"
   },
   "login": {
@@ -83,10 +84,12 @@
       "upcoming": "Upcoming",
       "past": "Past",
       "cancelled": "Cancelled"
-    }
+    },
+    "searchPlaceholder": "Search by doctor or date...",
+    "noResults": "No appointments match your search"
   },
   "health": {
-    "title": "My Health",
+    "title": "Health",
     "diagnoses": "Diagnoses",
     "vitals": "Vitals",
     "history": "Medical History",
@@ -119,11 +122,11 @@
     "noResults": "No diagnoses match your search"
   },
   "medications": {
-    "title": "My Medications",
+    "title": "Meds",
     "current": "Current",
-    "past": "Past",
+    "past": "Dispensed",
     "noCurrent": "No current medications",
-    "noPast": "No past medications",
+    "noPast": "No dispensed medications",
     "dosage": "Dosage",
     "frequency": "Frequency",
     "prescribedBy": "Prescribed By",
@@ -155,7 +158,7 @@
     "abnormal": "Abnormal",
     "expandOrder": "Show Tests",
     "collapseOrder": "Hide Tests",
-    "orders": "Orders",
+    "orders": "Lab Orders",
     "results": "Results",
     "reportedBy": "Reported By",
     "tests": "tests",
@@ -189,6 +192,15 @@
       "mid_back": "Mid Back", "lower_back": "Lower Back", "l_buttock": "L. Buttock", "r_buttock": "R. Buttock",
       "l_back_thigh": "L. Back Thigh", "r_back_thigh": "R. Back Thigh", "l_calf": "L. Calf", "r_calf": "R. Calf"
     }
+  },
+  "dashboard": {
+    "updates": "Updates",
+    "myDoctor": "My Doctor",
+    "health": "Health",
+    "nutrition": "Nutrition",
+    "fitness": "Fitness",
+    "read": "Read",
+    "noUpdate": "No update today"
   },
   "common": {
     "loading": "Loading...",

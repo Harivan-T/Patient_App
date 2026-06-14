@@ -14,7 +14,7 @@ interface HealthData {
   carePlan: CarePlan | null;
 }
 
-const BRAND = '#6BC9E4';
+const BRAND = 'var(--color-primary)';
 
 export default function HealthPage({ params }: { params: { locale: string } }) {
   const t = useTranslations('health');
@@ -25,6 +25,7 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
   const [loading, setLoading] = useState(true);
   const [diagSearch, setDiagSearch] = useState('');
   const [carePlanExpanded, setCarePlanExpanded] = useState(false);
+  const [txMap, setTxMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch('/api/health')
@@ -32,6 +33,31 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
       .then(setData)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!['ar', 'ku'].includes(locale)) return;
+    const cp = data.carePlan;
+    const texts = [...new Set([
+      ...data.diagnoses.flatMap((d) => [d.name, d.description, d.bodySite, d.doctor].filter(Boolean) as string[]),
+      ...data.vitals.map((v) => v.type).filter(Boolean),
+      ...(cp ? [cp.title, cp.description, cp.reason, cp.comment, ...cp.goals].filter(Boolean) as string[] : []),
+    ])];
+    if (!texts.length) return;
+    fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texts, locale }),
+    }).then((r) => r.json()).then((d) => {
+      const map: Record<string, string> = {};
+      texts.forEach((text, i) => { map[text] = d.translations?.[i] || text; });
+      setTxMap(map);
+    }).catch(() => {});
+  }, [data, locale]);
+
+  function tx(text: string | undefined): string {
+    if (!text) return '';
+    return txMap[text] || text;
+  }
 
   const TABS: Tab[] = ['diagnoses', 'vitals', 'carePlan'];
 
@@ -58,10 +84,10 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
               onClick={() => setTab(id)}
               className={`flex-1 py-2 px-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${
                 tab === id
-                  ? 'bg-white dark:bg-slate-800 shadow-sm'
+                  ? 'bg-[#3B66DD] text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400'
               }`}
-              style={tab === id ? { color: BRAND } : {}}
+              
             >
               {t(id)}
             </button>
@@ -117,10 +143,10 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
                       <div key={d.id} className="card p-4">
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 dark:text-gray-100">{d.name}</p>
+                            <p className="font-semibold text-gray-900 dark:text-gray-100">{tx(d.name)}</p>
                             {d.description && (
                               <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
-                                {d.description}
+                                {tx(d.description)}
                               </p>
                             )}
                           </div>
@@ -142,7 +168,7 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
                           {d.bodySite && (
                             <>
                               <span className="text-gray-400">{t('bodySite')}</span>
-                              <span className="text-gray-700 dark:text-gray-300">{d.bodySite}</span>
+                              <span className="text-gray-700 dark:text-gray-300">{tx(d.bodySite)}</span>
                             </>
                           )}
                           {d.code && (
@@ -171,7 +197,7 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {data.vitals.map((v, i) => (
                       <div key={i} className="card p-4">
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{v.type}</p>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{tx(v.type)}</p>
                         <p className="text-2xl font-bold mt-1" style={{ color: BRAND }}>
                           {v.value}{' '}
                           <span className="text-sm font-normal text-gray-500">{v.unit}</span>
@@ -197,7 +223,7 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
                       onClick={() => setCarePlanExpanded((v) => !v)}
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 dark:text-gray-100">{data.carePlan.title}</p>
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">{tx(data.carePlan.title)}</p>
                         {data.carePlan.doctor && (
                           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{t('createdBy')} {data.carePlan.doctor}</p>
                         )}
@@ -222,25 +248,25 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
                         {data.carePlan.description && (
                           <div className="px-5 py-4">
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{t('carePlanDescription')}</p>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{data.carePlan.description}</p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{tx(data.carePlan.description)}</p>
                           </div>
                         )}
                         {data.carePlan.reason && (
                           <div className="px-5 py-4">
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{t('carePlanReason')}</p>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{data.carePlan.reason}</p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{tx(data.carePlan.reason)}</p>
                           </div>
                         )}
                         {data.carePlan.schedule && (
                           <div className="px-5 py-4">
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{t('carePlanSchedule')}</p>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{data.carePlan.schedule}</p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{tx(data.carePlan.schedule)}</p>
                           </div>
                         )}
                         {data.carePlan.comment && (
                           <div className="px-5 py-4 border-s-4" style={{ borderColor: BRAND }}>
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{t('doctorNotes')}</p>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{data.carePlan.comment}</p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{tx(data.carePlan.comment)}</p>
                           </div>
                         )}
                       </div>

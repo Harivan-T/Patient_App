@@ -66,6 +66,15 @@ export interface CarePlan {
   goals: string[];
 }
 
+export interface MedicationDrug {
+  name: string;
+  dosage?: string;
+  route?: string;
+  frequency?: string;
+  usage?: string;
+  endDate?: string;
+}
+
 export interface Medication {
   id: string;
   name: string;
@@ -78,6 +87,7 @@ export interface Medication {
   status: 'current' | 'past';
   instructions?: string;
   refillable: boolean;
+  drugs?: MedicationDrug[];
 }
 
 export interface LabOrder {
@@ -87,6 +97,8 @@ export interface LabOrder {
   hospitalName?: string;
   status: 'pending' | 'completed' | 'partial';
   tests: LabTest[];
+  pendingTests: LabTest[];
+  completedTests: LabTest[];
 }
 
 export interface LabTest {
@@ -98,6 +110,7 @@ export interface LabTest {
   isAbnormal?: boolean;
   status: 'pending' | 'completed';
   date?: string;
+  sampleType?: string;
 }
 
 export interface LabAnalyte {
@@ -127,6 +140,17 @@ export interface BodyMapAnnotation {
   severity: 1 | 2 | 3 | 4 | 5;
   description: string;
   createdAt: string;
+}
+
+export interface DispensedMed {
+  id: string;
+  drugName: string;
+  quantity: number | null;
+  dosage: string;
+  dispensedAt: string;
+  dispensedBy: string;
+  source: 'Pharmacy' | 'Hospital';
+  notes: string;
 }
 
 export interface JWTPayload {

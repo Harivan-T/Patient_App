@@ -4,41 +4,67 @@
 
 @layer base {
   :root {
-    --background: #f4f9fb;
-    --foreground: #111827;
-    --tibbna-blue: #6BC9E4;
-    --tibbna-blue-dark: #4AAFC8;
-    --tibbna-gold: #D4A844;
-    --tibbna-light: #EDF8FC;
+    /* ── New design tokens ──────────────────────────────── */
+    --color-primary:  #628FF6;
+    --color-bg:       #FCFCFC;
+    --color-surface:  #FFFFFF;
+    --color-heading:  #1A1A1A;
+    --color-muted:    #58575C;
+    --color-border:   #E7E7E7;
+
+    /* ── Aliases used by Tailwind ───────────────────────── */
+    --background: #FCFCFC;
+    --foreground: #1A1A1A;
+
+    /* ── Legacy brand tokens (kept for any remaining refs) ─ */
+    --tibbna-blue:      #628FF6;
+    --tibbna-blue-dark: #4A77E0;
+    --tibbna-gold:      #D4A844;
+    --tibbna-light:     #EEF3FE;
   }
+
   .dark {
-    --background: #0f172a;
-    --foreground: #f1f5f9;
-    --tibbna-light: #0f2a33;
+    --color-bg:      #0f172a;
+    --color-surface: #1e293b;
+    --color-heading: #f1f5f9;
+    --color-muted:   #94a3b8;
+    --color-border:  #334155;
+    --background:    #0f172a;
+    --foreground:    #f1f5f9;
+    --tibbna-light:  #1a2a4a;
   }
+
   * { box-sizing: border-box; }
+
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-heading);
+    font-family: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
   }
+
   h1, h2, h3, h4, h5, h6 {
-    color: #111827;
+    color: var(--color-heading);
+    font-family: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 600;
   }
+
   .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
     color: #f9fafb;
   }
+
   [dir='rtl'] {
-    font-family: 'Segoe UI', 'Noto Sans Arabic', system-ui, sans-serif;
+    font-family: var(--font-inter), 'Noto Sans Arabic', system-ui, sans-serif;
   }
 }
 
 @layer utilities {
   .card {
-    @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700;
+    @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700;
+    border-color: var(--color-border);
   }
   .btn-primary {
-    @apply bg-[#6BC9E4] hover:bg-[#4AAFC8] active:bg-[#3A9DB6] text-white font-semibold py-2.5 px-5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    background-color: var(--color-primary);
+    @apply hover:opacity-90 active:opacity-80 text-white font-semibold py-2.5 px-5 rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
     @apply bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-medium py-2.5 px-5 rounded-lg transition-colors;
@@ -47,10 +73,13 @@
     @apply bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .input {
-    @apply w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2.5 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#6BC9E4] focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500;
+    border-color: var(--color-border);
+    @apply w-full rounded-lg px-3 py-2.5 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500;
+    --tw-ring-color: var(--color-primary);
+    @apply focus:ring-2;
   }
   .nav-active {
-    color: #6BC9E4;
+    color: var(--color-primary);
   }
   .badge-abnormal {
     @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;

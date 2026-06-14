@@ -29,6 +29,9 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
   const [countdown, setCountdown] = useState(0);
   const [idWarning, setIdWarning] = useState('');
   const [devOtp, setDevOtp] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -37,9 +40,16 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
   }, [countdown]);
 
   function handlePatientIdChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.value;
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 12);
     setPatientId(raw);
     setIdWarning(validatePatientId(raw));
+  }
+
+  function handlePatientIdPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 12);
+    setPatientId(pasted);
+    setIdWarning(validatePatientId(pasted));
   }
 
   async function handleSendOtp(e: React.FormEvent) {
@@ -92,7 +102,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
         setError(t(`errors.${data.error}` as never) || data.error);
         return;
       }
-      router.push(`/${locale}/profile`);
+      router.push(`/${locale}/dashboard`);
       router.refresh();
     } catch {
       setError(t('errors.invalidOtp'));
@@ -119,27 +129,26 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #EDF8FC 0%, #f0f9ff 60%, #fefce8 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, var(--tibbna-light) 0%, #f0f9ff 60%, #fefce8 100%)' }}>
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8 gap-1">
+        {/* Logo — fade-in + scale on mount, pulse logo while loading */}
+        <div className={`flex flex-col items-center mb-8 gap-2 transition-all duration-700 ease-out ${
+          mounted ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-3 scale-95'
+        }`}>
           <Image
             src="/tibbna-logo.png"
             alt="Tibbna"
-            width={72}
-            height={72}
-            className="object-contain"
+            width={96}
+            height={96}
+            className={`object-contain transition-opacity duration-300 ${loading ? 'animate-pulse' : ''}`}
           />
-          <h1 className="text-2xl font-bold tracking-wide" style={{ color: '#6BC9E4' }}>Tibbna</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {step === 'credentials' ? t('subtitle') : t('otpSubtitle')}
-          </p>
+          <h1 className="text-3xl font-bold tracking-wide" style={{ color: 'var(--color-primary)' }}>Tibbna</h1>
         </div>
 
         <div className="card p-8">
           {step === 'credentials' ? (
             <form onSubmit={handleSendOtp} className="space-y-5">
-              <h2 className="text-xl font-semibold text-center text-gray-900 mb-6">{t('title')}</h2>
+              <p className="text-gray-500 dark:text-gray-400 text-sm text-center mb-2">{t('subtitle')}</p>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -150,6 +159,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
                   inputMode="numeric"
                   value={patientId}
                   onChange={handlePatientIdChange}
+                  onPaste={handlePatientIdPaste}
                   placeholder={t('patientIdPlaceholder')}
                   className={`input ${idWarning ? 'border-amber-500 focus:ring-amber-400' : ''}`}
                   maxLength={12}
@@ -168,15 +178,20 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   {t('phone')}
                 </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder={t('phonePlaceholder')}
-                  className="input"
-                  required
-                  dir="ltr"
-                />
+                <div className="flex input p-0 overflow-hidden">
+                  <span className="flex items-center px-3 bg-gray-50 dark:bg-slate-700 border-e border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-300 text-sm font-medium shrink-0">
+                    +964
+                  </span>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="7XX XXX XXXX"
+                    className="flex-1 px-3 py-2.5 bg-transparent text-sm focus:outline-none"
+                    required
+                    dir="ltr"
+                  />
+                </div>
               </div>
 
               {error && (
@@ -186,13 +201,22 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
               )}
 
               <button type="submit" disabled={loading} className="btn-primary w-full">
-                {loading ? t('sending') : t('sendOtp')}
+                {loading ? t('sending') : t('title')}
               </button>
+
+              <div className="text-center">
+                <button type="submit" disabled={loading} className="text-sm hover:underline disabled:opacity-50" style={{ color: 'var(--color-primary)' }}>
+                  {t('sendOtp')} →
+                </button>
+              </div>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-5">
-              <h2 className="text-xl font-semibold text-center text-gray-900 mb-2">{t('otpTitle')}</h2>
-              <p className="text-center text-sm text-gray-500 mb-6">{phone}</p>
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{t('otpTitle')}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('otpSubtitle')}</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-1">{phone}</p>
+              </div>
 
               {devOtp && (
                 <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-600 rounded-lg px-4 py-3 text-center">
@@ -231,7 +255,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
                       onClick={handleResend}
                       disabled={loading}
                       className="block w-full mt-2 font-semibold underline underline-offset-2 text-center"
-                      style={{ color: '#6BC9E4' }}
+                      style={{ color: 'var(--color-primary)' }}
                     >
                       {t('resend')}
                     </button>
@@ -253,7 +277,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
                     type="button"
                     onClick={handleResend}
                     className="text-sm hover:underline"
-                    style={{ color: '#6BC9E4' }}
+                    style={{ color: 'var(--color-primary)' }}
                   >
                     {t('resend')}
                   </button>

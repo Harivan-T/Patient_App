@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { otp, cookie } = await createOtpCookie(patientId, phone);
-    const devOtp = await sendSmsOtp(phone, otp);
+    const smsPhone = phone.startsWith('+') ? phone : `+964${phone.replace(/^0/, '')}`;
+    const devOtp = await sendSmsOtp(smsPhone, otp);
 
     const res = NextResponse.json({ success: true, ...(devOtp ? { devOtp } : {}) });
     res.headers.set('Set-Cookie', cookie);

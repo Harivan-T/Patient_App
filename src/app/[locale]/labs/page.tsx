@@ -1,43 +1,73 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { AppShell } from '@/components/layout/AppShell';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import type { LabOrder, LabTest, LabResultPanel, LabAnalyte } from '@/types';
 
-const BRAND = '#6BC9E4';
+const BRAND = 'var(--color-primary)';
 
 type Tab = 'orders' | 'results';
+
+// ── Status badge ──────────────────────────────────────────────────────────────
+
+const STATUS_STYLES: Record<string, string> = {
+  pending:   'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  partial:   'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  completed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+};
+
+function StatusBadge({ status, label }: { status: string; label: string }) {
+  const cls = STATUS_STYLES[status] ?? STATUS_STYLES.pending;
+  return (
+    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${cls}`}>
+      {label}
+    </span>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function LabsPage({ params }: { params: { locale: string } }) {
   const t = useTranslations('labs');
   const { locale } = params;
 
-  const [tab, setTab] = useState<Tab>('orders');
-  const [orders, setOrders] = useState<LabOrder[]>([]);
+  const [tab, setTab]         = useState<Tab>('orders');
+  const [orders, setOrders]   = useState<LabOrder[]>([]);
   const [results, setResults] = useState<LabResultPanel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [search, setSearch] = useState('');
+  const [search, setSearch]   = useState('');
 
-  useEffect(() => {
+  const fetchData = useCallback((isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+
     fetch('/api/labs')
       .then((r) => r.json())
       .then((data) => {
         setOrders(data.orders ?? []);
         setResults(data.results ?? []);
       })
-      .finally(() => setLoading(false));
+      .catch(() => {})
+      .finally(() => {
+        setLoading(false);
+        setRefreshing(false);
+      });
   }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   // Reset search when switching tabs
   useEffect(() => { setSearch(''); }, [tab]);
 
   const filteredOrders = useMemo(() => {
+    const active = orders.filter((o: LabOrder) => o.status !== 'completed');
     const q = search.trim().toLowerCase();
-    if (!q) return orders;
-    return orders.filter((o: LabOrder) =>
+    if (!q) return active;
+    return active.filter((o: LabOrder) =>
       o.doctorName?.toLowerCase().includes(q) ||
       o.hospitalName?.toLowerCase().includes(q) ||
       formatDate(o.orderDate).toLowerCase().includes(q) ||
@@ -65,6 +95,12 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
     });
   }
 
+  function statusLabel(status: string): string {
+    if (status === 'completed') return t('status.completed');
+    if (status === 'partial')   return t('status.partial');
+    return t('status.pending');
+  }
+
   return (
     <AppShell locale={locale} title={t('title')}>
       <div className="max-w-2xl mx-auto">
@@ -76,59 +112,74 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
               key={id}
               onClick={() => setTab(id)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
-                tab === id ? 'bg-white dark:bg-slate-800 shadow-sm' : 'text-gray-600 dark:text-gray-400'
+                tab === id ? 'bg-[#3B66DD] text-white shadow-sm' : 'text-gray-600 dark:text-gray-400'
               }`}
-              style={tab === id ? { color: BRAND } : {}}
             >
               {t(id)}
-              {id === 'results' && results.length > 0 && (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold text-white"
-                  style={{ background: BRAND }}>
-                  {results.length}
-                </span>
-              )}
+              {id === 'results' && (() => {
+                const count = results.length + orders.filter((o: LabOrder) => o.completedTests?.length > 0).length;
+                return count > 0 ? (
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold text-white"
+                    style={{ background: BRAND }}>
+                    {count}
+                  </span>
+                ) : null;
+              })()}
             </button>
           ))}
         </div>
 
-        {/* Search bar */}
-        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 mb-4 focus-within:ring-2 focus-within:ring-[#6BC9E4] focus-within:border-transparent">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-            strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
-            <circle cx="10.5" cy="10.5" r="6.5" />
-            <line x1="15.5" y1="15.5" x2="20" y2="20" />
-          </svg>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('searchPlaceholder')}
-            autoComplete="off" autoCorrect="off" spellCheck={false}
-            className="flex-1 py-2.5 bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none"
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-              </svg>
-            </button>
-          )}
+        {/* Search + refresh bar */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+              strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
+              <circle cx="10.5" cy="10.5" r="6.5" />
+              <line x1="15.5" y1="15.5" x2="20" y2="20" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('searchPlaceholder')}
+              autoComplete="off" autoCorrect="off" spellCheck={false}
+              className="flex-1 py-2.5 bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Refresh button */}
+          <button
+            onClick={() => fetchData(true)}
+            disabled={refreshing}
+            className="shrink-0 p-2.5 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
+            title="Refresh"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}>
+              <path d="M23 4v6h-6M1 20v-6h6" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         </div>
 
         {loading ? (
           <PageLoader />
         ) : tab === 'orders' ? (
-          /* ── ORDERS TAB ── */
+          /* ── LAB ORDERS TAB ── */
           filteredOrders.length === 0 ? (
             <Empty icon={<LabIcon />} text={search ? t('noResults') : t('noOrders')} />
           ) : (
             <div className="space-y-3">
-              {search && (
-                <p className="text-xs text-gray-400 px-1">{filteredOrders.length} {t('resultsFound')}</p>
-              )}
+              {search && <p className="text-xs text-gray-400 px-1">{filteredOrders.length} {t('resultsFound')}</p>}
               {filteredOrders.map((order: LabOrder) => {
                 const isExpanded = expanded.has(order.id);
-                const hasAbnormal = order.tests.some((test: LabTest) => test.isAbnormal);
                 return (
                   <div key={order.id} className="card overflow-hidden">
                     <button
@@ -140,20 +191,12 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
                           <span className="font-semibold text-gray-900 dark:text-gray-100">
                             {formatDate(order.orderDate)}
                           </span>
-                          {hasAbnormal && <span className="badge-abnormal">⚠ {t('abnormal')}</span>}
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            order.status === 'completed'
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              : order.status === 'partial'
-                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-                          }`}>
-                            {t(`status.${order.status as 'pending' | 'completed' | 'partial'}`)}
-                          </span>
+                          <StatusBadge status={order.status} label={statusLabel(order.status)} />
                         </div>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                          {t('orderedBy')}: {order.doctorName}
-                          {order.hospitalName && ` · ${order.hospitalName}`}
+                          {order.doctorName
+                            ? <>{order.doctorName}{order.hospitalName && ` · ${order.hospitalName}`}</>
+                            : order.hospitalName || null}
                         </p>
                         <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                           {order.tests.length} {t('tests')}
@@ -164,16 +207,13 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
                         <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
                       </svg>
                     </button>
-
-                    {isExpanded && order.tests.length > 0 && (
+                    {isExpanded && (
                       <div className="border-t border-gray-100 dark:border-slate-700">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="bg-gray-50 dark:bg-slate-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                               <th className="px-4 py-2 text-start font-medium">{t('testName')}</th>
                               <th className="px-4 py-2 text-end font-medium">{t('result')}</th>
-                              <th className="px-4 py-2 text-end font-medium hidden sm:table-cell">{t('normalRange')}</th>
-                              <th className="px-4 py-2 text-end font-medium">{t('unit')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -191,68 +231,121 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
           )
         ) : (
           /* ── RESULTS TAB ── */
-          filteredResults.length === 0 ? (
-            <Empty icon={<ResultIcon />} text={search ? t('noResults') : t('noResultsYet')} />
-          ) : (
-            <div className="space-y-3">
-              {filteredResults.map((panel: LabResultPanel) => {
-                const isExpanded = expanded.has(panel.id);
-                const hasAbnormal = panel.analytes.some((a: LabAnalyte) => a.isAbnormal);
-                return (
-                  <div key={panel.id} className="card overflow-hidden">
-                    <button
-                      className="w-full px-5 py-4 flex items-center justify-between gap-4 text-start hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
-                      onClick={() => toggleExpanded(panel.id)}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-gray-900 dark:text-gray-100">
-                            {panel.panelName}
-                          </span>
-                          {hasAbnormal && <span className="badge-abnormal">⚠ {t('abnormal')}</span>}
-                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                            {t('status.completed')}
-                          </span>
-                        </div>
-                        {panel.reportedBy && (
+          (() => {
+            const limsResultOrders = orders.filter((o: LabOrder) => o.completedTests.length > 0);
+            const hasAny = filteredResults.length > 0 || limsResultOrders.length > 0;
+            if (!hasAny) {
+              return <Empty icon={<ResultIcon />} text={search ? t('noResults') : t('noResultsYet')} />;
+            }
+            return (
+              <div className="space-y-3">
+                {/* LIMS orders with completed tests */}
+                {limsResultOrders.map((order: LabOrder) => {
+                  const isExpanded = expanded.has(`res-${order.id}`);
+                  const hasAbnormal = order.completedTests.some((t: LabTest) => t.isAbnormal);
+                  return (
+                    <div key={`res-${order.id}`} className="card overflow-hidden">
+                      <button
+                        className="w-full px-5 py-4 flex items-center justify-between gap-4 text-start hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+                        onClick={() => toggleExpanded(`res-${order.id}`)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
+                              {formatDate(order.orderDate)}
+                            </span>
+                            {hasAbnormal && <span className="badge-abnormal">⚠ {t('abnormal')}</span>}
+                            <StatusBadge status={order.status} label={statusLabel(order.status)} />
+                          </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                            {t('reportedBy')}: {panel.reportedBy}
+                            {order.doctorName
+                              ? <>{order.doctorName}{order.hospitalName && ` · ${order.hospitalName}`}</>
+                              : order.hospitalName || null}
                           </p>
-                        )}
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                          {formatDate(panel.date)} · {panel.analytes.length} {t('tests')}
-                        </p>
-                      </div>
-                      <svg viewBox="0 0 24 24" fill="currentColor"
-                        className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
-                      </svg>
-                    </button>
-
-                    {isExpanded && panel.analytes.length > 0 && (
-                      <div className="border-t border-gray-100 dark:border-slate-700">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="bg-gray-50 dark:bg-slate-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                              <th className="px-4 py-2 text-start font-medium">{t('testName')}</th>
-                              <th className="px-4 py-2 text-end font-medium">{t('result')}</th>
-                              <th className="px-4 py-2 text-end font-medium hidden sm:table-cell">{t('normalRange')}</th>
-                              <th className="px-4 py-2 text-end font-medium">{t('unit')}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {panel.analytes.map((analyte: LabAnalyte, i) => (
-                              <ResultAnalyteRow key={i} analyte={analyte} />
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                            {order.completedTests.length} {t('tests')}
+                          </p>
+                        </div>
+                        <svg viewBox="0 0 24 24" fill="currentColor"
+                          className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+                        </svg>
+                      </button>
+                      {isExpanded && (
+                        <div className="border-t border-gray-100 dark:border-slate-700">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="bg-gray-50 dark:bg-slate-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                <th className="px-4 py-2 text-start font-medium">{t('testName')}</th>
+                                <th className="px-4 py-2 text-end font-medium">{t('result')}</th>
+                                <th className="px-4 py-2 text-end font-medium hidden sm:table-cell">{t('normalRange')}</th>
+                                <th className="px-4 py-2 text-end font-medium">{t('unit')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {order.completedTests.map((test: LabTest) => (
+                                <OrderTestRow key={test.id} test={test} pendingLabel={t('status.pending')} />
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {/* EHRbase result panels */}
+                {filteredResults.map((panel: LabResultPanel) => {
+                  const isExpanded = expanded.has(panel.id);
+                  const hasAbnormal = panel.analytes.some((a: LabAnalyte) => a.isAbnormal);
+                  return (
+                    <div key={panel.id} className="card overflow-hidden">
+                      <button
+                        className="w-full px-5 py-4 flex items-center justify-between gap-4 text-start hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+                        onClick={() => toggleExpanded(panel.id)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{panel.panelName}</span>
+                            {hasAbnormal && <span className="badge-abnormal">⚠ {t('abnormal')}</span>}
+                            <StatusBadge status="completed" label={t('status.completed')} />
+                          </div>
+                          {panel.reportedBy && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{t('reportedBy')}: {panel.reportedBy}</p>
+                          )}
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                            {formatDate(panel.date)} · {panel.analytes.length} {t('tests')}
+                          </p>
+                        </div>
+                        <svg viewBox="0 0 24 24" fill="currentColor"
+                          className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+                        </svg>
+                      </button>
+                      {isExpanded && panel.analytes.length > 0 && (
+                        <div className="border-t border-gray-100 dark:border-slate-700">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="bg-gray-50 dark:bg-slate-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                <th className="px-4 py-2 text-start font-medium">{t('testName')}</th>
+                                <th className="px-4 py-2 text-end font-medium">{t('result')}</th>
+                                <th className="px-4 py-2 text-end font-medium hidden sm:table-cell">{t('normalRange')}</th>
+                                <th className="px-4 py-2 text-end font-medium">{t('unit')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {panel.analytes.map((analyte: LabAnalyte, i: number) => (
+                                <ResultAnalyteRow key={i} analyte={analyte} />
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()
         )}
       </div>
     </AppShell>
@@ -265,13 +358,18 @@ function OrderTestRow({ test, pendingLabel }: { test: LabTest; pendingLabel: str
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           {test.isAbnormal && <span className="badge-abnormal text-[10px]">!</span>}
-          <span className={test.isAbnormal ? 'text-red-700 dark:text-red-400 font-medium' : ''}>{test.name}</span>
+          <div>
+            <span className={test.isAbnormal ? 'text-red-700 dark:text-red-400 font-medium' : ''}>{test.name}</span>
+            {test.sampleType && (
+              <p className="text-[10px] text-gray-400 mt-0.5">{test.sampleType}</p>
+            )}
+          </div>
         </div>
       </td>
       <td className="px-4 py-3 text-end font-mono">
         {test.result
           ? <span className={test.isAbnormal ? 'text-red-600 dark:text-red-400 font-semibold' : ''}>{test.result}</span>
-          : <span className="text-gray-400 text-xs">{pendingLabel}</span>}
+          : <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{pendingLabel}</span>}
       </td>
       <td className="px-4 py-3 text-end text-gray-500 dark:text-gray-400 hidden sm:table-cell">{test.normalRange || '—'}</td>
       <td className="px-4 py-3 text-end text-gray-500 dark:text-gray-400">{test.unit || '—'}</td>

@@ -19,6 +19,7 @@ export async function GET() {
     lastName: patient.lastName,
     dateOfBirth: patient.dateOfBirth,
     gender: patient.gender,
+    phoneNumber: patient.phoneNumber,
     address: patient.address,
     bloodType: patient.bloodType,
     allergies: patient.allergies,

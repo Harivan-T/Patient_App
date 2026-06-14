@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSessionFromCookies } from '@/lib/auth';
-import { getMedications, sendRenewalToPharmacy } from '@/lib/epr';
+import { getMedications, getDispensedMeds, sendRenewalToPharmacy } from '@/lib/epr';
 
 export async function GET() {
   const session = await getSessionFromCookies();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const meds = await getMedications(session.patientId);
+  const [meds, dispensed] = await Promise.all([
+    getMedications(session.patientId),
+    getDispensedMeds(session.patientId),
+  ]);
 
   return NextResponse.json({
-    current: meds.filter((m) => m.status === 'current'),
-    past:    meds.filter((m) => m.status === 'past'),
+    current:   meds.filter((m) => m.status === 'current'),
+    dispensed,
   });
 }
 

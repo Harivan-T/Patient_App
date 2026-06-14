@@ -349,7 +349,7 @@ export async function getMedicationsFromEHR(ehrId: string): Promise<Medication[]
 
 // ── Lab orders (service requests) ────────────────────────────────────────────
 
-export async function getLabOrdersFromEHR(ehrId: string) {
+export async function getLabOrdersFromEHR(ehrId: string): Promise<import('@/types').LabOrder[]> {
   try {
     const rows = await runAQL(`
       SELECT
@@ -370,51 +370,76 @@ export async function getLabOrdersFromEHR(ehrId: string) {
       ORDER BY c/context/start_time/value DESC
     `, { ehrId });
 
-    return (rows as unknown[][]).map((r, i) => {
-      const description  = String(r[2] ?? '');
-      const narrative    = String(r[7] ?? '');
-      const serviceName  = String(r[1] ?? 'Service Request');
-      const date         = String(r[4] ?? r[8] ?? '');
-      const doctor       = String(r[5] ?? r[9] ?? '');
-      const labName      = String(r[6] ?? '');
-      const indication   = String(r[3] ?? '');
+    // Group by composition UID — one composition = one order card.
+    // Multiple instructions in the same composition = multiple tests in one order.
+    type OrderStatus = 'pending' | 'partial';
+    type OrderAcc = {
+      compId: string;
+      date: string;
+      doctor: string;
+      hospitalName: string;
+      status: OrderStatus;
+      tests: import('@/types').LabTest[];
+    };
 
-      // Parse status from description text
+    const orderMap = new Map<string, OrderAcc>();
+
+    for (const r of rows as unknown[][]) {
+      const compId      = String(r[0] ?? '');
+      const description = String(r[2] ?? '');
+      const serviceName = String(r[1] ?? 'Service Request');
+      const date        = String(r[4] ?? r[8] ?? '');
+      const doctor      = String(r[5] ?? r[9] ?? '');
+      const labName     = String(r[6] ?? '');
+
+      // Only include actual lab orders — they always carry a Category field
+      if (!description.includes('Category:')) continue;
+
       const statusMatch = description.match(/Status:\s*([^|]+)/i);
-      const urgencyMatch = (description + narrative).match(/Urgency:\s*([^|]+)/i);
-      const rawStatus = statusMatch?.[1]?.trim().toLowerCase() ?? 'pending';
-      const status = rawStatus.includes('complet') ? 'completed'
-                   : rawStatus.includes('cancel')  ? 'cancelled'
-                   : 'pending';
+      const rawStatus   = statusMatch?.[1]?.trim().toLowerCase() ?? 'requested';
+      if (rawStatus.includes('cancel') || rawStatus.includes('complet')) continue;
 
-      // Parse individual tests from "Selected Tests (N): test1, test2, ..."
+      const orderStatus: OrderStatus = rawStatus.includes('partial') ? 'partial' : 'pending';
+
+      const testStatus = 'pending' as const;
+
+      // Tests listed as "Selected Tests (N): t1, t2, ..." in the description
       const testsMatch = description.match(/Selected Tests[^:]*:\s*([^|]+)/i);
       const testNames: string[] = testsMatch
         ? testsMatch[1].split(',').map((t) => t.trim()).filter(Boolean)
         : [serviceName];
 
-      const urgency = urgencyMatch?.[1]?.trim() ?? '';
+      if (!orderMap.has(compId)) {
+        orderMap.set(compId, { compId, date, doctor, hospitalName: labName || serviceName, status: orderStatus, tests: [] });
+      }
+      const acc = orderMap.get(compId)!;
 
-      return {
-        id:          String(r[0] ?? i),
-        orderDate:   date,
-        doctorName:  doctor,
-        hospitalName: labName || serviceName,
-        status,
-        indication,
-        urgency,
-        tests: testNames.map((name, j) => ({
-          id:          `${r[0]}-${j}`,
-          name,
-          result:      '',
-          unit:        '',
-          normalRange: '',
-          isAbnormal:  false,
-          status:      'pending' as const,
-          date,
-        })),
-      };
-    });
+      testNames.forEach((name) => {
+        if (!acc.tests.find((t) => t.name === name)) {
+          acc.tests.push({
+            id:          `${compId}-${acc.tests.length}`,
+            name,
+            result:      '',
+            unit:        '',
+            normalRange: '',
+            isAbnormal:  false,
+            status:      testStatus,
+            date,
+          });
+        }
+      });
+    }
+
+    return Array.from(orderMap.values()).map((acc) => ({
+      id:             acc.compId,
+      orderDate:      acc.date,
+      doctorName:     acc.doctor,
+      hospitalName:   acc.hospitalName,
+      status:         acc.status,
+      tests:          acc.tests,
+      pendingTests:   acc.tests,
+      completedTests: [],
+    }));
   } catch (e) {
     console.error('[EHRbase] getLabOrdersFromEHR failed:', e);
     return [];

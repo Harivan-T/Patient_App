@@ -7,7 +7,7 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 const TOKEN_COOKIE = 'hp_token';
 const OTP_COOKIE   = 'hp_otp';
-const SESSION_TIMEOUT = 30 * 24 * 60 * 60; // 30 days
+const SESSION_TIMEOUT = 10 * 365 * 24 * 60 * 60; // 10 years — expires only on logout
 const OTP_TTL         =  5 * 60; // seconds
 
 // ── JWT / session ─────────────────────────────────────────────────────────────

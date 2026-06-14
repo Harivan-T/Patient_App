@@ -4,12 +4,13 @@
     "tagline": "صحتك، بطريقتك"
   },
   "nav": {
+    "dashboard": "الرئيسية",
     "profile": "الملف الشخصي",
     "appointments": "المواعيد",
     "health": "صحتي",
     "medications": "أدويتي",
     "labs": "المختبر",
-    "bodymap": "خريطة الجسم",
+    "bodymap": "طبيبي",
     "logout": "تسجيل الخروج"
   },
   "login": {
@@ -83,7 +84,9 @@
       "upcoming": "قادم",
       "past": "سابق",
       "cancelled": "ملغى"
-    }
+    },
+    "searchPlaceholder": "ابحث بالطبيب أو التاريخ...",
+    "noResults": "لا توجد مواعيد تطابق بحثك"
   },
   "health": {
     "title": "صحتي",
@@ -121,9 +124,9 @@
   "medications": {
     "title": "أدويتي",
     "current": "الحالية",
-    "past": "السابقة",
+    "past": "الموزعة",
     "noCurrent": "لا توجد أدوية حالية",
-    "noPast": "لا توجد أدوية سابقة",
+    "noPast": "لا توجد أدوية موزعة",
     "dosage": "الجرعة",
     "frequency": "التكرار",
     "prescribedBy": "وصف من قبل",
@@ -155,7 +158,7 @@
     "abnormal": "غير طبيعي",
     "expandOrder": "عرض الفحوصات",
     "collapseOrder": "إخفاء الفحوصات",
-    "orders": "الطلبات",
+    "orders": "طلبات المختبر",
     "results": "النتائج",
     "reportedBy": "صدر من قبل",
     "tests": "فحوصات",
@@ -189,6 +192,15 @@
       "mid_back": "الظهر الأوسط", "lower_back": "الظهر السفلي", "l_buttock": "الأرداف الأيسر", "r_buttock": "الأرداف الأيمن",
       "l_back_thigh": "الفخذ الخلفي الأيسر", "r_back_thigh": "الفخذ الخلفي الأيمن", "l_calf": "بطة الساق اليسرى", "r_calf": "بطة الساق اليمنى"
     }
+  },
+  "dashboard": {
+    "updates": "المستجدات",
+    "myDoctor": "طبيبي",
+    "health": "الصحة",
+    "nutrition": "التغذية",
+    "fitness": "اللياقة البدنية",
+    "read": "اقرأ",
+    "noUpdate": "لا يوجد تحديث اليوم"
   },
   "common": {
     "loading": "جاري التحميل...",
