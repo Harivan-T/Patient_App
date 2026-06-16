@@ -347,6 +347,36 @@ export async function getMedicationsFromEHR(ehrId: string): Promise<Medication[]
   }
 }
 
+// ── Encounter doctor lookup ───────────────────────────────────────────────────
+// Builds a date-keyed map of c/composer/name across ALL compositions for this
+// patient — the same field Diagnoses uses.  Used to back-fill appointment rows
+// whose EPR doctorid/staff_id FKs are NULL.
+export async function getEncounterDoctors(ehrId: string): Promise<Map<string, string>> {
+  try {
+    const rows = await runAQL(`
+      SELECT c/context/start_time/value AS date,
+             c/composer/name            AS doctor
+      FROM EHR e
+        CONTAINS COMPOSITION c
+      WHERE e/ehr_id/value = $ehrId
+        AND c/composer/name IS NOT NULL
+      ORDER BY c/context/start_time/value DESC
+      LIMIT 500
+    `, { ehrId });
+
+    const map = new Map<string, string>();
+    for (const row of rows as unknown[][]) {
+      const date   = String(row[0] ?? '').slice(0, 10); // YYYY-MM-DD
+      const doctor = String(row[1] ?? '').trim();
+      // Keep the first (most recent) composer per date
+      if (date && doctor && !map.has(date)) map.set(date, doctor);
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
 // ── Lab orders (service requests) ────────────────────────────────────────────
 
 export async function getLabOrdersFromEHR(ehrId: string): Promise<import('@/types').LabOrder[]> {

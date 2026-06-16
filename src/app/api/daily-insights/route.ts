@@ -98,6 +98,28 @@ async function upsert(insight: DailyInsight, language: string, date: string) {
   );
 }
 
+// ── Arabic political-content filter ──────────────────────────────────────────
+// NewsData's 'health' category in Arabic includes government/ministry articles.
+// Skip any result whose title contains a strong political signal word so the
+// feed shows medical/wellness content instead of policy news.
+// Words that appear in Arabic "health" category but signal non-medical content:
+// government/ministry news, dream interpretation, horoscopes, celebrity gossip.
+const AR_SKIP_TOKENS = [
+  // political / government
+  'وزير', 'الوزير', 'حكومة', 'برلمان', 'انتخاب', 'مجلس النواب', 'سياسة', 'رئيس الوزراء',
+  // dream interpretation / spiritual
+  'تفسير حلم', 'تفسير الأحلام', 'ابن سيرين', 'رؤيا',
+  // horoscopes / luck
+  'أبراج', 'الحظ', 'الطالع', 'برج',
+  // celebrity / entertainment
+  'فنانة', 'ممثلة', 'مشاهير', 'نجمة',
+];
+
+function isIrrelevantAr(title: string, snippet: string): boolean {
+  const text = title + ' ' + snippet;
+  return AR_SKIP_TOKENS.some((tok) => text.includes(tok));
+}
+
 // ── NewsData fetch ────────────────────────────────────────────────────────────
 // Always uses category=health. Iterates the result list and returns the first
 // article whose URL and title are not already in `exclude` (dedupe set).
@@ -134,9 +156,11 @@ async function fetchFromNewsData(
     for (const article of results) {
       const url   = article.link  ?? '';
       const title = article.title ?? '';
-      // Skip if this article is already claimed by an earlier section
+      // Skip if already claimed by an earlier section
       if (url   && exclude.has(url))   continue;
       if (title && exclude.has(title)) continue;
+      // Skip non-medical Arabic content (political, dream interpretation, horoscopes, etc.)
+      if (language === 'ar' && isIrrelevantAr(title, article.description ?? '')) continue;
 
       return {
         category: section,

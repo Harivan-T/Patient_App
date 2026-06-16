@@ -21,8 +21,8 @@ export interface Appointment {
   doctorName: string;
   hospitalName: string;
   department?: string;
-  type: 'appointment' | 'operation';
-  status: 'upcoming' | 'past' | 'cancelled';
+  type: string;
+  status: string;
   notes?: string;
 }
 

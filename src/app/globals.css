@@ -6,14 +6,14 @@
   :root {
     /* ── New design tokens ──────────────────────────────── */
     --color-primary:  #628FF6;
-    --color-bg:       #FCFCFC;
-    --color-surface:  #FFFFFF;
+    --color-bg:       #FFFFFF;
+    --color-surface:  #f6f6f6;
     --color-heading:  #1A1A1A;
     --color-muted:    #58575C;
     --color-border:   #E7E7E7;
 
     /* ── Aliases used by Tailwind ───────────────────────── */
-    --background: #FCFCFC;
+    --background: #FFFFFF;
     --foreground: #1A1A1A;
 
     /* ── Legacy brand tokens (kept for any remaining refs) ─ */
@@ -59,7 +59,7 @@
 
 @layer utilities {
   .card {
-    @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700;
+    @apply bg-surface dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700;
     border-color: var(--color-border);
   }
   .btn-primary {

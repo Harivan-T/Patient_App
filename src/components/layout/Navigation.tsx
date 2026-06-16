@@ -94,7 +94,7 @@ export function Navigation({ locale, variant = 'bottom' }: { locale: string; var
   }
 
   return (
-    <nav className="fixed bottom-0 start-0 end-0 z-50 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700">
+    <nav className="bg-surface dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700">
       <ul className="flex justify-around py-1">
         {NAV_ITEMS.filter(({ key }) => key !== 'bodymap').map(({ key, href, icon }) => {
           const active = isActive(href);

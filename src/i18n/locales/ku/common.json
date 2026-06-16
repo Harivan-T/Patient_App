@@ -80,10 +80,23 @@
     "type": "جۆر",
     "appointment": "چاوپێکەوتن",
     "operation": "نەشتەرگەری",
+    "visiting": "سەردان",
+    "home_visit": "سەردانی ماڵەوە",
+    "consultation": "ڕاوێژکاری",
+    "follow_up": "شوێنکەوتنەوە",
+    "emergency": "ئەورژانس",
+    "check_up": "پشکنینی ئاسایی",
+    "checkup": "پشکنینی ئاسایی",
+    "procedure": "کاری پزیشکی",
+    "screening": "کرتەپشکنین",
+    "reason": "هۆکار",
     "status": {
       "upcoming": "داهاتوو",
       "past": "ئەمیانە",
-      "cancelled": "هەڵوەشێندراوەتەوە"
+      "cancelled": "هەڵوەشێندراوەتەوە",
+      "scheduled": "پلاندراو",
+      "completed": "تەواوبوو",
+      "no-show": "نەهاتوو"
     },
     "searchPlaceholder": "بگەڕێ بە دکتۆر یان بەروار...",
     "noResults": "هیچ چاوپێکەوتنێک لەگەڵ گەڕانەکەت نەگونجا"

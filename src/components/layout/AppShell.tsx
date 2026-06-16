@@ -32,9 +32,9 @@ export function AppShell({
   const fullName = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') : '';
 
   return (
-    <div className="flex flex-col min-h-screen bg-background dark:bg-slate-900">
-      {/* Top header — fixed height h-16 (4rem) for sidebar offset math */}
-      <header dir="ltr" className="sticky top-0 z-40 h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 md:px-8 flex items-center gap-3">
+    <div className="flex flex-col h-screen overflow-hidden bg-background dark:bg-slate-900">
+      {/* Top header — fixed height, stays at top as a shrink-0 flex child */}
+      <header dir="ltr" className="shrink-0 z-40 h-16 bg-surface dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 md:px-8 flex items-center gap-3">
         <Link href={`/${locale}/dashboard`} className="flex items-center gap-3 shrink-0 cursor-pointer">
           <Image src="/tibbna-logo.png" alt="Tibbna" width={34} height={34} className="object-contain" />
           {fullName && (
@@ -56,7 +56,7 @@ export function AppShell({
       <div dir="ltr" className="flex flex-1 min-h-0">
 
         {/* Sidebar — tablet and desktop only */}
-        <aside className="hidden md:flex flex-col w-56 lg:w-64 shrink-0 sticky top-16 h-[calc(100vh-4rem)] bg-white dark:bg-slate-800 border-e border-gray-200 dark:border-slate-700 overflow-y-auto">
+        <aside className="hidden md:flex flex-col w-56 lg:w-64 shrink-0 bg-surface dark:bg-slate-800 border-e border-gray-200 dark:border-slate-700 overflow-y-auto">
           <Link href={`/${locale}/dashboard`} className="flex flex-col items-center gap-2 px-4 py-5 border-b border-gray-100 dark:border-slate-700 cursor-pointer w-full">
             <Image src="/tibbna-logo.png" alt="Tibbna" width={48} height={48} className="object-contain" />
             {fullName && (
@@ -69,15 +69,15 @@ export function AppShell({
         </aside>
 
         {/* Main content — RTL text direction for Arabic/Kurdish */}
-        <main dir={isRTL(locale) ? 'rtl' : 'ltr'} className="flex-1 overflow-auto pb-24 md:pb-8">
+        <main dir={isRTL(locale) ? 'rtl' : 'ltr'} className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
             {children}
           </div>
         </main>
       </div>
 
-      {/* Bottom nav — mobile only */}
-      <div className="md:hidden">
+      {/* Bottom nav — mobile only, shrink-0 keeps it pinned at the bottom of the flex column */}
+      <div className="md:hidden shrink-0">
         <Navigation locale={locale} variant="bottom" />
       </div>
     </div>

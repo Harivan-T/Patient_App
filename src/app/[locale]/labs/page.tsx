@@ -104,70 +104,73 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
   return (
     <AppShell locale={locale} title={t('title')}>
       <div className="max-w-2xl mx-auto">
+        {/* Pinned tab header — sticks to top of main scroll container */}
+        <div className="sticky top-0 z-10 bg-background dark:bg-slate-900 pb-4">
 
-        {/* Orders / Results tab switcher */}
-        <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 mb-4">
-          {(['orders', 'results'] as Tab[]).map((id) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
-                tab === id ? 'bg-[#3B66DD] text-white shadow-sm' : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {t(id)}
-              {id === 'results' && (() => {
-                const count = results.length + orders.filter((o: LabOrder) => o.completedTests?.length > 0).length;
-                return count > 0 ? (
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold text-white"
-                    style={{ background: BRAND }}>
-                    {count}
-                  </span>
-                ) : null;
-              })()}
-            </button>
-          ))}
-        </div>
-
-        {/* Search + refresh bar */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-              strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
-              <circle cx="10.5" cy="10.5" r="6.5" />
-              <line x1="15.5" y1="15.5" x2="20" y2="20" />
-            </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t('searchPlaceholder')}
-              autoComplete="off" autoCorrect="off" spellCheck={false}
-              className="flex-1 py-2.5 bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none"
-            />
-            {search && (
-              <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                </svg>
+          {/* Orders / Results tab switcher */}
+          <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 mb-3">
+            {(['orders', 'results'] as Tab[]).map((id) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  tab === id ? 'bg-[#3B66DD] text-white shadow-sm' : 'text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                {t(id)}
+                {id === 'results' && (() => {
+                  const count = results.length + orders.filter((o: LabOrder) => o.completedTests?.length > 0).length;
+                  return count > 0 ? (
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold text-white"
+                      style={{ background: BRAND }}>
+                      {count}
+                    </span>
+                  ) : null;
+                })()}
               </button>
-            )}
+            ))}
           </div>
 
-          {/* Refresh button */}
-          <button
-            onClick={() => fetchData(true)}
-            disabled={refreshing}
-            className="shrink-0 p-2.5 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
-            title="Refresh"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-              className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}>
-              <path d="M23 4v6h-6M1 20v-6h6" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
+          {/* Search + refresh bar */}
+          <div className="flex items-center gap-2">
+            <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
+                <circle cx="10.5" cy="10.5" r="6.5" />
+                <line x1="15.5" y1="15.5" x2="20" y2="20" />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t('searchPlaceholder')}
+                autoComplete="off" autoCorrect="off" spellCheck={false}
+                className="flex-1 py-2.5 bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none"
+              />
+              {search && (
+                <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            {/* Refresh button */}
+            <button
+              onClick={() => fetchData(true)}
+              disabled={refreshing}
+              className="shrink-0 p-2.5 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
+              title="Refresh"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}>
+                <path d="M23 4v6h-6M1 20v-6h6" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+        </div>{/* end sticky header */}
 
         {loading ? (
           <PageLoader />

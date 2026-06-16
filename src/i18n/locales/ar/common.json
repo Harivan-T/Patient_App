@@ -80,10 +80,23 @@
     "type": "النوع",
     "appointment": "موعد",
     "operation": "عملية",
+    "visiting": "زيارة",
+    "home_visit": "زيارة منزلية",
+    "consultation": "استشارة",
+    "follow_up": "متابعة",
+    "emergency": "طوارئ",
+    "check_up": "فحص روتيني",
+    "checkup": "فحص روتيني",
+    "procedure": "إجراء طبي",
+    "screening": "فحص مبكر",
+    "reason": "السبب",
     "status": {
       "upcoming": "قادم",
       "past": "سابق",
-      "cancelled": "ملغى"
+      "cancelled": "ملغى",
+      "scheduled": "مجدول",
+      "completed": "مكتمل",
+      "no-show": "لم يحضر"
     },
     "searchPlaceholder": "ابحث بالطبيب أو التاريخ...",
     "noResults": "لا توجد مواعيد تطابق بحثك"

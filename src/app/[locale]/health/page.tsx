@@ -24,7 +24,16 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
   const [data, setData] = useState<HealthData>({ diagnoses: [], vitals: [], carePlan: null });
   const [loading, setLoading] = useState(true);
   const [diagSearch, setDiagSearch] = useState('');
+  const [diagExpanded, setDiagExpanded] = useState<Set<string>>(new Set());
   const [carePlanExpanded, setCarePlanExpanded] = useState(false);
+
+  function toggleDiagExpanded(id: string) {
+    setDiagExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  }
   const [txMap, setTxMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -77,48 +86,50 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
   return (
     <AppShell locale={locale} title={t('title')}>
       <div className="max-w-2xl mx-auto">
-        <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 mb-4 overflow-x-auto">
-          {TABS.map((id) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              className={`flex-1 py-2 px-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${
-                tab === id
-                  ? 'bg-[#3B66DD] text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-              
-            >
-              {t(id)}
-            </button>
-          ))}
-        </div>
-
-        {/* Search bar — diagnoses tab only */}
-        {tab === 'diagnoses' && (
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 mb-4 focus-within:ring-2 focus-within:border-transparent" style={{ '--tw-ring-color': BRAND } as React.CSSProperties}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
-              <circle cx="10.5" cy="10.5" r="6.5" /><line x1="15.5" y1="15.5" x2="20" y2="20" />
-            </svg>
-            <input
-              type="text"
-              value={diagSearch}
-              onChange={(e) => setDiagSearch(e.target.value)}
-              placeholder={t('searchPlaceholder')}
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              className="flex-1 py-2.5 bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none"
-            />
-            {diagSearch && (
-              <button onClick={() => setDiagSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                </svg>
+        {/* Pinned tab header — sticks to top of main scroll container */}
+        <div className="sticky top-0 z-10 bg-background dark:bg-slate-900 pb-4">
+          <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 mb-3 overflow-x-auto">
+            {TABS.map((id) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className={`flex-1 py-2 px-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${
+                  tab === id
+                    ? 'bg-[#3B66DD] text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                {t(id)}
               </button>
-            )}
+            ))}
           </div>
-        )}
+
+          {/* Search bar — diagnoses tab only */}
+          {tab === 'diagnoses' && (
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 focus-within:ring-2 focus-within:border-transparent" style={{ '--tw-ring-color': BRAND } as React.CSSProperties}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
+                <circle cx="10.5" cy="10.5" r="6.5" /><line x1="15.5" y1="15.5" x2="20" y2="20" />
+              </svg>
+              <input
+                type="text"
+                value={diagSearch}
+                onChange={(e) => setDiagSearch(e.target.value)}
+                placeholder={t('searchPlaceholder')}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                className="flex-1 py-2.5 bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none"
+              />
+              {diagSearch && (
+                <button onClick={() => setDiagSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
+        </div>{/* end sticky header */}
 
         {loading ? (
           <PageLoader />
@@ -139,53 +150,72 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
                     {diagSearch && (
                       <p className="text-xs text-gray-400 px-1">{filteredDiagnoses.length} {t('results')}</p>
                     )}
-                    {filteredDiagnoses.map((d) => (
-                      <div key={d.id} className="card p-4">
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 dark:text-gray-100">{tx(d.name)}</p>
-                            {d.description && (
-                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
-                                {tx(d.description)}
-                              </p>
-                            )}
-                          </div>
-                          <span className={`badge-${d.status} shrink-0`}>{t(`status.${d.status}`)}</span>
+                    {filteredDiagnoses.map((d) => {
+                      const isOpen = diagExpanded.has(d.id);
+                      return (
+                        <div key={d.id} className="card overflow-hidden">
+                          {/* Collapsed view: name + status + chevron */}
+                          <button
+                            className="w-full px-4 py-4 flex items-center justify-between gap-3 text-start hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+                            onClick={() => toggleDiagExpanded(d.id)}
+                          >
+                            <p className="font-semibold text-gray-900 dark:text-gray-100 flex-1 min-w-0">{tx(d.name)}</p>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className={`badge-${d.status}`}>{t(`status.${d.status}`)}</span>
+                              <svg
+                                viewBox="0 0 24 24" fill="currentColor"
+                                className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                              >
+                                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+                              </svg>
+                            </div>
+                          </button>
+
+                          {/* Expanded details */}
+                          {isOpen && (
+                            <div className="border-t border-gray-100 dark:border-slate-700 px-4 py-4">
+                              {d.description && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
+                                  {tx(d.description)}
+                                </p>
+                              )}
+                              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                {d.recordedAt && (
+                                  <>
+                                    <span className="text-gray-400">{t('dateRecorded')}</span>
+                                    <span className="text-gray-700 dark:text-gray-300">{formatDate(d.recordedAt)}</span>
+                                  </>
+                                )}
+                                {d.date && (
+                                  <>
+                                    <span className="text-gray-400">{t('onset')}</span>
+                                    <span className="text-gray-700 dark:text-gray-300">{formatDate(d.date)}</span>
+                                  </>
+                                )}
+                                {d.bodySite && (
+                                  <>
+                                    <span className="text-gray-400">{t('bodySite')}</span>
+                                    <span className="text-gray-700 dark:text-gray-300">{tx(d.bodySite)}</span>
+                                  </>
+                                )}
+                                {d.code && (
+                                  <>
+                                    <span className="text-gray-400">{t('icdCode')}</span>
+                                    <span className="text-gray-700 dark:text-gray-300">{d.code}</span>
+                                  </>
+                                )}
+                                {d.doctor && (
+                                  <>
+                                    <span className="text-gray-400">{t('doctor')}</span>
+                                    <span className="text-gray-700 dark:text-gray-300">{d.doctor}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs pt-2 border-t border-gray-100 dark:border-slate-700">
-                          {d.recordedAt && (
-                            <>
-                              <span className="text-gray-400">{t('dateRecorded')}</span>
-                              <span className="text-gray-700 dark:text-gray-300">{formatDate(d.recordedAt)}</span>
-                            </>
-                          )}
-                          {d.date && (
-                            <>
-                              <span className="text-gray-400">{t('onset')}</span>
-                              <span className="text-gray-700 dark:text-gray-300">{formatDate(d.date)}</span>
-                            </>
-                          )}
-                          {d.bodySite && (
-                            <>
-                              <span className="text-gray-400">{t('bodySite')}</span>
-                              <span className="text-gray-700 dark:text-gray-300">{tx(d.bodySite)}</span>
-                            </>
-                          )}
-                          {d.code && (
-                            <>
-                              <span className="text-gray-400">{t('icdCode')}</span>
-                              <span className="text-gray-700 dark:text-gray-300">{d.code}</span>
-                            </>
-                          )}
-                          {d.doctor && (
-                            <>
-                              <span className="text-gray-400">{t('doctor')}</span>
-                              <span className="text-gray-700 dark:text-gray-300">{d.doctor}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )
             )}

@@ -331,8 +331,9 @@ export function BodyMapContent() {
                 </div>
               )}
               <div className="flex justify-end mt-5">
-                <button onClick={() => setStep(2)} disabled={zones.length === 0} className="btn-primary">
-                  {t('buttons.next')} →
+                <button onClick={() => setStep(2)} disabled={zones.length === 0} className="btn-primary flex flex-col items-center gap-0.5 leading-tight">
+                  <span>{t('buttons.next')}</span>
+                  <span aria-hidden>→</span>
                 </button>
               </div>
             </div>
@@ -355,8 +356,11 @@ export function BodyMapContent() {
                 })}
               </div>
               <div className="flex justify-between mt-5">
-                <button onClick={() => setStep(1)} className="btn-secondary">← {t('buttons.back')}</button>
-                <button onClick={() => setStep(3)} disabled={symptoms.length === 0} className="btn-primary">{t('buttons.next')} →</button>
+                <button onClick={() => setStep(1)} className="btn-secondary flex flex-col items-center gap-0.5 leading-tight"><span>{t('buttons.back')}</span><span aria-hidden>←</span></button>
+                <button onClick={() => setStep(3)} disabled={symptoms.length === 0} className="btn-primary flex flex-col items-center gap-0.5 leading-tight">
+                  <span>{t('buttons.next')}</span>
+                  <span aria-hidden>→</span>
+                </button>
               </div>
             </div>
           )}
@@ -393,8 +397,11 @@ export function BodyMapContent() {
                 </div>
               </div>
               <div className="flex justify-between mt-5">
-                <button onClick={() => setStep(2)} className="btn-secondary">← {t('buttons.back')}</button>
-                <button onClick={() => setStep(4)} disabled={!duration} className="btn-primary">{t('buttons.next')} →</button>
+                <button onClick={() => setStep(2)} className="btn-secondary flex flex-col items-center gap-0.5 leading-tight"><span>{t('buttons.back')}</span><span aria-hidden>←</span></button>
+                <button onClick={() => setStep(4)} disabled={!duration} className="btn-primary flex flex-col items-center gap-0.5 leading-tight">
+                  <span>{t('buttons.next')}</span>
+                  <span aria-hidden>→</span>
+                </button>
               </div>
             </div>
           )}
@@ -435,8 +442,11 @@ export function BodyMapContent() {
                   placeholder={t('step4.notesPlaceholder')} className="input resize-none" rows={3} maxLength={500} />
               </div>
               <div className="flex justify-between mt-5">
-                <button onClick={() => setStep(3)} className="btn-secondary">← {t('buttons.back')}</button>
-                <button onClick={() => setStep(5)} className="btn-primary">{t('steps.review')} →</button>
+                <button onClick={() => setStep(3)} className="btn-secondary flex flex-col items-center gap-0.5 leading-tight"><span>{t('buttons.back')}</span><span aria-hidden>←</span></button>
+                <button onClick={() => setStep(5)} className="btn-primary flex flex-col items-center gap-0.5 leading-tight">
+                  <span>{t('steps.review')}</span>
+                  <span aria-hidden>→</span>
+                </button>
               </div>
             </div>
           )}
@@ -477,7 +487,7 @@ export function BodyMapContent() {
                 )}
               </div>
               <div className="flex justify-between mt-6">
-                <button onClick={() => setStep(4)} className="btn-secondary">← {t('buttons.edit')}</button>
+                <button onClick={() => setStep(4)} className="btn-secondary">{t('buttons.edit')}</button>
                 <button onClick={handleSubmit} disabled={submitting} className="btn-primary">
                   {submitting ? t('buttons.submitting') : t('buttons.submit')}
                 </button>
