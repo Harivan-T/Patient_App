@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/epr';
 
+export const dynamic = 'force-dynamic';
+
 export interface NewsArticle {
   title: string;
   source: string;

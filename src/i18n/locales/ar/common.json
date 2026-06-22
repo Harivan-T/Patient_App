@@ -222,6 +222,19 @@
     "homeVisit": "زيارة منزلية",
     "videoMeet": "زيارة بالفيديو"
   },
+  "areaSymptoms": {
+    "head":     { "label": "الرأس",        "headache": "صداع",               "dizziness": "دوخة",                 "pressure": "ضغط" },
+    "neck":     { "label": "الرقبة",       "pain": "ألم",                    "stiffness": "تيبّس",                "limited_movement": "صعوبة الحركة" },
+    "chest":    { "label": "الصدر",        "chest_pain": "ألم الصدر",        "shortness_of_breath": "ضيق التنفس", "palpitations": "خفقان" },
+    "abdomen":  { "label": "البطن",        "abdominal_pain": "ألم البطن",    "nausea": "غثيان",                   "bloating": "انتفاخ" },
+    "pelvis":   { "label": "الحوض",        "pain": "ألم",                    "cramping": "تقلصات",                "discomfort": "انزعاج" },
+    "arm":      { "label": "الذراع",       "pain": "ألم",                    "numbness": "تنميل",                 "weakness": "ضعف" },
+    "hand":     { "label": "اليد",         "pain": "ألم",                    "tingling": "وخز",                   "swelling": "تورّم" },
+    "leg":      { "label": "الساق",        "pain": "ألم",                    "swelling": "تورّم",                 "cramping": "تقلصات" },
+    "foot":     { "label": "القدم",        "pain": "ألم",                    "swelling": "تورّم",                 "numbness": "تنميل" },
+    "shoulder": { "label": "الكتف",        "pain": "ألم",                    "stiffness": "تيبّس",                "limited_movement": "صعوبة الحركة" },
+    "back":     { "label": "الظهر",        "pain": "ألم",                    "stiffness": "تيبّس",                "limited_movement": "صعوبة الحركة" }
+  },
   "common": {
     "loading": "جاري التحميل...",
     "error": "حدث خطأ ما",

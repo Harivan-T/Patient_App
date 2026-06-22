@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/epr';
 
+export const dynamic = 'force-dynamic';
+
 export interface DailyInsight {
   category: 'health' | 'food' | 'sports';
   title: string;

@@ -222,6 +222,19 @@
     "homeVisit": "سەردانی ماڵەوە",
     "videoMeet": "چاوپێکەوتنی ڤیدیۆیی"
   },
+  "areaSymptoms": {
+    "head":     { "label": "Head",     "headache": "Serêş",              "dizziness": "Sersiûr",            "pressure": "Tansiyoon" },
+    "neck":     { "label": "Neck",     "pain": "Êş",                    "stiffness": "Hişkبوون",           "limited_movement": "Tengezariya Livîn" },
+    "chest":    { "label": "Chest",    "chest_pain": "Êşa Sîng",        "shortness_of_breath": "Tengezariya Nefesê", "palpitations": "Lêdana Dilê" },
+    "abdomen":  { "label": "Abdomen",  "abdominal_pain": "Êşa Zikê",    "nausea": "Sekinîn",               "bloating": "Pejnandin" },
+    "pelvis":   { "label": "Pelvis",   "pain": "Êş",                    "cramping": "Kramp",               "discomfort": "Nerehetî" },
+    "arm":      { "label": "Arm",      "pain": "Êş",                    "numbness": "Bêhêzî",              "weakness": "Lawazî" },
+    "hand":     { "label": "Hand",     "pain": "Êş",                    "tingling": "Xilxilandin",         "swelling": "Gewreبوون" },
+    "leg":      { "label": "Leg",      "pain": "Êş",                    "swelling": "Gewreبوون",           "cramping": "Kramp" },
+    "foot":     { "label": "Foot",     "pain": "Êş",                    "swelling": "Gewreبوون",           "numbness": "Bêhêzî" },
+    "shoulder": { "label": "Shoulder", "pain": "Êş",                    "stiffness": "Hişkبوون",           "limited_movement": "Tengezariya Livîn" },
+    "back":     { "label": "Back",     "pain": "Êş",                    "stiffness": "Hişkبوون",           "limited_movement": "Tengezariya Livîn" }
+  },
   "common": {
     "loading": "بارکردن...",
     "error": "هەڵەیەک ڕوویدا",

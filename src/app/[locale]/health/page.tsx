@@ -87,7 +87,7 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
     <AppShell locale={locale} title={t('title')}>
       <div className="max-w-2xl mx-auto">
         {/* Pinned tab header — sticks to top of main scroll container */}
-        <div className="sticky top-0 z-10 bg-background dark:bg-slate-900 pb-4">
+        <div className="sticky top-[var(--inner-nav-top)] z-30 bg-background dark:bg-slate-900 pb-4">
           <div className="seg-toggle mb-3 overflow-x-auto">
             {TABS.map((id) => (
               <button

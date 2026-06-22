@@ -5,31 +5,28 @@ import { useTranslations } from 'next-intl';
 const VISIT_TYPES = [
   {
     key: 'clinicVisit' as const,
+    // Stethoscope / medical cross — matches appointments page "default" bucket
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-        <circle cx="6.5" cy="3.5" r="1" fill="currentColor" stroke="none" />
-        <circle cx="17.5" cy="3.5" r="1" fill="currentColor" stroke="none" />
-        <path d="M6.5 4.5v4.5a5.5 5.5 0 0 0 11 0V4.5" />
-        <path d="M12 14v4" />
-        <circle cx="12" cy="20" r="2" />
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6" aria-hidden="true">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H9v-2h3v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z" />
       </svg>
     ),
   },
   {
     key: 'homeVisit' as const,
+    // House — matches appointments page "home_visit" bucket
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-        <path d="M3 12l9-9 9 9" />
-        <path d="M4.5 10.5V20a1 1 0 001 1h4v-5h5v5h4a1 1 0 001-1v-9.5" />
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6" aria-hidden="true">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
       </svg>
     ),
   },
   {
     key: 'videoMeet' as const,
+    // Video camera — matches appointments page "video" bucket
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-        <path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14" />
-        <rect x="3" y="8" width="12" height="8" rx="2" />
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6" aria-hidden="true">
+        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
       </svg>
     ),
   },
@@ -44,10 +41,12 @@ export function BookDoctorOptions() {
         <button
           key={key}
           type="button"
-          className="flex flex-col items-center gap-2.5 py-4 px-2 rounded-xl border border-border dark:border-slate-600 bg-white dark:bg-slate-700/40 text-xs font-medium transition-colors hover:border-primary hover:bg-[#E6EFF3] dark:hover:bg-[#0f2a33]"
+          className="flex flex-col items-center gap-2.5 py-4 px-2 rounded-xl border border-[var(--color-border)] dark:border-slate-600 bg-white dark:bg-slate-700/40 text-xs font-medium transition-all hover:border-[var(--color-primary)] hover:bg-[var(--tibbna-light)] dark:hover:bg-[#0f2a33]"
         >
-          <span className="text-primary">{icon}</span>
-          <span className="text-slate-700 dark:text-slate-200 leading-tight text-center">{t(key)}</span>
+          <span className="text-[var(--color-primary)]">{icon}</span>
+          <span className="text-slate-700 dark:text-slate-200 leading-tight text-center">
+            {t(key)}
+          </span>
         </button>
       ))}
     </div>

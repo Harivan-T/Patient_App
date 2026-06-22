@@ -222,6 +222,19 @@
     "homeVisit": "Home visit",
     "videoMeet": "Video meet"
   },
+  "areaSymptoms": {
+    "head":     { "label": "Head",     "headache": "Headache",            "dizziness": "Dizziness",              "pressure": "Pressure" },
+    "neck":     { "label": "Neck",     "pain": "Pain",                    "stiffness": "Stiffness",              "limited_movement": "Limited movement" },
+    "chest":    { "label": "Chest",    "chest_pain": "Chest pain",        "shortness_of_breath": "Shortness of breath", "palpitations": "Palpitations" },
+    "abdomen":  { "label": "Abdomen",  "abdominal_pain": "Abdominal pain","nausea": "Nausea",                    "bloating": "Bloating" },
+    "pelvis":   { "label": "Pelvis",   "pain": "Pain",                    "cramping": "Cramping",                "discomfort": "Discomfort" },
+    "arm":      { "label": "Arm",      "pain": "Pain",                    "numbness": "Numbness",                "weakness": "Weakness" },
+    "hand":     { "label": "Hand",     "pain": "Pain",                    "tingling": "Tingling",                "swelling": "Swelling" },
+    "leg":      { "label": "Leg",      "pain": "Pain",                    "swelling": "Swelling",                "cramping": "Cramping" },
+    "foot":     { "label": "Foot",     "pain": "Pain",                    "swelling": "Swelling",                "numbness": "Numbness" },
+    "shoulder": { "label": "Shoulder", "pain": "Pain",                    "stiffness": "Stiffness",              "limited_movement": "Limited movement" },
+    "back":     { "label": "Back",     "pain": "Pain",                    "stiffness": "Stiffness",              "limited_movement": "Limited movement" }
+  },
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
