@@ -215,6 +215,13 @@
     "read": "اقرأ",
     "noUpdate": "لا يوجد تحديث اليوم"
   },
+  "booking": {
+    "bookDoctor": "احجز طبيبًا",
+    "submitRecord": "حفظ السجل",
+    "clinicVisit": "زيارة العيادة",
+    "homeVisit": "زيارة منزلية",
+    "videoMeet": "زيارة بالفيديو"
+  },
   "common": {
     "loading": "جاري التحميل...",
     "error": "حدث خطأ ما",

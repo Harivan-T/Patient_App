@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
@@ -17,7 +16,6 @@ function validatePatientId(value: string): string {
 export default function LoginPage({ params }: { params: { locale: string } }) {
   const t = useTranslations('login');
   const tc = useTranslations('common');
-  const router = useRouter();
   const { locale } = params;
 
   const [step, setStep] = useState<Step>('credentials');
@@ -102,8 +100,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
         setError(t(`errors.${data.error}` as never) || data.error);
         return;
       }
-      router.push(`/${locale}/dashboard`);
-      router.refresh();
+      window.location.href = `/${locale}/dashboard`;
     } catch {
       setError(t('errors.invalidOtp'));
     } finally {
@@ -129,7 +126,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, var(--tibbna-light) 0%, #f0f9ff 60%, #fefce8 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md">
         {/* Logo — fade-in + scale on mount, pulse logo while loading */}
         <div className={`flex flex-col items-center mb-8 gap-2 transition-all duration-700 ease-out ${
@@ -203,12 +200,6 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
               <button type="submit" disabled={loading} className="btn-primary w-full">
                 {loading ? t('sending') : t('title')}
               </button>
-
-              <div className="text-center">
-                <button type="submit" disabled={loading} className="text-sm hover:underline disabled:opacity-50" style={{ color: 'var(--color-primary)' }}>
-                  {t('sendOtp')} →
-                </button>
-              </div>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-5">

@@ -115,14 +115,14 @@ export default function DashboardPage({ params }: { params: { locale: string } }
       <div className="max-w-2xl mx-auto">
         {/* Pinned tab header — sticks to top of main scroll container */}
         <div className="sticky top-0 z-10 bg-background dark:bg-slate-900 pb-4">
-          <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1">
+          <div className="seg-toggle">
             {(['updates', 'mydoctor'] as Tab[]).map((id) => (
               <button
                 key={id}
                 onClick={() => setTab(id)}
                 className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                   tab === id
-                    ? 'bg-[#3B66DD] text-white shadow-sm'
+                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
                     : 'text-gray-600 dark:text-gray-400'
                 }`}
               >

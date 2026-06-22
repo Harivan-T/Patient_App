@@ -7,12 +7,13 @@ function getPool(): Pool {
   if (!pool) {
     // Strip channel_binding from URL — pg doesn't support it and it causes timeout on Neon
     const url = (process.env.DATABASE_URL ?? '').replace(/[&?]channel_binding=[^&]*/g, '');
+    const isLocal = /localhost|127\.0\.0\.1/.test(url);
     pool = new Pool({
       connectionString: url,
       max: 10,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 15000,
-      ssl: { rejectUnauthorized: false },
+      ssl: isLocal ? false : { rejectUnauthorized: false },
     });
   }
   return pool;

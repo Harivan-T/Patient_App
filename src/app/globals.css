@@ -5,22 +5,27 @@
 @layer base {
   :root {
     /* ── New design tokens ──────────────────────────────── */
-    --color-primary:  #628FF6;
+    --color-primary:  #548194;
     --color-bg:       #FFFFFF;
     --color-surface:  #f6f6f6;
     --color-heading:  #1A1A1A;
     --color-muted:    #58575C;
-    --color-border:   #E7E7E7;
+    --color-border:   #CBD2E0;
+    --color-chrome:   #769AAA;  /* header + bottom-nav bar background */
 
     /* ── Aliases used by Tailwind ───────────────────────── */
     --background: #FFFFFF;
     --foreground: #1A1A1A;
 
     /* ── Legacy brand tokens (kept for any remaining refs) ─ */
-    --tibbna-blue:      #628FF6;
-    --tibbna-blue-dark: #4A77E0;
+    --tibbna-blue:      #548194;
+    --tibbna-blue-dark: #3d6475;
     --tibbna-gold:      #D4A844;
-    --tibbna-light:     #EEF3FE;
+    --tibbna-light:     #E6EFF3;
+
+    /* ── Floating chrome shared tokens (nav bar + seg-toggles) ─ */
+    --chrome-border-color: rgba(84, 129, 148, 0.35);
+    --chrome-shadow: 0 10px 28px rgba(84, 129, 148, 0.35), 0 0 18px rgba(84, 129, 148, 0.25);
   }
 
   .dark {
@@ -29,6 +34,7 @@
     --color-heading: #f1f5f9;
     --color-muted:   #94a3b8;
     --color-border:  #334155;
+    --color-chrome:  #548194;  /* slightly deeper on dark mode */
     --background:    #0f172a;
     --foreground:    #f1f5f9;
     --tibbna-light:  #1a2a4a;
@@ -59,8 +65,15 @@
 
 @layer utilities {
   .card {
-    @apply bg-surface dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700;
+    @apply bg-background dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700;
     border-color: var(--color-border);
+  }
+  /* Segmented tab-toggle container — shared across all pages */
+  .seg-toggle {
+    @apply flex gap-1 rounded-2xl p-1;
+    background: transparent;
+    border: 1.5px solid var(--chrome-border-color);
+    box-shadow: var(--chrome-shadow);
   }
   .btn-primary {
     background-color: var(--color-primary);

@@ -34,16 +34,16 @@ export function AppShell({
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background dark:bg-slate-900">
       {/* Top header — fixed height, stays at top as a shrink-0 flex child */}
-      <header dir="ltr" className="shrink-0 z-40 h-16 bg-surface dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 md:px-8 flex items-center gap-3">
+      <header dir="ltr" className="shrink-0 z-40 mx-3 mt-3 rounded-2xl h-12 px-4 flex items-center gap-3" style={{ background: 'var(--color-primary)', border: '1.5px solid var(--chrome-border-color)', boxShadow: 'var(--chrome-shadow)' }}>
         <Link href={`/${locale}/dashboard`} className="flex items-center gap-3 shrink-0 cursor-pointer">
-          <Image src="/tibbna-logo.png" alt="Tibbna" width={34} height={34} className="object-contain" />
+          <Image src="/tibbna-logo.png" alt="Tibbna" width={36} height={36} className="object-contain" />
           {fullName && (
-            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{fullName}</span>
+            <span className="text-sm font-semibold text-white whitespace-nowrap">{fullName}</span>
           )}
         </Link>
         <Link
           href={`/${locale}/settings`}
-          className="ml-auto shrink-0 p-1.5 rounded-lg text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+          className="ml-auto shrink-0 p-1.5 rounded-lg text-white hover:bg-white/20 transition-colors"
           aria-label="Settings"
         >
           <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">

@@ -215,6 +215,13 @@
     "read": "Read",
     "noUpdate": "No update today"
   },
+  "booking": {
+    "bookDoctor": "Book a Doctor",
+    "submitRecord": "Submit Record",
+    "clinicVisit": "Clinic visit",
+    "homeVisit": "Home visit",
+    "videoMeet": "Video meet"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
