@@ -203,8 +203,22 @@
       "l_shin": "L. Shin", "r_shin": "R. Shin", "l_foot": "L. Foot", "r_foot": "R. Foot",
       "l_trap": "L. Trapezius", "r_trap": "R. Trapezius", "upper_back": "Upper Back",
       "mid_back": "Mid Back", "lower_back": "Lower Back", "l_buttock": "L. Buttock", "r_buttock": "R. Buttock",
-      "l_back_thigh": "L. Back Thigh", "r_back_thigh": "R. Back Thigh", "l_calf": "L. Calf", "r_calf": "R. Calf"
+      "l_back_thigh": "L. Back Thigh", "r_back_thigh": "R. Back Thigh", "l_calf": "L. Calf", "r_calf": "R. Calf",
+      "arm_left": "Left Arm", "arm_right": "Right Arm",
+      "hand_left": "Left Hand", "hand_right": "Right Hand",
+      "leg_left": "Left Leg", "leg_right": "Right Leg",
+      "foot_left": "Left Foot", "foot_right": "Right Foot"
     }
+  },
+  "body3d": {
+    "male": "Male",
+    "female": "Female",
+    "hint": "Tap a region to select · Drag to rotate · Pinch to zoom",
+    "head": "Head", "neck": "Neck", "chest": "Chest", "abdomen": "Abdomen", "pelvis": "Pelvis",
+    "arm_left": "Left Arm", "arm_right": "Right Arm",
+    "hand_left": "Left Hand", "hand_right": "Right Hand",
+    "leg_left": "Left Leg", "leg_right": "Right Leg",
+    "foot_left": "Left Foot", "foot_right": "Right Foot"
   },
   "dashboard": {
     "updates": "Updates",
@@ -214,6 +228,13 @@
     "fitness": "Fitness",
     "read": "Read",
     "noUpdate": "No update today"
+  },
+  "booking": {
+    "bookDoctor": "Book a Doctor",
+    "submitRecord": "Submit Record",
+    "clinicVisit": "Clinic visit",
+    "homeVisit": "Home visit",
+    "videoMeet": "Video meet"
   },
   "common": {
     "loading": "Loading...",

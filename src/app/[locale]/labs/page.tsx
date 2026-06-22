@@ -108,13 +108,13 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
         <div className="sticky top-0 z-10 bg-background dark:bg-slate-900 pb-4">
 
           {/* Orders / Results tab switcher */}
-          <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 mb-3">
+          <div className="seg-toggle mb-3">
             {(['orders', 'results'] as Tab[]).map((id) => (
               <button
                 key={id}
                 onClick={() => setTab(id)}
                 className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
-                  tab === id ? 'bg-[#3B66DD] text-white shadow-sm' : 'text-gray-600 dark:text-gray-400'
+                  tab === id ? 'bg-[var(--color-primary)] text-white shadow-sm' : 'text-gray-600 dark:text-gray-400'
                 }`}
               >
                 {t(id)}
@@ -133,7 +133,7 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
 
           {/* Search + refresh bar */}
           <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent">
+            <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-800 border border-border rounded-lg px-3 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                 strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
                 <circle cx="10.5" cy="10.5" r="6.5" />
@@ -160,7 +160,7 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
             <button
               onClick={() => fetchData(true)}
               disabled={refreshing}
-              className="shrink-0 p-2.5 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
+              className="shrink-0 p-2.5 rounded-lg border border-border bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
               title="Refresh"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"

@@ -81,7 +81,7 @@ export default function ProfilePage({ params }: { params: { locale: string } }) 
               onClick={() => setTab(id)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                 tab === id
-                  ? 'bg-[#3B66DD] text-white shadow-sm'
+                  ? 'bg-[var(--color-primary)] text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400'
               }`}
               

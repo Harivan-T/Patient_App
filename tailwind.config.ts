@@ -17,6 +17,7 @@ const config: Config = {
         heading:    'var(--color-heading)',
         muted:      'var(--color-muted)',
         border:     'var(--color-border)',
+        chrome:     'var(--color-chrome)',
         foreground: 'var(--foreground)',
         // Legacy aliases
         tibbna: {

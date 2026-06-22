@@ -10,12 +10,12 @@ const intlMiddleware = createMiddleware({
 
 const PUBLIC_PATHS = ['/login', '/splash'];
 
-// Edge-runtime JWT verification using Web Crypto (no Node.js APIs)
+// Uses Web Crypto API (Edge Runtime compatible) instead of jose, which pulls
+// in CompressionStream — a Node.js API unavailable in Edge Runtime.
 async function isValidToken(token: string): Promise<boolean> {
   try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return false;
-    const [headerB64, payloadB64, sigB64] = parts;
+    const [header, payload, sig] = token.split('.');
+    if (!header || !payload || !sig) return false;
 
     const secret = process.env.JWT_SECRET ?? 'fallback-secret-change-in-production';
     const key = await crypto.subtle.importKey(
@@ -23,24 +23,19 @@ async function isValidToken(token: string): Promise<boolean> {
       new TextEncoder().encode(secret),
       { name: 'HMAC', hash: 'SHA-256' },
       false,
-      ['verify']
+      ['verify'],
     );
 
-    const b64ToBytes = (b: string) => {
-      const bin = atob(b.replace(/-/g, '+').replace(/_/g, '/'));
-      return Uint8Array.from(bin, (c) => c.charCodeAt(0));
-    };
-
-    const valid = await crypto.subtle.verify(
-      'HMAC',
-      key,
-      b64ToBytes(sigB64),
-      new TextEncoder().encode(`${headerB64}.${payloadB64}`)
-    );
+    const b64url = (s: string) => s.replace(/-/g, '+').replace(/_/g, '/');
+    const sigBytes = Uint8Array.from(atob(b64url(sig)), (c) => c.charCodeAt(0));
+    const data = new TextEncoder().encode(`${header}.${payload}`);
+    const valid = await crypto.subtle.verify('HMAC', key, sigBytes, data);
     if (!valid) return false;
 
-    const payload = JSON.parse(new TextDecoder().decode(b64ToBytes(payloadB64)));
-    return typeof payload.exp === 'number' && payload.exp > Date.now() / 1000;
+    const claims = JSON.parse(atob(b64url(payload)));
+    if (claims.exp && claims.exp < Math.floor(Date.now() / 1000)) return false;
+
+    return true;
   } catch {
     return false;
   }

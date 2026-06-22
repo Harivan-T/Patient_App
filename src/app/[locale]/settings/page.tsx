@@ -182,14 +182,14 @@ export default function SettingsPage({ params }: { params: { locale: string } })
     <AppShell locale={locale} title={t('settings')}>
       <div className="max-w-2xl mx-auto">
         {/* Tab bar */}
-        <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 mb-6">
+        <div className="seg-toggle mb-6">
           {(['settings', 'help'] as Tab[]).map((id) => (
             <button
               key={id}
               onClick={() => setTab(id)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                 tab === id
-                  ? 'bg-[#3B66DD] text-white shadow-sm'
+                  ? 'bg-[var(--color-primary)] text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400'
               }`}
             >
@@ -251,7 +251,7 @@ export default function SettingsPage({ params }: { params: { locale: string } })
                     className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
                       theme === th
                         ? 'border-[var(--color-primary)] bg-[var(--tibbna-light)] dark:bg-[#0f2a33] text-[var(--color-primary)]'
-                        : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300'
+                        : 'border-border text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     {t(`theme${th.charAt(0).toUpperCase() + th.slice(1)}` as 'themeLight')}
@@ -271,7 +271,7 @@ export default function SettingsPage({ params }: { params: { locale: string } })
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border transition-colors ${
                       locale === code
                         ? 'border-[var(--color-primary)] bg-[var(--tibbna-light)] dark:bg-[#0f2a33] text-[var(--color-primary)]'
-                        : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300'
+                        : 'border-border text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     <span>{label}</span>

@@ -88,14 +88,14 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
       <div className="max-w-2xl mx-auto">
         {/* Pinned tab header — sticks to top of main scroll container */}
         <div className="sticky top-0 z-10 bg-background dark:bg-slate-900 pb-4">
-          <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 mb-3 overflow-x-auto">
+          <div className="seg-toggle mb-3 overflow-x-auto">
             {TABS.map((id) => (
               <button
                 key={id}
                 onClick={() => setTab(id)}
                 className={`flex-1 py-2 px-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${
                   tab === id
-                    ? 'bg-[#3B66DD] text-white shadow-sm'
+                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
                     : 'text-gray-600 dark:text-gray-400'
                 }`}
               >
@@ -106,7 +106,7 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
 
           {/* Search bar — diagnoses tab only */}
           {tab === 'diagnoses' && (
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 focus-within:ring-2 focus-within:border-transparent" style={{ '--tw-ring-color': BRAND } as React.CSSProperties}>
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-border rounded-lg px-3 focus-within:ring-2 focus-within:border-transparent" style={{ '--tw-ring-color': BRAND } as React.CSSProperties}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
                 <circle cx="10.5" cy="10.5" r="6.5" /><line x1="15.5" y1="15.5" x2="20" y2="20" />
               </svg>

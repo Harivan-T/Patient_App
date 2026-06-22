@@ -203,8 +203,22 @@
       "l_shin": "قاچی چەپ", "r_shin": "قاچی ڕاست", "l_foot": "پێی چەپ", "r_foot": "پێی ڕاست",
       "l_trap": "ماسولکەی چەپ", "r_trap": "ماسولکەی ڕاست", "upper_back": "باڵای پشت",
       "mid_back": "ناوەڕاستی پشت", "lower_back": "خوارەوەی پشت", "l_buttock": "کون چەپ", "r_buttock": "کون ڕاست",
-      "l_back_thigh": "ڕانی پشتەوەی چەپ", "r_back_thigh": "ڕانی پشتەوەی ڕاست", "l_calf": "چرووی چەپ", "r_calf": "چرووی ڕاست"
+      "l_back_thigh": "ڕانی پشتەوەی چەپ", "r_back_thigh": "ڕانی پشتەوەی ڕاست", "l_calf": "چرووی چەپ", "r_calf": "چرووی ڕاست",
+      "arm_left": "Left Arm", "arm_right": "Right Arm",
+      "hand_left": "Left Hand", "hand_right": "Right Hand",
+      "leg_left": "Left Leg", "leg_right": "Right Leg",
+      "foot_left": "Left Foot", "foot_right": "Right Foot"
     }
+  },
+  "body3d": {
+    "male": "Male",
+    "female": "Female",
+    "hint": "Tap a region to select · Drag to rotate · Pinch to zoom",
+    "head": "Head", "neck": "Neck", "chest": "Chest", "abdomen": "Abdomen", "pelvis": "Pelvis",
+    "arm_left": "Left Arm", "arm_right": "Right Arm",
+    "hand_left": "Left Hand", "hand_right": "Right Hand",
+    "leg_left": "Left Leg", "leg_right": "Right Leg",
+    "foot_left": "Left Foot", "foot_right": "Right Foot"
   },
   "dashboard": {
     "updates": "نوێکاریەکان",
@@ -214,6 +228,13 @@
     "fitness": "ڕاهێنان",
     "read": "بخوێنەوە",
     "noUpdate": "ئەمڕۆ نوێکاریەک نییە"
+  },
+  "booking": {
+    "bookDoctor": "دکتۆر حجز بکە",
+    "submitRecord": "پاشەکەوتکردنی تۆمار",
+    "clinicVisit": "سەردانی کلینیک",
+    "homeVisit": "سەردانی ماڵەوە",
+    "videoMeet": "چاوپێکەوتنی ڤیدیۆیی"
   },
   "common": {
     "loading": "بارکردن...",
