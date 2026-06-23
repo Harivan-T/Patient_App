@@ -41,7 +41,7 @@ export default function SplashPage() {
   }
 
   const bg = "min-h-screen flex items-center justify-center";
-  const bgStyle = { background: 'linear-gradient(135deg, var(--tibbna-light) 0%, #f0f9ff 60%, #fefce8 100%)' };
+  const bgStyle = { background: '#ffffff' };
 
   /* ── Splash ── */
   if (step === 'splash') {
