@@ -74,9 +74,8 @@ export default function MedicationsPage({ params }: { params: { locale: string }
   return (
     <AppShell locale={locale} title={t('title')}>
       <div className="max-w-2xl mx-auto">
-        {/* Pinned tab header — sticks to top of main scroll container */}
-        <div className="sticky top-[var(--inner-nav-top)] z-30 bg-background dark:bg-slate-900 pb-4">
-          {/* Current / Dispensed tabs */}
+        {/* Inner tab nav — transparent, sticks at top of scroll area */}
+        <div className="sticky z-30" style={{ top: 'var(--inner-nav-top)' }}>
           <div className="seg-toggle mb-3">
             {(['current', 'past'] as Tab[]).map((id) => (
               <button
@@ -92,11 +91,13 @@ export default function MedicationsPage({ params }: { params: { locale: string }
               </button>
             ))}
           </div>
-          {/* Search bar — current tab only */}
-          {tab !== 'past' && (
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-border rounded-lg px-3 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent">
+        </div>
+        {/* Search bar — current tab only */}
+        {tab !== 'past' && (
+          <div className="pb-2">
+            <div className="flex items-center gap-2 border border-border rounded-lg px-2.5 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent" style={{ background: 'var(--card-bg)' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-                strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
+                strokeLinecap="round" className="w-3.5 h-3.5 text-gray-400 shrink-0">
                 <circle cx="10.5" cy="10.5" r="6.5" />
                 <line x1="15.5" y1="15.5" x2="20" y2="20" />
               </svg>
@@ -108,7 +109,7 @@ export default function MedicationsPage({ params }: { params: { locale: string }
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck={false}
-                className="flex-1 py-2.5 bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none"
+                className="flex-1 py-1.5 bg-transparent text-sm focus:outline-none" style={{ color: 'var(--color-heading)' }}
               />
               {search && (
                 <button
@@ -121,8 +122,8 @@ export default function MedicationsPage({ params }: { params: { locale: string }
                 </button>
               )}
             </div>
-          )}
-        </div>{/* end sticky header */}
+          </div>
+        )}
 
         {tab === 'past' ? (
           <DispensedSection items={dispensed} loading={loading} />

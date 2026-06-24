@@ -250,8 +250,8 @@ export default function SettingsPage({ params }: { params: { locale: string } })
                     onClick={() => applyTheme(th)}
                     className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
                       theme === th
-                        ? 'border-[var(--color-primary)] bg-[var(--tibbna-light)] dark:bg-[#0f2a33] text-[var(--color-primary)]'
-                        : 'border-border text-gray-700 dark:text-gray-300'
+                        ? 'border-[var(--color-primary)] bg-[var(--tibbna-light)] text-[var(--color-primary)]'
+                        : 'border-border text-[var(--color-muted)]'
                     }`}
                   >
                     {t(`theme${th.charAt(0).toUpperCase() + th.slice(1)}` as 'themeLight')}
@@ -270,8 +270,8 @@ export default function SettingsPage({ params }: { params: { locale: string } })
                     onClick={() => switchLocale(code)}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border transition-colors ${
                       locale === code
-                        ? 'border-[var(--color-primary)] bg-[var(--tibbna-light)] dark:bg-[#0f2a33] text-[var(--color-primary)]'
-                        : 'border-border text-gray-700 dark:text-gray-300'
+                        ? 'border-[var(--color-primary)] bg-[var(--tibbna-light)] text-[var(--color-primary)]'
+                        : 'border-border text-[var(--color-muted)]'
                     }`}
                   >
                     <span>{label}</span>

@@ -33,18 +33,38 @@
        This gap pins the inner seg-toggle 8px below the header's
        bottom edge. Raise it if the header height ever changes.   */
     --inner-nav-top: 8px;
+    /* seg-toggle height (~44px) + mb-3 gap (12px) = 56px */
+    --inner-nav-h: 56px;
+    --search-bar-top: calc(var(--inner-nav-top) + var(--inner-nav-h));
+
+    /* ── Card + nav chrome tokens (dark overrides below) ── */
+    --card-bg:          #FFFFFF;
+    --nav-border-color: rgba(84,129,148,0.18);
+    --nav-glow:         0 4px 14px rgba(84,129,148,0.10);
   }
 
   .dark {
-    --color-bg:      #0f172a;
-    --color-surface: #1e293b;
-    --color-heading: #f1f5f9;
-    --color-muted:   #94a3b8;
-    --color-border:  #334155;
-    --color-chrome:  #548194;  /* slightly deeper on dark mode */
-    --background:    #0f172a;
-    --foreground:    #f1f5f9;
-    --tibbna-light:  #1a2a4a;
+    /* Brand — lighter teal so it reads on deep backgrounds */
+    --color-primary: #6FA6BA;
+    /* Background layers */
+    --color-bg:      #0F1A1F;
+    --color-surface: #172A31;
+    /* Typography */
+    --color-heading: #E6EDEF;
+    --color-muted:   #93A8AE;
+    /* Structure */
+    --color-border:  #2A4A54;
+    --color-chrome:  #6FA6BA;
+    /* Tailwind bg-background / text-foreground aliases */
+    --background:    #0F1A1F;
+    --foreground:    #E6EDEF;
+    /* Tint for active toggle / language selection backgrounds */
+    --tibbna-light:  rgba(111,166,186,0.18);
+    /* Elevated surfaces — cards, sheets */
+    --card-bg:       #172A31;
+    /* Nav chrome — lighter teal against deep bg */
+    --nav-border-color: rgba(111,166,186,0.28);
+    --nav-glow:      0 4px 18px rgba(111,166,186,0.18);
   }
 
   * { box-sizing: border-box; }
@@ -62,7 +82,7 @@
   }
 
   .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-    color: #f9fafb;
+    color: var(--color-heading);
   }
 
   [dir='rtl'] {
@@ -72,15 +92,18 @@
 
 @layer utilities {
   .card {
-    @apply bg-background dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700;
+    @apply rounded-xl shadow-sm border;
+    background: var(--card-bg);
     border-color: var(--color-border);
   }
   /* Segmented tab-toggle container — shared across all pages */
   .seg-toggle {
     @apply flex gap-1 rounded-2xl p-1;
     background: transparent;
-    border: 1.5px solid var(--chrome-border-color);
-    box-shadow: var(--chrome-shadow);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 1.5px solid var(--nav-border-color);
+    box-shadow: var(--nav-glow);
   }
   .btn-primary {
     background-color: var(--color-primary);
@@ -90,13 +113,25 @@
     @apply bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-medium py-2.5 px-5 rounded-lg transition-colors;
   }
   .btn-danger {
-    @apply bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply font-semibold py-2.5 px-5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    color: #ef4444;
+    border: 1.5px solid rgba(239,68,68,0.45);
+    background: transparent;
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: rgba(239,68,68,0.08);
+    border-color: #ef4444;
   }
   .input {
     border-color: var(--color-border);
-    @apply w-full rounded-lg px-3 py-2.5 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500;
+    background: var(--card-bg);
+    color: var(--color-heading);
+    @apply w-full rounded-lg px-3 py-2.5 focus:outline-none focus:border-transparent;
     --tw-ring-color: var(--color-primary);
     @apply focus:ring-2;
+  }
+  .input::placeholder {
+    color: var(--color-muted);
   }
   .nav-active {
     color: var(--color-primary);
