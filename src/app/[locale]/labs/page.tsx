@@ -105,7 +105,7 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
     <AppShell locale={locale} title={t('title')}>
       <div className="max-w-2xl mx-auto">
         {/* Inner tab nav — transparent, sticks at top of scroll area */}
-        <div className="sticky top-[var(--inner-nav-top)] z-30">
+        <div className="sticky z-30" style={{ top: 'var(--inner-nav-top)' }}>
           <div className="seg-toggle mb-3">
             {(['orders', 'results'] as Tab[]).map((id) => (
               <button
@@ -129,12 +129,12 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
             ))}
           </div>
         </div>
-        {/* Search + refresh bar — separate sticky with opaque background */}
-        <div className="sticky top-[var(--search-bar-top)] z-20 bg-background pb-3">
+        {/* Search + refresh bar */}
+        <div className="pb-2">
           <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-2 border border-border rounded-lg px-3 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent" style={{ background: 'var(--card-bg)' }}>
+            <div className="flex-1 flex items-center gap-2 border border-border rounded-lg px-2.5 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent" style={{ background: 'var(--card-bg)' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-                strokeLinecap="round" className="w-4 h-4 text-gray-400 shrink-0">
+                strokeLinecap="round" className="w-3.5 h-3.5 text-gray-400 shrink-0">
                 <circle cx="10.5" cy="10.5" r="6.5" />
                 <line x1="15.5" y1="15.5" x2="20" y2="20" />
               </svg>
@@ -144,7 +144,7 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('searchPlaceholder')}
                 autoComplete="off" autoCorrect="off" spellCheck={false}
-                className="flex-1 py-2.5 bg-transparent text-sm focus:outline-none" style={{ color: 'var(--color-heading)' }}
+                className="flex-1 py-1.5 bg-transparent text-sm focus:outline-none" style={{ color: 'var(--color-heading)' }}
               />
               {search && (
                 <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">

@@ -114,7 +114,7 @@ export default function DashboardPage({ params }: { params: { locale: string } }
     <AppShell locale={params.locale}>
       <div className="max-w-2xl mx-auto">
         {/* Pinned tab header — sticks to top of main scroll container */}
-        <div className="sticky top-[var(--inner-nav-top)] z-30 pb-4">
+        <div className="sticky z-30 pb-4" style={{ top: 'var(--inner-nav-top)' }}>
           <div className="seg-toggle">
             {(['updates', 'mydoctor'] as Tab[]).map((id) => (
               <button
