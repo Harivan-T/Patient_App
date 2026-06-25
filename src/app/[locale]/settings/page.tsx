@@ -173,7 +173,7 @@ export default function SettingsPage({ params }: { params: { locale: string } })
   async function handleLogout() {
     setLoggingOut(true);
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.push(`/${locale}/login`);
+    router.replace(`/${locale}/login`);
   }
 
   const fullName = [patient?.firstName, patient?.lastName].filter(Boolean).join(' ') || '—';

@@ -67,7 +67,7 @@ export default function ProfilePage({ params }: { params: { locale: string } }) 
   async function handleLogout() {
     setLoggingOut(true);
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.push(`/${locale}/login`);
+    router.replace(`/${locale}/login`);
   }
 
   return (

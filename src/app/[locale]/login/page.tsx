@@ -135,8 +135,8 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
           <Image
             src="/tibbna-logo.png"
             alt="Tibbna"
-            width={96}
-            height={96}
+            width={120}
+            height={120}
             className={`object-contain transition-opacity duration-300 ${loading ? 'animate-pulse' : ''}`}
           />
           <h1 className="text-3xl font-bold tracking-wide" style={{ color: 'var(--color-primary)' }}>Tibbna</h1>

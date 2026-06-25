@@ -64,7 +64,14 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  return intlMiddleware(req);
+  const response = intlMiddleware(req);
+  if (!isPublic) {
+    // Prevent bfcache from storing authenticated pages — browsers won't restore
+    // a no-store page from cache, forcing a real network request (and middleware
+    // re-check) on every visit including Back/Forward navigation.
+    response.headers.set('Cache-Control', 'no-store');
+  }
+  return response;
 }
 
 export const config = {

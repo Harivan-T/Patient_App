@@ -29,6 +29,21 @@ export function AppShell({
       .catch(() => {});
   }, []);
 
+  // Guard against bfcache restoring an authenticated page after logout.
+  // The `pageshow` event fires on bfcache restores (e.persisted === true) without
+  // hitting the server, so middleware never runs. We re-check the session here and
+  // redirect if the cookie is gone.
+  useEffect(() => {
+    function handlePageShow(e: PageTransitionEvent) {
+      if (!e.persisted) return;
+      fetch('/api/auth/session')
+        .then((r) => { if (!r.ok) window.location.replace(`/${locale}/login`); })
+        .catch(() => { window.location.replace(`/${locale}/login`); });
+    }
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, [locale]);
+
   const fullName = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') : '';
 
   return (

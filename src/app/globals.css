@@ -41,6 +41,9 @@
     --card-bg:          #FFFFFF;
     --nav-border-color: rgba(84,129,148,0.18);
     --nav-glow:         0 4px 14px rgba(84,129,148,0.10);
+
+    /* ── Splash / language-select page ─────────────────── */
+    --splash-bg: #A7C8CF;
   }
 
   .dark {
