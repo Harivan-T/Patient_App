@@ -191,7 +191,7 @@
     "symptoms": { "pain": "ألم", "burning": "حرقة", "swelling": "تورم", "numbness": "خدر", "stiffness": "تيبس", "tingling": "وخز", "pressure": "ضغط", "throbbing": "نبض" },
     "durations": { "today": "اليوم", "fewDays": "أيام قليلة", "oneToTwoWeeks": "1–2 أسبوع", "oneMonth": "أكثر من شهر", "threeMonths": "أكثر من 3 أشهر", "overYear": "أكثر من سنة" },
     "questions": { "movementPain": "هل تزيد الحركة من الألم؟", "nightPain": "هل يشتد الألم ليلاً؟", "takingMedication": "هل تتناول دواء لعلاجه؟", "hasFever": "هل لديك حمى؟" },
-    "buttons": { "next": "التالي", "back": "السابق", "edit": "تعديل", "submit": "إرسال التقرير", "submitting": "جاري الإرسال…", "newReport": "تقرير جديد" },
+    "buttons": { "next": "التالي", "back": "السابق", "edit": "تعديل", "submit": "إرسال التقرير", "submitting": "جاري الإرسال…", "newReport": "تقرير جديد", "startNew": "بدء تشخيص جديد" },
     "success": { "title": "تم إرسال التقرير", "subtitle": "تم حفظ تقرير الألم." },
     "history": { "title": "سجل الألم", "noRecords": "لا توجد سجلات بعد" },
     "pain": { "mild": "خفيف", "moderate": "متوسط", "severe": "شديد" },

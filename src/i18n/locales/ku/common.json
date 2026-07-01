@@ -191,7 +191,7 @@
     "symptoms": { "pain": "ئێش", "burning": "سووتان", "swelling": "خولەکەوتن", "numbness": "وشکاندن", "stiffness": "ڕووخان", "tingling": "خستخست", "pressure": "پتەمە", "throbbing": "لێکدانی مار" },
     "durations": { "today": "ئەمڕۆ", "fewDays": "چەند ڕۆژێک", "oneToTwoWeeks": "1-2 هەفتە", "oneMonth": "زیاتر لە مانگێک", "threeMonths": "زیاتر لە 3 مانگ", "overYear": "زیاتر لە ساڵێک" },
     "questions": { "movementPain": "ئایا جووڵەکردن ئێشەکە زیادتر دەکات؟", "nightPain": "ئایا شەوانە زیادتر دەبێت؟", "takingMedication": "ئایا دەرمانت بۆ دەخۆیت؟", "hasFever": "ئایا گەرمتەوە هەیەت؟" },
-    "buttons": { "next": "داهاتوو", "back": "گەڕانەوە", "edit": "دەستکاری", "submit": "ناردنی ڕاپۆرت", "submitting": "دەنێردرێت…", "newReport": "ڕاپۆرتی نوێ" },
+    "buttons": { "next": "داهاتوو", "back": "گەڕانەوە", "edit": "دەستکاری", "submit": "ناردنی ڕاپۆرت", "submitting": "دەنێردرێت…", "newReport": "ڕاپۆرتی نوێ", "startNew": "دەستپێکردنی تەشخیسێکی نوێ" },
     "success": { "title": "ڕاپۆرت نێردرا", "subtitle": "ڕاپۆرتی ئێشەکەت پاشەکەوتکرا." },
     "history": { "title": "مێژووی ئێش", "noRecords": "هیچ تۆمارێک نییە" },
     "pain": { "mild": "سووک", "moderate": "مامناوەند", "severe": "توند" },

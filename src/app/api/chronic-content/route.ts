@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── 5. Name fallback for uncoded diagnoses ───────────────────────────────────
-  let nameRows: ContentRow[] = [];
+  const nameRows: ContentRow[] = [];
   if (uncoded.length > 0) {
     // Load all content for this locale set, then JS-match by condition_key
     const allContent = await query<ContentRow>(

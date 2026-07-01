@@ -364,6 +364,9 @@ export function BodyMapContent() {
           </div>
           <h2 className="text-lg font-semibold text-gray-900">{t('success.title')}</h2>
           <p className="text-sm text-gray-500">{t('success.subtitle')}</p>
+          <button onClick={resetForm} className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-white text-sm font-semibold transition-opacity hover:opacity-90" style={{ background: BRAND }}>
+            {t('buttons.startNew')}
+          </button>
         </div>
       ) : (
         <div className="card p-5">

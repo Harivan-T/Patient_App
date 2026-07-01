@@ -191,7 +191,7 @@
     "symptoms": { "pain": "Pain", "burning": "Burning", "swelling": "Swelling", "numbness": "Numbness", "stiffness": "Stiffness", "tingling": "Tingling", "pressure": "Pressure", "throbbing": "Throbbing" },
     "durations": { "today": "Today", "fewDays": "A few days", "oneToTwoWeeks": "1–2 weeks", "oneMonth": "1+ month", "threeMonths": "3+ months", "overYear": "Over a year" },
     "questions": { "movementPain": "Does movement make it worse?", "nightPain": "Is it worse at night?", "takingMedication": "Are you taking medication for it?", "hasFever": "Do you have a fever?" },
-    "buttons": { "next": "Next", "back": "Back", "edit": "Edit", "submit": "Submit Report", "submitting": "Submitting…", "newReport": "New Report" },
+    "buttons": { "next": "Next", "back": "Back", "edit": "Edit", "submit": "Submit Report", "submitting": "Submitting…", "newReport": "New Report", "startNew": "Start New Diagnosis" },
     "success": { "title": "Report submitted", "subtitle": "Your pain report has been saved." },
     "history": { "title": "Pain History", "noRecords": "No records yet" },
     "pain": { "mild": "Mild", "moderate": "Moderate", "severe": "Severe" },
