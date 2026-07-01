@@ -370,21 +370,27 @@ async function fetchSection(
   exclude: Set<string>,
   chronicCodes: string[],
 ): Promise<DailyInsight | null> {
-  // Pick keyword: condition-specific if patient has chronic conditions, else generic
-  const getKeyword = (lang: string): string | null => {
-    if (chronicCodes.length > 0) {
-      const condKw = buildConditionKeyword(section, chronicCodes, lang);
-      if (condKw) return condKw;
-    }
-    return GENERIC_KEYWORDS[section][lang] ?? null;
-  };
+  const condKw   = (lang: string) => buildConditionKeyword(section, chronicCodes, lang);
+  const genericKw = (lang: string) => GENERIC_KEYWORDS[section][lang] ?? null;
 
-  const hit = await fetchFromNewsData(section, locale, getKeyword(locale), exclude);
-  if (hit) return hit;
+  // Build ordered list of (lang, keyword) attempts:
+  // 1. Condition-specific in requested locale
+  // 2. Condition-specific in fallback languages
+  // 3. Generic keyword in requested locale        ← new fallback
+  // 4. Generic keyword in fallback languages      ← new fallback
+  const attempts: Array<[string, string | null]> = [];
 
-  for (const fallbackLang of (LANG_FALLBACK[locale] ?? [])) {
-    const fallbackHit = await fetchFromNewsData(section, fallbackLang, getKeyword(fallbackLang), exclude);
-    if (fallbackHit) return fallbackHit;
+  if (chronicCodes.length > 0) {
+    attempts.push([locale, condKw(locale)]);
+    for (const lang of (LANG_FALLBACK[locale] ?? [])) attempts.push([lang, condKw(lang)]);
+  }
+  // Always add generic as final safety net so section is never empty
+  attempts.push([locale, genericKw(locale)]);
+  for (const lang of (LANG_FALLBACK[locale] ?? [])) attempts.push([lang, genericKw(lang)]);
+
+  for (const [lang, kw] of attempts) {
+    const hit = await fetchFromNewsData(section, lang, kw, exclude);
+    if (hit) return hit;
   }
   return null;
 }
