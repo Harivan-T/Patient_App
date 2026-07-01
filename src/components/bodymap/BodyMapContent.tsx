@@ -34,7 +34,6 @@ interface ZoneDef {
 }
 
 const ZONES: ZoneDef[] = [
-  { id: 'head',          side: 'front', shape: { type: 'ellipse', cx: 100, cy: 28, rx: 22, ry: 26 } },
   { id: 'neck',          side: 'front', shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
   { id: 'l-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 65, cy: 73, rx: 14, ry: 11 } },
   { id: 'r-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 135,cy: 73, rx: 14, ry: 11 } },
@@ -53,7 +52,7 @@ const ZONES: ZoneDef[] = [
   { id: 'r-shin',        side: 'front', shape: { type: 'rect',    x: 114, y: 244, w: 20,  h: 36, rx: 5 } },
   { id: 'l-foot',        side: 'front', shape: { type: 'ellipse', cx: 72, cy: 285, rx: 12, ry: 7 } },
   { id: 'r-foot',        side: 'front', shape: { type: 'ellipse', cx: 128,cy: 285, rx: 12, ry: 7 } },
-  { id: 'head-b',        side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 28, rx: 22, ry: 26 } },
+  { id: 'head-b',        side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 32, rx: 26, ry: 30 } },
   { id: 'neck-b',        side: 'back',  shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
   { id: 'l-trap',        side: 'back',  shape: { type: 'ellipse', cx: 73, cy: 74, rx: 16, ry: 11 } },
   { id: 'r-trap',        side: 'back',  shape: { type: 'ellipse', cx: 127,cy: 74, rx: 16, ry: 11 } },
@@ -80,13 +79,30 @@ function painColor(level: number): string {
   return '#ef4444';
 }
 
+// Face zone coordinates in body-SVG space (viewBox 0 0 200 300).
 function BodySVG({ side, selectedZones, onToggle, gender }: {
   side: 'front' | 'back';
   selectedZones: string[];
   onToggle: (id: string) => void;
   gender: 'male' | 'female';
 }) {
-  const zones = ZONES.filter((z) => z.side === side);
+  const isFront  = side === 'front';
+  const isFemale = gender === 'female';
+  const zones    = ZONES.filter((z) => z.side === side);
+
+  const headHit = (id: string) => {
+    const sel = selectedZones.includes(id);
+    return {
+      fill: BRAND,
+      fillOpacity: sel ? 0.38 : 0.08,
+      stroke: BRAND,
+      strokeWidth: sel ? 1.5 : 1.2,
+      strokeOpacity: sel ? 0.9 : 0.55,
+      strokeDasharray: sel ? undefined : ('3 2' as const),
+      className: 'cursor-pointer transition-all hover:fill-[var(--color-primary)] hover:fill-opacity-[0.2]',
+      onClick: () => onToggle(id),
+    };
+  };
 
   function renderShape(z: ZoneDef, selected: boolean) {
     const sharedProps = {
@@ -103,12 +119,14 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
     return <rect key={z.id} x={z.shape.x} y={z.shape.y} width={z.shape.w} height={z.shape.h} rx={z.shape.rx ?? 0} {...sharedProps} />;
   }
 
-  const isFemale = gender === 'female';
-
   return (
     <svg viewBox="0 0 200 300" className="w-full max-w-[220px] mx-auto select-none">
+      {/* ── Body base outline ─────────────────────────────────────── */}
       <g fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1">
-        <ellipse cx="100" cy="28" rx="22" ry="26" />
+        <ellipse cx="100" cy="32" rx="26" ry="30" />
+        {/* Ear outlines */}
+        <ellipse cx="73"  cy="32" rx="5" ry="8" />
+        <ellipse cx="127" cy="32" rx="5" ry="8" />
         <rect x="91" y="52" width="18" height="14" rx="4" />
         {isFemale ? (
           <>
@@ -130,11 +148,24 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
         <ellipse cx="129" cy="285" rx="11" ry="7" />
       </g>
 
-      {side === 'front' ? (
-        <g fill="#94a3b8" stroke="none">
-          <circle cx="91" cy="24" r="2.5" />
-          <circle cx="109" cy="24" r="2.5" />
-          <path d="M93 36 Q100 41 107 36" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+      {/* ── Face / body decorative details (non-interactive) ─────── */}
+      {isFront ? (
+        <g style={{ pointerEvents: 'none' }}>
+          {/* Eyebrows */}
+          <path d="M84 23 Q89 19 95 22" fill="none" stroke="#7a9fae" strokeWidth="0.9" strokeLinecap="round" />
+          <path d="M105 22 Q111 19 117 23" fill="none" stroke="#7a9fae" strokeWidth="0.9" strokeLinecap="round" />
+          {/* Eyes */}
+          <circle cx="89" cy="27" r="3" fill="#7a9fae" />
+          <circle cx="111" cy="27" r="3" fill="#7a9fae" />
+          {/* Nose dots */}
+          <circle cx="99" cy="37" r="1" fill="#94a3b8" />
+          <circle cx="101" cy="37" r="1" fill="#94a3b8" />
+          {/* Smile */}
+          <path d="M92 41 Q100 47 108 41" fill="none" stroke="#7a9fae" strokeWidth="1.5" strokeLinecap="round" />
+          {/* Ear inner curves */}
+          <path d="M72 28 Q68 32 72 36" fill="none" stroke="#b0bec5" strokeWidth="0.7" strokeLinecap="round" />
+          <path d="M128 28 Q132 32 128 36" fill="none" stroke="#b0bec5" strokeWidth="0.7" strokeLinecap="round" />
+          {/* Body centerline */}
           <line x1="100" y1="68" x2="100" y2="156" stroke="#94a3b8" strokeWidth="0.8" strokeDasharray="3,3" />
           {isFemale && (
             <>
@@ -144,18 +175,37 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
           )}
         </g>
       ) : (
-        <g>
+        <g style={{ pointerEvents: 'none' }}>
           <line x1="100" y1="68" x2="100" y2="156" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4,4" />
           <ellipse cx="82" cy="92" rx="12" ry="18" fill="#d1dae5" />
           <ellipse cx="118" cy="92" rx="12" ry="18" fill="#d1dae5" />
-          <ellipse cx="100" cy="22" rx="20" ry="12" fill="#d1dae5" />
+          <ellipse cx="100" cy="26" rx="23" ry="14" fill="#d1dae5" />
           {isFemale && (
             <path d="M78 145 Q100 152 122 145" fill="none" stroke="#cbd5e1" strokeWidth="1.5" />
           )}
         </g>
       )}
 
+      {/* ── Body zones (non-head) ─────────────────────────────────── */}
       {zones.map((z) => renderShape(z, selectedZones.includes(z.id)))}
+
+      {/* ── Front head: 6 flat hit zones directly tappable at normal scale ── */}
+      {/* Render order = priority: later elements win clicks on overlap areas */}
+      {isFront && (
+        <>
+          {/* Full head ellipse — catches forehead, skull, chin (background layer) */}
+          <ellipse cx="100" cy="32" rx="26" ry="30" {...headHit('head-scalp')} />
+          {/* Ear zones — cover ear protrusions + side edges of head */}
+          <ellipse cx="75"  cy="31" rx="11" ry="16" {...headHit('head-ear-l')} />
+          <ellipse cx="125" cy="31" rx="11" ry="16" {...headHit('head-ear-r')} />
+          {/* Eyes band — upper horizontal strip (both eyes, overrides ear overlap) */}
+          <rect x="82" y="15" width="36" height="16" {...headHit('head-eyes')} />
+          {/* Nose zone — center strip */}
+          <rect x="89" y="31" width="22" height="14" {...headHit('head-nose')} />
+          {/* Teeth/mouth zone — lower strip */}
+          <rect x="86" y="45" width="28" height="15" {...headHit('head-teeth')} />
+        </>
+      )}
     </svg>
   );
 }
@@ -192,7 +242,6 @@ export function BodyMapContent() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting]       = useState(false);
   const [submitted, setSubmitted]         = useState(false);
-  const [bookAboveOpen, setBookAboveOpen]       = useState(false);
   const [bookStep5Open, setBookStep5Open]       = useState(false);
   const [historyOpen, setHistoryOpen]           = useState(false);
   const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
@@ -219,6 +268,31 @@ export function BodyMapContent() {
 
   function getDurationLabel(key: string): string {
     return t(`durations.${key}` as Parameters<typeof t>[0]);
+  }
+
+  function buildCollapsedSymptomLine(rec: PainRecord): string {
+    // Use structured areaSymptoms if available (new records); fall back to parsing flat symptoms array
+    const src: Record<string, string[]> = rec.areaSymptoms && Object.keys(rec.areaSymptoms).length > 0
+      ? rec.areaSymptoms
+      : {};
+    if (Object.keys(src).length === 0) {
+      for (const s of (rec.symptoms ?? [])) {
+        if (s.includes('.')) {
+          const [area, key] = s.split('.');
+          (src[area] ??= []).push(key);
+        }
+      }
+    }
+    return Object.entries(src)
+      .filter(([, syms]) => syms.length > 0)
+      .map(([group, syms]) => {
+        const areaLabel = (tAreaSymptoms as (k: string) => string)(`${group}.label`);
+        const symptomLabels = syms
+          .map(sym => { try { return (tAreaSymptoms as (k: string) => string)(`${group}.${sym}`); } catch { return sym; } })
+          .join(', ');
+        return `${areaLabel}: ${symptomLabels}`;
+      })
+      .join(' · ');
   }
 
   function toggleZone(id: string) {
@@ -290,7 +364,6 @@ export function BodyMapContent() {
           </div>
           <h2 className="text-lg font-semibold text-gray-900">{t('success.title')}</h2>
           <p className="text-sm text-gray-500">{t('success.subtitle')}</p>
-          <button onClick={resetForm} className="btn-primary">{t('buttons.newReport')}</button>
         </div>
       ) : (
         <div className="card p-5">
@@ -369,14 +442,12 @@ export function BodyMapContent() {
               <p className="text-sm text-gray-500 mb-4">{t('step2.subtitle')}</p>
               {selectedGroups.map((group, gIdx) => (
                 <div key={group} className={gIdx > 0 ? 'mt-5' : ''}>
-                  {selectedGroups.length > 1 && (
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: BRAND }}>
-                        {(tAreaSymptoms as (k: string) => string)(`${group}.label`)}
-                      </span>
-                      <div className="flex-1 h-px bg-gray-100" />
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: BRAND }}>
+                      {(tAreaSymptoms as (k: string) => string)(`${group}.label`)}
+                    </span>
+                    <div className="flex-1 h-px bg-gray-100" />
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     {(AREA_SYMPTOM_KEYS[group] ?? []).map((symptomKey, sIdx) => {
                       const isActive = (areaSymptoms[group] ?? []).includes(symptomKey);
@@ -523,26 +594,17 @@ export function BodyMapContent() {
                     ))}
                   </div>
                 </SummaryRow>
-                <SummaryRow label={t('step5.symptoms')}>
-                  <div className="flex flex-col gap-1.5 items-end">
-                    {Object.entries(areaSymptoms).filter(([, syms]) => syms.length > 0).map(([group, syms]) => (
-                      <div key={group} className="text-end">
-                        {selectedGroups.length > 1 && (
-                          <span className="text-[10px] text-gray-400 me-1">
-                            {(tAreaSymptoms as (k: string) => string)(`${group}.label`)}:
-                          </span>
-                        )}
-                        <span className="inline-flex flex-wrap gap-1 justify-end">
-                          {syms.map(sym => (
-                            <span key={sym} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
-                              {(tAreaSymptoms as (k: string) => string)(`${group}.${sym}`)}
-                            </span>
-                          ))}
+                {Object.entries(areaSymptoms).filter(([, syms]) => syms.length > 0).map(([group, syms]) => (
+                  <SummaryRow key={group} label={(tAreaSymptoms as (k: string) => string)(`${group}.label`)}>
+                    <div className="flex flex-wrap gap-1 justify-end">
+                      {syms.map(sym => (
+                        <span key={sym} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                          {(tAreaSymptoms as (k: string) => string)(`${group}.${sym}`)}
                         </span>
-                      </div>
-                    ))}
-                  </div>
-                </SummaryRow>
+                      ))}
+                    </div>
+                  </SummaryRow>
+                ))}
                 <SummaryRow label={t('step5.painLevel')}>
                   <span className="font-bold text-base" style={{ color: painColor(painLevel) }}>{painLevel}/10 — {painLabel(painLevel)}</span>
                 </SummaryRow>
@@ -591,28 +653,6 @@ export function BodyMapContent() {
           )}
         </div>
       )}
-
-      {/* Placement 1 — Book a Doctor above diagnoses/history */}
-      <div className="mt-8 mb-5">
-        <button
-          type="button"
-          onClick={() => setBookAboveOpen(o => !o)}
-          className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-white font-semibold text-sm transition-opacity hover:opacity-90 active:opacity-80"
-          style={{ background: 'var(--color-primary)' }}
-        >
-          <span className="flex items-center gap-2.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 shrink-0" aria-hidden="true">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H9v-2h3v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z" />
-            </svg>
-            {tBooking('bookDoctor')}
-          </span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            className={`w-4 h-4 shrink-0 transition-transform ${bookAboveOpen ? 'rotate-180' : ''}`} aria-hidden="true">
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </button>
-        {bookAboveOpen && <BookDoctorOptions />}
-      </div>
 
       {/* Pain History — collapsed by default, open on tap */}
       <div className="mt-0">
@@ -700,7 +740,7 @@ export function BodyMapContent() {
                           </p>
                           {!isExpanded && rec.symptoms?.length > 0 && (
                             <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-muted)' }}>
-                              {rec.symptoms.slice(0, 4).map((s) => getSymptomLabel(s)).join(' · ')}
+                              {buildCollapsedSymptomLine(rec)}
                             </p>
                           )}
                         </div>

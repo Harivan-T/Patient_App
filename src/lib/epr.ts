@@ -671,6 +671,7 @@ export async function sendRenewalToPharmacy(
 interface PainRecordInput {
   zones:            string[];
   symptoms:         string[];
+  areaSymptoms?:    Record<string, string[]>;
   painLevel:        number;
   duration:         string;
   movementPain:     boolean;
@@ -698,21 +699,25 @@ export async function savePainRecord(patientId: string, data: PainRecordInput) {
       recorded_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
+  // Add area_symptoms column to existing tables that predate this field
+  await query(`ALTER TABLE patient_pain_records ADD COLUMN IF NOT EXISTS area_symptoms JSONB NOT NULL DEFAULT '{}'`).catch(() => {});
 
   const rows = await query<{
     id: string; patient_id: string; zones: string[]; symptoms: string[];
+    area_symptoms: Record<string, string[]>;
     pain_level: number; duration: string; movement_pain: boolean; night_pain: boolean;
     taking_medication: boolean; has_fever: boolean; notes: string; recorded_at: string;
   }>(
     `INSERT INTO patient_pain_records
-       (patient_id, zones, symptoms, pain_level, duration,
+       (patient_id, zones, symptoms, area_symptoms, pain_level, duration,
         movement_pain, night_pain, taking_medication, has_fever, notes)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      RETURNING *`,
     [
       patientId,
       data.zones,
       data.symptoms,
+      JSON.stringify(data.areaSymptoms ?? {}),
       data.painLevel,
       data.duration,
       data.movementPain,
@@ -728,6 +733,7 @@ export async function savePainRecord(patientId: string, data: PainRecordInput) {
     id:               r.id,
     zones:            r.zones,
     symptoms:         r.symptoms,
+    areaSymptoms:     r.area_symptoms as Record<string, string[]>,
     painLevel:        r.pain_level,
     duration:         r.duration,
     movementPain:     r.movement_pain,
@@ -742,11 +748,11 @@ export async function savePainRecord(patientId: string, data: PainRecordInput) {
 export async function getPainHistory(patientId: string) {
   try {
     const rows = await query<{
-      id: string; zones: string[]; symptoms: string[]; pain_level: number;
-      duration: string; movement_pain: boolean; night_pain: boolean;
+      id: string; zones: string[]; symptoms: string[]; area_symptoms: Record<string, string[]>;
+      pain_level: number; duration: string; movement_pain: boolean; night_pain: boolean;
       taking_medication: boolean; has_fever: boolean; notes: string; recorded_at: string;
     }>(
-      `SELECT id, zones, symptoms, pain_level, duration,
+      `SELECT id, zones, symptoms, area_symptoms, pain_level, duration,
               movement_pain, night_pain, taking_medication, has_fever, notes, recorded_at
        FROM patient_pain_records
        WHERE patient_id = $1
@@ -758,6 +764,7 @@ export async function getPainHistory(patientId: string) {
       id:               r.id,
       zones:            r.zones,
       symptoms:         r.symptoms,
+      areaSymptoms:     r.area_symptoms as Record<string, string[]>,
       painLevel:        r.pain_level,
       duration:         r.duration,
       movementPain:     r.movement_pain,

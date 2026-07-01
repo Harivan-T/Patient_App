@@ -183,7 +183,7 @@
   "bodymap": {
     "title": "تقرير الألم",
     "steps": { "zones": "المناطق", "symptoms": "الأعراض", "painScale": "مقياس الألم", "questions": "أسئلة", "review": "مراجعة" },
-    "step1": { "heading": "أين يؤلمك؟", "subtitle": "اضغط على المناطق المصابة (يمكن اختيار أكثر من منطقة)", "front": "أمامي", "back": "خلفي" },
+    "step1": { "heading": "أين يؤلمك؟", "subtitle": "اضغط على المناطق المصابة (يمكن اختيار أكثر من منطقة)", "front": "أمامي", "back": "خلفي", "headPanel": "الرأس / الوجه" },
     "step2": { "heading": "كيف تصف الشعور؟", "subtitle": "اختر كل ما ينطبق" },
     "step3": { "heading": "ما شدة الألم؟", "subtitle": "قيّم ألمك ومدة معاناتك", "painLevel": "مستوى الألم", "duration": "منذ متى وأنت تعاني؟", "mild": "خفيف", "moderate": "متوسط", "severe": "شديد" },
     "step4": { "heading": "بعض الأسئلة الإضافية", "subtitle": "أسئلة سريعة بنعم/لا", "notes": "ملاحظات إضافية", "notesOptional": "اختياري", "notesPlaceholder": "أي تفاصيل أخرى حول أعراضك..." },
@@ -196,7 +196,8 @@
     "history": { "title": "سجل الألم", "noRecords": "لا توجد سجلات بعد" },
     "pain": { "mild": "خفيف", "moderate": "متوسط", "severe": "شديد" },
     "zones": {
-      "head": "الرأس", "neck": "الرقبة", "l_shoulder": "الكتف الأيسر", "r_shoulder": "الكتف الأيمن",
+      "head": "الرأس", "head_scalp": "فروة الرأس / الجبهة", "head_eyes": "العينان", "head_eye_l": "العين اليسرى", "head_eye_r": "العين اليمنى", "head_nose": "الأنف", "head_ear_l": "الأذن اليسرى", "head_ear_r": "الأذن اليمنى", "head_teeth": "الأسنان / الفم", "head_mouth": "الأسنان / الفم",
+      "neck": "الرقبة", "l_shoulder": "الكتف الأيسر", "r_shoulder": "الكتف الأيمن",
       "chest": "الصدر", "abdomen": "البطن", "l_upper_arm": "الذراع الأيسر", "r_upper_arm": "الذراع الأيمن",
       "l_forearm": "الساعد الأيسر", "r_forearm": "الساعد الأيمن", "pelvis": "الحوض والوركان",
       "l_thigh": "الفخذ الأيسر", "r_thigh": "الفخذ الأيمن", "l_knee": "الركبة اليسرى", "r_knee": "الركبة اليمنى",
@@ -213,7 +214,16 @@
     "nutrition": "التغذية",
     "fitness": "اللياقة البدنية",
     "read": "اقرأ",
-    "noUpdate": "لا يوجد تحديث اليوم"
+    "noUpdate": "لا يوجد تحديث اليوم",
+    "myConditions": "حالاتك الصحية",
+    "noConditionContent": "لا توجد نصائح مخصصة لحالاتك الصحية حتى الآن.",
+    "conditionCategory": {
+      "diet":       "التغذية",
+      "monitoring": "المتابعة",
+      "exercise":   "الرياضة",
+      "medication": "الدواء",
+      "lifestyle":  "نمط الحياة"
+    }
   },
   "booking": {
     "bookDoctor": "احجز طبيبًا",
@@ -223,7 +233,11 @@
     "videoMeet": "زيارة بالفيديو"
   },
   "areaSymptoms": {
-    "head":     { "label": "الرأس",        "headache": "صداع",               "dizziness": "دوخة",                 "pressure": "ضغط" },
+    "head":       { "label": "الرأس",        "headache": "صداع",               "dizziness": "دوخة",                 "pressure": "ضغط" },
+    "head-eyes":  { "label": "العينان",       "eye_pain": "ألم العين / مشكلة في الرؤية" },
+    "head-nose":  { "label": "الأنف",         "nose_problem": "احتقان الأنف / ألم" },
+    "head-ears":  { "label": "الأذنان",       "ear_pain": "ألم الأذن" },
+    "head-teeth": { "label": "الأسنان / الفم", "mouth_throat_pain": "ألم الأسنان / الفم" },
     "neck":     { "label": "الرقبة",       "pain": "ألم",                    "stiffness": "تيبّس",                "limited_movement": "صعوبة الحركة" },
     "chest":    { "label": "الصدر",        "chest_pain": "ألم الصدر",        "shortness_of_breath": "ضيق التنفس", "palpitations": "خفقان" },
     "abdomen":  { "label": "البطن",        "abdominal_pain": "ألم البطن",    "nausea": "غثيان",                   "bloating": "انتفاخ" },
@@ -247,5 +261,31 @@
     "no": "لا",
     "noData": "لا توجد بيانات",
     "sessionExpired": "انتهت الجلسة. يرجى تسجيل الدخول مجدداً."
+  },
+  "cart": {
+    "cart":              "السلة",
+    "orderHistory":      "سجل الطلبات",
+    "add":               "إضافة",
+    "addGroup":          "إضافة المجموعة",
+    "addAll":            "إضافة الكل",
+    "adding":            "جاري الإضافة...",
+    "added":             "تمت الإضافة",
+    "submitOrder":       "تأكيد الطلب",
+    "submitting":        "جاري التأكيد...",
+    "emptyCart":         "سلة طلباتك فارغة",
+    "emptyCartSub":      "أضف أدوية من تبويب الحالية أو الموزعة.",
+    "emptyHistory":      "لا توجد طلبات",
+    "emptyHistorySub":   "ستظهر الطلبات المرسلة هنا.",
+    "orderSubmitted":    "تم تأكيد الطلب!",
+    "orderSubmittedSub": "تم تسجيل طلبك وسيتم مراجعته.",
+    "newOrder":          "طلب جديد",
+    "quantity":          "الكمية",
+    "remove":            "إزالة",
+    "item":              "عنصر",
+    "items":             "عناصر",
+    "orderedOn":         "تاريخ الطلب",
+    "statusRecorded":    "مسجل",
+    "deleteItem":        "إزالة هذا الدواء",
+    "group":             "مجموعة"
   }
 }

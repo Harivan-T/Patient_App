@@ -183,7 +183,7 @@
   "bodymap": {
     "title": "ڕاپۆرتی ئێش",
     "steps": { "zones": "ناوچەکان", "symptoms": "نیشانەکان", "painScale": "پێوانەی ئێش", "questions": "پرسیارەکان", "review": "پێداچوونەوە" },
-    "step1": { "heading": "لەکوێ ئێشت هەیە؟", "subtitle": "لەسەر ناوچەکانی ئێشدار بکرتانەوە (دەتوانی زیاتر لە یەک هەڵبژێریت)", "front": "پێشەوە", "back": "پشتەوە" },
+    "step1": { "heading": "لەکوێ ئێشت هەیە؟", "subtitle": "لەسەر ناوچەکانی ئێشدار بکرتانەوە (دەتوانی زیاتر لە یەک هەڵبژێریت)", "front": "پێشەوە", "back": "پشتەوە", "headPanel": "سەر / رووی" },
     "step2": { "heading": "چۆن هەستی پێ دەکەیت؟", "subtitle": "هەموو ئەوانە هەڵبژێرە کە دەگونجێن" },
     "step3": { "heading": "چەند زۆرە ئێشەکە؟", "subtitle": "ئێشەکەت هەڵبسەنج و کاتی بنووسە", "painLevel": "ئاستی ئێش", "duration": "چەند کاتێکە ئێشت هەیە؟", "mild": "سووک", "moderate": "مامناوەند", "severe": "توند" },
     "step4": { "heading": "چەند پرسیارێکی تر", "subtitle": "پرسیارەکانی خێرا بەبەڵێ/نەخێر", "notes": "تێبینیی زیادە", "notesOptional": "ئارەزووانە", "notesPlaceholder": "هەر وردەکارییەکی تر دەربارەی نیشانەکانت..." },
@@ -196,7 +196,8 @@
     "history": { "title": "مێژووی ئێش", "noRecords": "هیچ تۆمارێک نییە" },
     "pain": { "mild": "سووک", "moderate": "مامناوەند", "severe": "توند" },
     "zones": {
-      "head": "سەر", "neck": "مل", "l_shoulder": "پشی چەپ", "r_shoulder": "پشی ڕاست",
+      "head": "سەر", "head_scalp": "سەرۆچکە / پێشانی", "head_eyes": "چاوەکان", "head_eye_l": "چاوی چەپ", "head_eye_r": "چاوی ڕاست", "head_nose": "لووت", "head_ear_l": "گوێی چەپ", "head_ear_r": "گوێی ڕاست", "head_teeth": "دندان / دەم", "head_mouth": "دندان / دەم",
+      "neck": "مل", "l_shoulder": "پشی چەپ", "r_shoulder": "پشی ڕاست",
       "chest": "سنگ", "abdomen": "زگ", "l_upper_arm": "باڵای بازوی چەپ", "r_upper_arm": "باڵای بازوی ڕاست",
       "l_forearm": "خوارەوەی بازوی چەپ", "r_forearm": "خوارەوەی بازوی ڕاست", "pelvis": "ملچ و لووک",
       "l_thigh": "ڕانی چەپ", "r_thigh": "ڕانی ڕاست", "l_knee": "چۆکی چەپ", "r_knee": "چۆکی ڕاست",
@@ -213,7 +214,16 @@
     "nutrition": "خواردنی تەندروست",
     "fitness": "ڕاهێنان",
     "read": "بخوێنەوە",
-    "noUpdate": "ئەمڕۆ نوێکاریەک نییە"
+    "noUpdate": "ئەمڕۆ نوێکاریەک نییە",
+    "myConditions": "دۆخی تەندروستیت",
+    "noConditionContent": "ئێستا ڕێنمایی تایبەت بۆ دۆخەکانت بەردەست نییە.",
+    "conditionCategory": {
+      "diet":       "خواردن",
+      "monitoring": "چاودێری",
+      "exercise":   "ڕاکردن",
+      "medication": "دەرمان",
+      "lifestyle":  "شێوازی ژیان"
+    }
   },
   "booking": {
     "bookDoctor": "دکتۆر حجز بکە",
@@ -223,7 +233,11 @@
     "videoMeet": "چاوپێکەوتنی ڤیدیۆیی"
   },
   "areaSymptoms": {
-    "head":     { "label": "Head",     "headache": "Serêş",              "dizziness": "Sersiûr",            "pressure": "Tansiyoon" },
+    "head":       { "label": "Serê",        "headache": "Serêş",              "dizziness": "Sersiûr",            "pressure": "Tansiyoon" },
+    "head-eyes":  { "label": "Çavan",       "eye_pain": "Êşa Çav / Dîtin" },
+    "head-nose":  { "label": "Poz",         "nose_problem": "Pirsgirêka Poz" },
+    "head-ears":  { "label": "Guhan",       "ear_pain": "Êşa Guh" },
+    "head-teeth": { "label": "Diranên / Dev", "mouth_throat_pain": "Êşa Diranan / Dev" },
     "neck":     { "label": "Neck",     "pain": "Êş",                    "stiffness": "Hişkبوون",           "limited_movement": "Tengezariya Livîn" },
     "chest":    { "label": "Chest",    "chest_pain": "Êşa Sîng",        "shortness_of_breath": "Tengezariya Nefesê", "palpitations": "Lêdana Dilê" },
     "abdomen":  { "label": "Abdomen",  "abdominal_pain": "Êşa Zikê",    "nausea": "Sekinîn",               "bloating": "Pejnandin" },
@@ -247,5 +261,31 @@
     "no": "نەخێر",
     "noData": "هیچ داتایەک بەردەست نییە",
     "sessionExpired": "ئۆتۆریزەیشن بەسەرچووە. تکایە دووبارە چوونەژوورەوە."
+  },
+  "cart": {
+    "cart":              "سەبەتە",
+    "orderHistory":      "مێژووی داواکاری",
+    "add":               "زیادکردن",
+    "addGroup":          "گرووپ زیادکردن",
+    "addAll":            "هەموو زیادکردن",
+    "adding":            "دەزیادکرێ...",
+    "added":             "زیادکرا",
+    "submitOrder":       "داواکاری نێردن",
+    "submitting":        "دەنێردرێت...",
+    "emptyCart":         "سەبەتەکەت بەتاڵە",
+    "emptyCartSub":      "دەرمان لە تابی ئێستا یان دابەشکراو زیاد بکە.",
+    "emptyHistory":      "هیچ داواکارییەک نییە",
+    "emptyHistorySub":   "داواکارییە نێردراوەکان ئێرە دەردەکەون.",
+    "orderSubmitted":    "داواکاری نێردرا!",
+    "orderSubmittedSub": "داواکارییەکەت تۆمارکرا و دەپێداچوونەوێت.",
+    "newOrder":          "داواکاری نوێ",
+    "quantity":          "بڕ",
+    "remove":            "سڕینەوە",
+    "item":              "دانە",
+    "items":             "دانە",
+    "orderedOn":         "بەرواری داواکاری",
+    "statusRecorded":    "تۆمارکراوە",
+    "deleteItem":        "ئەم دەرمانە لابردن",
+    "group":             "گرووپ"
   }
 }

@@ -6,8 +6,10 @@ import { AppShell } from '@/components/layout/AppShell';
 import { BodyMapContent } from '@/components/bodymap/BodyMapContent';
 import type { DailyInsight } from '@/app/api/daily-insights/route';
 
-type Tab = 'updates' | 'mydoctor';
+type Tab      = 'updates' | 'mydoctor';
 type Category = 'health' | 'food' | 'sports';
+
+// ── DailyInsightsWidget ───────────────────────────────────────────────────────
 
 function InsightCard({
   item,
@@ -106,6 +108,8 @@ function DailyInsightsWidget({ locale }: { locale: string }) {
   );
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function DashboardPage({ params }: { params: { locale: string } }) {
   const t = useTranslations('dashboard');
   const [tab, setTab] = useState<Tab>('updates');
@@ -113,7 +117,7 @@ export default function DashboardPage({ params }: { params: { locale: string } }
   return (
     <AppShell locale={params.locale}>
       <div className="max-w-2xl mx-auto">
-        {/* Pinned tab header — sticks to top of main scroll container */}
+        {/* Tab nav */}
         <div className="sticky z-30 pb-4" style={{ top: 'var(--inner-nav-top)' }}>
           <div className="seg-toggle">
             {(['updates', 'mydoctor'] as Tab[]).map((id) => (
@@ -132,7 +136,9 @@ export default function DashboardPage({ params }: { params: { locale: string } }
           </div>
         </div>
 
-        {tab === 'updates' && <DailyInsightsWidget locale={params.locale} />}
+        {tab === 'updates' && (
+          <DailyInsightsWidget locale={params.locale} />
+        )}
         {tab === 'mydoctor' && <BodyMapContent />}
       </div>
     </AppShell>

@@ -1,0 +1,237 @@
+import { NextResponse } from 'next/server';
+import { query } from '@/lib/db';
+
+// POST /api/admin/migrate — idempotent. Run once (or re-run safely).
+export async function POST() {
+  // ── Drop previous basket/order tables (replaced by cart system) ──
+  await query(`DROP TABLE IF EXISTS basket_items   CASCADE`);
+  await query(`DROP TABLE IF EXISTS med_baskets    CASCADE`);
+  await query(`DROP TABLE IF EXISTS order_items    CASCADE`);
+  await query(`DROP TABLE IF EXISTS med_orders     CASCADE`);
+  await query(`DROP TABLE IF EXISTS medications_catalog CASCADE`);
+
+  // ── cart: one open cart per patient ──
+  await query(`
+    CREATE TABLE IF NOT EXISTS carts (
+      id         SERIAL PRIMARY KEY,
+      patient_id TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      status     TEXT NOT NULL DEFAULT 'open'
+                 CHECK (status IN ('open', 'submitted'))
+    )
+  `);
+
+  // ── cart_items: individual medication lines ──
+  // medication_id  — composite string key, e.g. "curr:<medId>:<drugName>"
+  // group_id       — nullable; the prescription ID this drug belongs to
+  // group_name     — nullable; snapshot of the prescription/group name
+  await query(`
+    CREATE TABLE IF NOT EXISTS cart_items (
+      id            SERIAL PRIMARY KEY,
+      cart_id       INTEGER NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
+      medication_id TEXT NOT NULL,
+      name_snapshot TEXT NOT NULL,
+      quantity      INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+      group_id      TEXT,
+      group_name    TEXT,
+      UNIQUE(cart_id, medication_id)
+    )
+  `);
+
+  // ── orders: submitted (recorded) orders ──
+  await query(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id         SERIAL PRIMARY KEY,
+      patient_id TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      status     TEXT NOT NULL DEFAULT 'recorded'
+    )
+  `);
+
+  // ── order_items: immutable snapshot of what was ordered ──
+  await query(`
+    CREATE TABLE IF NOT EXISTS order_items (
+      id                  SERIAL PRIMARY KEY,
+      order_id            INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+      medication_id       TEXT NOT NULL,
+      name_snapshot       TEXT NOT NULL,
+      quantity            INTEGER NOT NULL,
+      group_name_snapshot TEXT
+    )
+  `);
+
+  // ── chronic_disease_content: static educational content per ICD-10 condition ──
+  // ⚠️  CLINICIAN REVIEW REQUIRED — seed rows are starter copy only.
+  await query(`
+    CREATE TABLE IF NOT EXISTS chronic_disease_content (
+      id             SERIAL PRIMARY KEY,
+      condition_code TEXT NOT NULL,
+      condition_key  TEXT NOT NULL,
+      language       TEXT NOT NULL DEFAULT 'en' CHECK (language IN ('en','ar','ku')),
+      category       TEXT,
+      title          TEXT NOT NULL,
+      body_text      TEXT NOT NULL,
+      sort_order     INTEGER NOT NULL DEFAULT 0
+    )
+  `);
+  await query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS cdc_uix
+    ON chronic_disease_content (condition_code, language, sort_order)
+  `).catch(() => {});
+
+  // Seed rows — idempotent (ON CONFLICT DO NOTHING)
+  type SeedRow = [string, string, string, string | null, string, string, number];
+  const seed: SeedRow[] = [
+    // ── E11 — Type 2 Diabetes ───────────────────────────────────────────────────
+    ['E11','diabetes','en','diet',
+      'Watch what you eat',
+      'Limit refined carbohydrates such as white bread, rice, and sugary drinks. Favour vegetables, whole grains, and lean protein. Spreading meals evenly through the day helps keep blood sugar stable.',
+      1],
+    ['E11','diabetes','en','monitoring',
+      'Check your blood sugar regularly',
+      'Regular blood glucose monitoring helps you and your doctor spot patterns early. Keep a log of your readings and bring it to every clinic visit.',
+      2],
+    ['E11','diabetes','en','exercise',
+      'Move every day',
+      'Aim for at least 30 minutes of moderate activity — brisk walking, swimming, or cycling — on most days. Physical activity helps your body use insulin more effectively.',
+      3],
+
+    ['E11','diabetes','ar','diet',
+      'راقب ما تأكله',
+      'تجنب الكربوهيدرات المكررة كالخبز الأبيض والأرز والمشروبات السكرية. آثر الخضراوات والحبوب الكاملة والبروتين الخالي من الدهون. وزّع وجباتك على مدار اليوم للحفاظ على استقرار مستوى السكر في الدم.',
+      1],
+    ['E11','diabetes','ar','monitoring',
+      'راقب مستوى السكر في دمك بانتظام',
+      'تساعدك المتابعة المنتظمة لمستوى الجلوكوز على اكتشاف الأنماط مبكراً. احتفظ بسجل لقراءاتك وأحضره معك في كل زيارة طبية.',
+      2],
+    ['E11','diabetes','ar','exercise',
+      'تحرك كل يوم',
+      'اهدف إلى ممارسة نشاط بدني معتدل لا يقل عن 30 دقيقة يومياً كالمشي السريع أو السباحة أو ركوب الدراجة. يساعد النشاط البدني جسمك على استخدام الأنسولين بفاعلية أكبر.',
+      3],
+
+    ['E11','diabetes','ku','diet',
+      'سەیری خواردنەکەت بکە',
+      'کاربۆهایدرەیتی پاڵاوراو وەک نانی سپی، برنج، و خواردنی شەکردار کەم بکەوە. سەوزە، دانەوێلەی تەواو، و پرۆتینی کەمچەور پێشنیار دەکرێت. خواردنەکانت بە یەکسانی لە ڕۆژدا دابەش بکە.',
+      1],
+    ['E11','diabetes','ku','monitoring',
+      'شەکری خوێنەکەت بە بەردەوامی پشکنین بکە',
+      'پشکنینی بەردەوامی گلوکۆز یارمەتیدەدات کە نموونەکان زوو دەردەکەون. تۆماری خوێندنەکانت بنووسە و لە هەموو سەردانێکی پزیشکیدا پێشکەشی بکە.',
+      2],
+    ['E11','diabetes','ku','exercise',
+      'ڕۆژانە بجووڵە',
+      'دواچوونی 30 خولەکی ئاستەواز مانەوە وەک پێپیاوکردنی خێرا، مەلەکردن، یان دووچەرخەسواری ئامانج بگرە. چالاکی جەستەیی کاریگەری ئینسولین بۆ جەستەکەت باشتر دەکات.',
+      3],
+
+    // ── I10 — Hypertension ────────────────────────────────────────────────────
+    ['I10','hypertension','en','diet',
+      'Cut down on salt',
+      'Aim for less than 5 g of salt per day. Avoid processed foods, canned goods, and adding extra salt at the table. A diet rich in fruits, vegetables, and low-fat dairy is proven to lower blood pressure.',
+      1],
+    ['I10','hypertension','en','monitoring',
+      'Measure your blood pressure at home',
+      'Take two readings in the morning before medication and two in the evening for seven days. Bring the log to your next appointment. Your target is below 130/80 mmHg.',
+      2],
+    ['I10','hypertension','en','lifestyle',
+      'Manage stress',
+      'Chronic stress raises blood pressure. Try short daily walks, deep-breathing exercises, or other relaxation techniques. Aim for 7–8 hours of sleep each night.',
+      3],
+
+    ['I10','hypertension','ar','diet',
+      'قلل تناول الملح',
+      'اهدف إلى أقل من 5 غرامات من الملح يومياً. تجنب الأطعمة المعالجة والمعلبة وإضافة الملح إلى طعامك. النظام الغذائي الغني بالفواكه والخضراوات ومنتجات الألبان قليلة الدسم ثبتت فاعليته في خفض ضغط الدم.',
+      1],
+    ['I10','hypertension','ar','monitoring',
+      'راقب ضغط دمك في المنزل',
+      'خذ قراءتين صباحاً قبل تناول الدواء وقراءتين مساءً لمدة سبعة أيام. أحضر السجل إلى زيارتك التالية. الهدف الطبيعي أقل من 130/80 ملم زئبق.',
+      2],
+    ['I10','hypertension','ar','lifestyle',
+      'تحكم في التوتر',
+      'التوتر المزمن يرفع ضغط الدم. جرب تمارين التنفس العميق أو المشي اليومي القصير. احرص على النوم لمدة 7–8 ساعات كل ليلة.',
+      3],
+
+    ['I10','hypertension','ku','diet',
+      'خوێ کەم بخۆ',
+      'ئامانج بگرە کەمتر لە 5 گرام خوێ ڕۆژانە. لە خواردنی پرۆسەکراو و گڵاوکراو بپەرهێز. خواردنی دەوڵەمەند لە میوە، سەوزە، و بەرهەمی شیری کەمچەور کاریگەری ئامادەکراویەتی بۆ دابەزاندنی تانسیۆن.',
+      1],
+    ['I10','hypertension','ku','monitoring',
+      'تانسیۆنەکەت لە ماڵ پشکنین بکە',
+      'دوو قراءت بەیانیان پێش دەرمان و دوو ئێواران لە ماوەی حەوت ڕۆژ بگرە. تۆمارەکە بۆ سەردانی داهاتووت ببە. ئامانجی ئاساییانە کەمتر لە 130/80 mmHg.',
+      2],
+    ['I10','hypertension','ku','lifestyle',
+      'ستریسەکانت بیکوژێنەرەوە',
+      'ستریسی بەردەوام تانسیۆن بەرز دەکاتەوە. شێوازی هەناسەگرتنی قووڵ یان پێپیاوکردنی ڕۆژانەی کورت تاقیبکەرەوە. ئامانج بگرە ڕۆژانە 7–8 کاتژمێر بخەویت.',
+      3],
+
+    // ── J45 — Asthma ──────────────────────────────────────────────────────────
+    ['J45','asthma','en','monitoring',
+      'Know your triggers',
+      'Common asthma triggers include dust mites, pollen, pet dander, cold air, and tobacco smoke. Identify your personal triggers and take steps to reduce exposure at home and work.',
+      1],
+    ['J45','asthma','en','medication',
+      'Keep your rescue inhaler accessible',
+      'Always carry your short-acting reliever inhaler. If you need it more than twice a week for symptoms, contact your doctor — your control plan may need adjusting.',
+      2],
+
+    ['J45','asthma','ar','monitoring',
+      'تعرف على محفزات ربوك',
+      'تشمل محفزات الربو الشائعة عث الغبار والحبوب ووبر الحيوانات الأليفة والهواء البارد ودخان التبغ. حدد محفزاتك الشخصية واتخذ خطوات للحد من التعرض لها في المنزل والعمل.',
+      1],
+    ['J45','asthma','ar','medication',
+      'احتفظ ببخاخ الإنقاذ دائماً معك',
+      'احمل دائماً بخاخ الإسعاف سريع المفعول. إذا احتجت إليه أكثر من مرتين في الأسبوع، راجع طبيبك — قد يحتاج برنامج علاجك إلى تعديل.',
+      2],
+
+    ['J45','asthma','ku','monitoring',
+      'هۆکارەکانی ئەستمات بناسە',
+      'هۆکارە باوەکانی ئەستما تووزی مەلمەلێک، گەردە، موی ئاژەڵی ماڵ، ئاوای سارد، و دووکەڵی تووتن دەگرێتەوە. هۆکارە تایبەتەکانی خۆت بناسە و بەرامبەریان کەم بکەرەوە.',
+      1],
+    ['J45','asthma','ku','medication',
+      'بەخشێنەرەکەت لەگەڵت بێت',
+      'هەمیشە بەخشێنەرەکەی خێراکاردەکاتی خۆت لەگەڵت بگرە. ئەگەر لە هەفتەیەکدا زیاتر لە دووجار پێویستت کرد، پزیشکەکەت بئاگادار بکەرەوە.',
+      2],
+
+    // ── E78 — Hyperlipidaemia / High Cholesterol ──────────────────────────────
+    ['E78','cholesterol','en','diet',
+      'Eat a heart-healthy diet',
+      'Replace saturated fats (butter, fatty meat, full-fat dairy) with unsaturated fats found in olive oil, nuts, and oily fish. Increase soluble fibre from oats, beans, and fresh fruit to help lower LDL cholesterol.',
+      1],
+
+    ['E78','cholesterol','ar','diet',
+      'اتبع نظاماً غذائياً صديقاً للقلب',
+      'استبدل الدهون المشبعة (الزبدة، اللحوم الدهنية، منتجات الألبان الكاملة الدسم) بالدهون غير المشبعة الموجودة في زيت الزيتون والمكسرات والأسماك الدهنية. زد تناول الألياف القابلة للذوبان من الشوفان والفول والفاكهة الطازجة.',
+      1],
+
+    ['E78','cholesterol','ku','diet',
+      'خواردنی دڵپاکانە بۆ قەڵب',
+      'چەوری دۆشاوراو (کرێم، گۆشتی چەور، بەرهەمی شیری کامل) جێگری چەوری نادۆشاوراو لە زەیتوونی، قۆز، و ماسیی چەوردار بکە. فایبەری تەحلاودراو لە جۆی، لوبیا، و میوەی تازە زیاد بکە.',
+      1],
+
+    // ── N18 — Chronic Kidney Disease ─────────────────────────────────────────
+    ['N18','kidney','en','diet',
+      'Protect your kidneys through diet',
+      'Limit potassium-rich foods (bananas, tomatoes, potatoes) and phosphorus-rich foods (dairy, nuts, cola drinks) as instructed by your care team. Ask your doctor for your personal daily fluid target.',
+      1],
+
+    ['N18','kidney','ar','diet',
+      'احمِ كليتيك من خلال التغذية',
+      'قلل الأطعمة الغنية بالبوتاسيوم (الموز والطماطم والبطاطس) والفوسفور (منتجات الألبان والمكسرات ومشروبات الكولا) وفق توجيهات فريق رعايتك. استشر طبيبك حول الكمية المناسبة من السوائل يومياً.',
+      1],
+
+    ['N18','kidney','ku','diet',
+      'گورچیلەکانت بەڕێی خواردن بپارێزە',
+      'خواردنی دەوڵەمەند لە پۆتاسیۆم (مۆز، تەماتە، باتاتە) و فۆسفۆر (شیر و بەرهەمەکانی، قۆز، خواردنی کۆلا) کەم بکەوە بەپێی ڕێنمایی تیمی تیمارتان. لەسەر مقدارەکەی ئاو ڕۆژانە لە پزیشکەکەتەوە بپرسە.',
+      1],
+  ];
+
+  for (const [code, key, lang, cat, title, body, order] of seed) {
+    await query(
+      `INSERT INTO chronic_disease_content
+         (condition_code, condition_key, language, category, title, body_text, sort_order)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (condition_code, language, sort_order) DO NOTHING`,
+      [code, key, lang, cat, title, body, order],
+    );
+  }
+
+  return NextResponse.json({ ok: true, message: 'Cart tables + chronic content created.' });
+}

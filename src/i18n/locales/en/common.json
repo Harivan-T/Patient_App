@@ -183,7 +183,7 @@
   "bodymap": {
     "title": "Pain Report",
     "steps": { "zones": "Zones", "symptoms": "Symptoms", "painScale": "Pain Scale", "questions": "Questions", "review": "Review" },
-    "step1": { "heading": "Where does it hurt?", "subtitle": "Tap the areas on your body (select all that apply)", "front": "Front", "back": "Back" },
+    "step1": { "heading": "Where does it hurt?", "subtitle": "Tap the areas on your body (select all that apply)", "front": "Front", "back": "Back", "headPanel": "Head / Face" },
     "step2": { "heading": "What does it feel like?", "subtitle": "Select all that apply" },
     "step3": { "heading": "How bad is the pain?", "subtitle": "Rate your pain and how long you've had it", "painLevel": "Pain Level", "duration": "How long have you had this?", "mild": "Mild", "moderate": "Moderate", "severe": "Severe" },
     "step4": { "heading": "A few more questions", "subtitle": "Quick yes/no questions", "notes": "Additional notes", "notesOptional": "optional", "notesPlaceholder": "Any other details about your symptoms..." },
@@ -196,7 +196,8 @@
     "history": { "title": "Pain History", "noRecords": "No records yet" },
     "pain": { "mild": "Mild", "moderate": "Moderate", "severe": "Severe" },
     "zones": {
-      "head": "Head", "neck": "Neck", "l_shoulder": "L. Shoulder", "r_shoulder": "R. Shoulder",
+      "head": "Head", "head_scalp": "Scalp / Forehead", "head_eyes": "Eyes", "head_eye_l": "Left Eye", "head_eye_r": "Right Eye", "head_nose": "Nose", "head_ear_l": "Left Ear", "head_ear_r": "Right Ear", "head_teeth": "Teeth / Mouth", "head_mouth": "Teeth / Mouth",
+      "neck": "Neck", "l_shoulder": "L. Shoulder", "r_shoulder": "R. Shoulder",
       "chest": "Chest", "abdomen": "Abdomen", "l_upper_arm": "L. Upper Arm", "r_upper_arm": "R. Upper Arm",
       "l_forearm": "L. Forearm", "r_forearm": "R. Forearm", "pelvis": "Pelvis / Hips",
       "l_thigh": "L. Thigh", "r_thigh": "R. Thigh", "l_knee": "L. Knee", "r_knee": "R. Knee",
@@ -213,7 +214,16 @@
     "nutrition": "Nutrition",
     "fitness": "Fitness",
     "read": "Read",
-    "noUpdate": "No update today"
+    "noUpdate": "No update today",
+    "myConditions": "Your Conditions",
+    "noConditionContent": "No personalized tips are available for your conditions yet.",
+    "conditionCategory": {
+      "diet":       "Diet",
+      "monitoring": "Monitoring",
+      "exercise":   "Exercise",
+      "medication": "Medication",
+      "lifestyle":  "Lifestyle"
+    }
   },
   "booking": {
     "bookDoctor": "Book a Doctor",
@@ -223,7 +233,11 @@
     "videoMeet": "Video meet"
   },
   "areaSymptoms": {
-    "head":     { "label": "Head",     "headache": "Headache",            "dizziness": "Dizziness",              "pressure": "Pressure" },
+    "head":       { "label": "Head",           "headache": "Headache",            "dizziness": "Dizziness",              "pressure": "Pressure" },
+    "head-eyes":  { "label": "Eyes",           "eye_pain": "Eye pain / vision problem" },
+    "head-nose":  { "label": "Nose",           "nose_problem": "Nose congestion / pain" },
+    "head-ears":  { "label": "Ears",           "ear_pain": "Ear pain" },
+    "head-teeth": { "label": "Teeth / Mouth",  "mouth_throat_pain": "Mouth / throat pain" },
     "neck":     { "label": "Neck",     "pain": "Pain",                    "stiffness": "Stiffness",              "limited_movement": "Limited movement" },
     "chest":    { "label": "Chest",    "chest_pain": "Chest pain",        "shortness_of_breath": "Shortness of breath", "palpitations": "Palpitations" },
     "abdomen":  { "label": "Abdomen",  "abdominal_pain": "Abdominal pain","nausea": "Nausea",                    "bloating": "Bloating" },
@@ -247,5 +261,31 @@
     "no": "No",
     "noData": "No data available",
     "sessionExpired": "Session expired. Please log in again."
+  },
+  "cart": {
+    "cart":              "Cart",
+    "orderHistory":      "Order History",
+    "add":               "Add",
+    "addGroup":          "Add Group",
+    "addAll":            "Add All",
+    "adding":            "Adding...",
+    "added":             "Added",
+    "submitOrder":       "Submit Order",
+    "submitting":        "Submitting...",
+    "emptyCart":         "Your cart is empty",
+    "emptyCartSub":      "Add medications from the Current or Dispensed tabs.",
+    "emptyHistory":      "No orders yet",
+    "emptyHistorySub":   "Submitted orders will appear here.",
+    "orderSubmitted":    "Order submitted!",
+    "orderSubmittedSub": "Your order has been recorded and is pending review.",
+    "newOrder":          "Start New Order",
+    "quantity":          "Qty",
+    "remove":            "Remove",
+    "item":              "item",
+    "items":             "items",
+    "orderedOn":         "Ordered on",
+    "statusRecorded":    "Recorded",
+    "deleteItem":        "Remove medication",
+    "group":             "Group"
   }
 }

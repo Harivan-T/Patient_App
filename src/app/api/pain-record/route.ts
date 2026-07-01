@@ -6,6 +6,7 @@ import { savePainRecord, getPainHistory } from '@/lib/epr';
 const schema = z.object({
   zones:             z.array(z.string()).min(1),
   symptoms:          z.array(z.string()).default([]),
+  areaSymptoms:      z.record(z.string(), z.array(z.string())).default({}),
   painLevel:         z.number().int().min(1).max(10),
   duration:          z.string().default(''),
   movementPain:      z.boolean().default(false),
