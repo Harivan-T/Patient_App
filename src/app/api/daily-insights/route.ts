@@ -216,8 +216,8 @@ async function getChronicCodes(): Promise<string[]> {
     }
     const codes = Array.from(new Set(
       diagnoses
-        .filter((d) => d.status === 'chronic')
-        .map((d) => (d.code?.trim()) || resolveCodeFromName(d.name))
+        .filter((d) => d.status === 'chronic' || d.status === 'active')
+        .map((d) => (d.code?.trim()) || resolveCodeFromName(d.name) || resolveCodeFromName((d as {description?: string}).description ?? ''))
         .filter((c): c is string => Boolean(c)),
     )).sort();
     return codes;
@@ -405,6 +405,7 @@ export async function GET(req: NextRequest) {
   // Resolve patient's chronic conditions for keyword personalization
   const chronicCodes = await getChronicCodes();
   const conditionKey = chronicCodes.join(','); // '' = no conditions = generic news
+
 
   const result: Record<Section, DailyInsight | null> = { health: null, food: null, sports: null };
   const seen = new Set<string>();

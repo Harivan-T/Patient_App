@@ -14,6 +14,7 @@ export const CONDITION_CODE_MAP: Array<{ pattern: RegExp; code: string }> = [
 
   // ── Hypertension ─────────────────────────────────────────────────────────────
   { pattern: /hypertens|high blood press/i,                    code: 'I10' },
+  { pattern: /blood\s*pr[ea][e]?s+ure/i,                       code: 'I10' }, // "blood pressure" / "blood preasure" typo
   { pattern: /ارتفاع.*ضغط|ضغط.*دم.*مرتف|ضغط عال|ضغط الدم/i,  code: 'I10' }, // Arabic
   { pattern: /تانسیۆنی بەرز|فشاری خوێن/i,                     code: 'I10' }, // Kurdish
 
@@ -36,9 +37,11 @@ export const CONDITION_CODE_MAP: Array<{ pattern: RegExp; code: string }> = [
   { pattern: /hypothyroid/i,                                   code: 'E03' },
   { pattern: /قصور.*درقية|كسل الغدة الدرقية/i,                 code: 'E03' }, // Arabic
 
-  // ── Coronary Artery Disease ───────────────────────────────────────────────────
+  // ── Coronary Artery Disease / General Heart Disease ──────────────────────────
   { pattern: /coronary artery|ischaemi[ac] heart|ischemi[ac] heart/i, code: 'I25' },
+  { pattern: /heart\s*(problem|issue|disease|condition|trouble)/i,     code: 'I25' }, // vague "heart problems"
   { pattern: /أمراض القلب التاجية|شريان تاجي/i,                code: 'I25' }, // Arabic
+  { pattern: /کێشەی دڵ|نەخۆشی دڵ/i,                           code: 'I25' }, // Kurdish
 
   // ── Heart Failure ─────────────────────────────────────────────────────────────
   { pattern: /heart failure/i,                                  code: 'I50' },
