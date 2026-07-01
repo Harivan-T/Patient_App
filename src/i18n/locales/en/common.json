@@ -286,6 +286,8 @@
     "orderedOn":         "Ordered on",
     "statusRecorded":    "Recorded",
     "deleteItem":        "Remove medication",
-    "group":             "Group"
+    "group":             "Group",
+    "total":             "Total",
+    "priceOnRequest":    "Price on request"
   }
 }

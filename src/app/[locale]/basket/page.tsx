@@ -13,24 +13,38 @@ interface CartItem {
   quantity:     number;
   groupId:      string | null;
   groupName:    string | null;
+  price:        number | null;
 }
 
 interface OrderItem {
-  id:          number;
+  id:           number;
   medicationId: string;
   name:         string;
   quantity:     number;
   groupName:    string | null;
+  price:        number | null;
 }
 
 interface Order {
   id:        number;
   createdAt: string;
   status:    string;
+  total:     number | null;
   items:     OrderItem[];
 }
 
 type PageTab = 'cart' | 'history';
+
+function formatIQD(amount: number, locale: string): string {
+  try {
+    return new Intl.NumberFormat(locale === 'ar' ? 'ar-IQ' : 'en-US', {
+      style: 'currency', currency: 'IQD',
+      minimumFractionDigits: 0, maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `IQD ${Math.round(amount).toLocaleString()}`;
+  }
+}
 
 export default function BasketPage({ params }: { params: { locale: string } }) {
   const t      = useTranslations('cart');
@@ -54,7 +68,6 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
     });
   }
 
-  /* ── Fetch open cart ── */
   const fetchCart = useCallback(async () => {
     try {
       const res = await fetch('/api/cart');
@@ -66,7 +79,6 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
     finally { setLoading(false); }
   }, []);
 
-  /* ── Fetch order history ── */
   const fetchHistory = useCallback(async () => {
     setHistLoading(true);
     try {
@@ -81,7 +93,6 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
     if (tab === 'history') fetchHistory();
   }, [tab, fetchHistory]);
 
-  /* ── Quantity stepper ── */
   async function changeQty(itemId: number, delta: number, current: number) {
     const next = current + delta;
     if (next < 1) return removeItem(itemId);
@@ -96,7 +107,6 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
     window.dispatchEvent(new CustomEvent('cart-updated'));
   }
 
-  /* ── Remove single item ── */
   async function removeItem(itemId: number) {
     setUpdating((u) => new Set(u).add(itemId));
     await fetch(`/api/cart/${itemId}`, { method: 'DELETE' });
@@ -105,7 +115,6 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
     window.dispatchEvent(new CustomEvent('cart-updated'));
   }
 
-  /* ── Submit order ── */
   async function submitOrder() {
     setSubmitting(true);
     try {
@@ -119,7 +128,11 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
     finally { setSubmitting(false); }
   }
 
-  /* ── Success screen after submit ── */
+  // Derived cart total (null if any item has no price)
+  const cartTotal = cartItems.length > 0 && cartItems.every((i) => i.price != null)
+    ? cartItems.reduce((s, i) => s + (i.price ?? 0) * i.quantity, 0)
+    : null;
+
   if (submitted) {
     return (
       <AppShell locale={locale}>
@@ -152,7 +165,6 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
     );
   }
 
-  /* ── Main layout ── */
   return (
     <AppShell locale={locale}>
       <div className="max-w-2xl mx-auto">
@@ -189,25 +201,54 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
               icon="cart"
               title={t('emptyCart')}
               sub={t('emptyCartSub')}
-              action={<Link href={`/${locale}/medications`} className="inline-block px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: 'var(--color-primary)' }}>{t('newOrder')}</Link>}
+              action={
+                <Link
+                  href={`/${locale}/medications`}
+                  className="inline-block px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ background: 'var(--color-primary)' }}
+                >
+                  {t('newOrder')}
+                </Link>
+              }
             />
           ) : (
             <>
               <GroupedItemList
                 items={cartItems}
                 updating={updating}
+                locale={locale}
                 onChangeQty={changeQty}
                 onRemove={removeItem}
                 removeLabel={t('remove')}
               />
-              <div className="mt-6">
+
+              {/* Cart total */}
+              <div
+                className="mt-4 px-4 py-3 rounded-xl flex items-center justify-between"
+                style={{ background: 'var(--tibbna-light)' }}
+              >
+                <span className="text-sm font-semibold" style={{ color: 'var(--color-heading)' }}>
+                  {t('total')}
+                </span>
+                <span className="text-base font-bold" style={{ color: 'var(--color-primary)' }}>
+                  {cartTotal != null ? formatIQD(cartTotal, locale) : '—'}
+                </span>
+              </div>
+
+              {/* Place order button */}
+              <div className="mt-3">
                 <button
                   onClick={submitOrder}
                   disabled={submitting}
                   className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                   style={{ background: 'var(--color-primary)' }}
                 >
-                  {submitting ? t('submitting') : `${t('submitOrder')} · ${cartItems.length} ${cartItems.length === 1 ? t('item') : t('items')}`}
+                  {submitting
+                    ? t('submitting')
+                    : cartTotal != null
+                      ? `${t('submitOrder')} · ${formatIQD(cartTotal, locale)}`
+                      : `${t('submitOrder')} · ${cartItems.length} ${cartItems.length === 1 ? t('item') : t('items')}`
+                  }
                 </button>
               </div>
             </>
@@ -231,14 +272,13 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
                 const extraCount = order.items.length - 1;
                 return (
                   <div key={order.id} className="card overflow-hidden">
-                    {/* Summary row — always visible, tap to toggle */}
+                    {/* Summary row */}
                     <button
                       className="w-full text-start px-5 py-3.5 flex items-center gap-3"
                       onClick={() => toggleOrder(order.id)}
                       aria-expanded={isOpen}
                     >
                       <div className="flex-1 min-w-0">
-                        {/* Top line: date + status badge */}
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs" style={{ color: 'var(--color-muted)' }}>
                             {t('orderedOn')} {formatDate(order.createdAt)}
@@ -249,8 +289,12 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
                           >
                             {t('statusRecorded')}
                           </span>
+                          {order.total != null && (
+                            <span className="text-xs font-bold" style={{ color: 'var(--color-primary)' }}>
+                              {formatIQD(order.total, locale)}
+                            </span>
+                          )}
                         </div>
-                        {/* Bottom line: first med + overflow count */}
                         <p className="text-sm font-medium mt-0.5 truncate" style={{ color: 'var(--color-heading)' }}>
                           {firstName}
                           {extraCount > 0 && (
@@ -260,7 +304,6 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
                           )}
                         </p>
                       </div>
-                      {/* Chevron — rotates when open */}
                       <svg
                         viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" strokeWidth="2.5"
@@ -273,10 +316,20 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
                       </svg>
                     </button>
 
-                    {/* Expanded: full item list */}
+                    {/* Expanded item list + total footer */}
                     {isOpen && (
                       <div className="border-t border-gray-100 dark:border-slate-700">
-                        <ReadOnlyGroupedList items={order.items} />
+                        <ReadOnlyGroupedList items={order.items} locale={locale} />
+                        {order.total != null && (
+                          <div className="px-5 py-3 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                            <span className="text-sm font-semibold" style={{ color: 'var(--color-heading)' }}>
+                              {t('total')}
+                            </span>
+                            <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
+                              {formatIQD(order.total, locale)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -291,17 +344,17 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
   );
 }
 
-/* ── GroupedItemList — live cart, with steppers + delete ── */
+/* ── GroupedItemList — live cart with steppers + delete ── */
 function GroupedItemList({
-  items, updating, onChangeQty, onRemove, removeLabel,
+  items, updating, locale, onChangeQty, onRemove, removeLabel,
 }: {
   items: CartItem[];
   updating: Set<number>;
+  locale: string;
   onChangeQty: (id: number, delta: number, current: number) => void;
   onRemove: (id: number) => void;
   removeLabel: string;
 }) {
-  // Separate grouped from singles
   const groups   = new Map<string, { name: string; rows: CartItem[] }>();
   const singles: CartItem[] = [];
 
@@ -323,7 +376,7 @@ function GroupedItemList({
           </div>
           <div className="divide-y divide-gray-100 dark:divide-slate-700/60">
             {rows.map((item) => (
-              <CartRow key={item.itemId} item={item} busy={updating.has(item.itemId)}
+              <CartRow key={item.itemId} item={item} busy={updating.has(item.itemId)} locale={locale}
                 onChangeQty={onChangeQty} onRemove={onRemove} removeLabel={removeLabel} />
             ))}
           </div>
@@ -333,7 +386,7 @@ function GroupedItemList({
         <div className="card overflow-hidden">
           <div className="divide-y divide-gray-100 dark:divide-slate-700/60">
             {singles.map((item) => (
-              <CartRow key={item.itemId} item={item} busy={updating.has(item.itemId)}
+              <CartRow key={item.itemId} item={item} busy={updating.has(item.itemId)} locale={locale}
                 onChangeQty={onChangeQty} onRemove={onRemove} removeLabel={removeLabel} />
             ))}
           </div>
@@ -344,9 +397,9 @@ function GroupedItemList({
 }
 
 function CartRow({
-  item, busy, onChangeQty, onRemove, removeLabel,
+  item, busy, locale, onChangeQty, onRemove, removeLabel,
 }: {
-  item: CartItem; busy: boolean;
+  item: CartItem; busy: boolean; locale: string;
   onChangeQty: (id: number, delta: number, current: number) => void;
   onRemove: (id: number) => void;
   removeLabel: string;
@@ -355,6 +408,11 @@ function CartRow({
     <div className="px-4 py-3 flex items-center gap-3" style={{ opacity: busy ? 0.5 : 1, transition: 'opacity 0.15s' }}>
       <div className="flex-1 min-w-0">
         <p className="font-medium text-sm leading-snug" style={{ color: 'var(--color-heading)' }}>{item.name}</p>
+        {item.price != null && (
+          <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
+            {formatIQD(item.price, locale)} × {item.quantity} = {formatIQD(item.price * item.quantity, locale)}
+          </p>
+        )}
       </div>
       {/* Qty stepper */}
       <div className="flex items-center gap-1 shrink-0">
@@ -380,8 +438,8 @@ function CartRow({
   );
 }
 
-/* ── ReadOnlyGroupedList — order history, no controls ── */
-function ReadOnlyGroupedList({ items }: { items: OrderItem[] }) {
+/* ── ReadOnlyGroupedList — order history ── */
+function ReadOnlyGroupedList({ items, locale }: { items: OrderItem[]; locale: string }) {
   const groups   = new Map<string, { name: string; rows: OrderItem[] }>();
   const singles: OrderItem[] = [];
 
@@ -402,19 +460,29 @@ function ReadOnlyGroupedList({ items }: { items: OrderItem[] }) {
             <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-primary)' }}>{name}</p>
           </div>
           {rows.map((row) => (
-            <div key={row.id} className="px-4 py-2.5 flex items-center justify-between border-b border-gray-50 dark:border-slate-700/40 last:border-0">
-              <p className="text-sm" style={{ color: 'var(--color-heading)' }}>{row.name}</p>
-              <span className="text-xs font-medium ml-4 shrink-0" style={{ color: 'var(--color-muted)' }}>×{row.quantity}</span>
-            </div>
+            <HistoryRow key={row.id} item={row} locale={locale} />
           ))}
         </div>
       ))}
       {singles.map((item) => (
-        <div key={item.id} className="px-4 py-2.5 flex items-center justify-between border-b border-gray-50 dark:border-slate-700/40 last:border-0">
-          <p className="text-sm" style={{ color: 'var(--color-heading)' }}>{item.name}</p>
-          <span className="text-xs font-medium ml-4 shrink-0" style={{ color: 'var(--color-muted)' }}>×{item.quantity}</span>
-        </div>
+        <HistoryRow key={item.id} item={item} locale={locale} />
       ))}
+    </div>
+  );
+}
+
+function HistoryRow({ item, locale }: { item: OrderItem; locale: string }) {
+  return (
+    <div className="px-4 py-2.5 flex items-center justify-between border-b border-gray-50 dark:border-slate-700/40 last:border-0">
+      <p className="text-sm flex-1 min-w-0 truncate" style={{ color: 'var(--color-heading)' }}>{item.name}</p>
+      <div className="flex flex-col items-end ml-4 shrink-0">
+        <span className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>×{item.quantity}</span>
+        {item.price != null && (
+          <span className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>
+            {formatIQD(item.price * item.quantity, locale)}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

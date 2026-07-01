@@ -286,6 +286,8 @@
     "orderedOn":         "تاريخ الطلب",
     "statusRecorded":    "مسجل",
     "deleteItem":        "إزالة هذا الدواء",
-    "group":             "مجموعة"
+    "group":             "مجموعة",
+    "total":             "الإجمالي",
+    "priceOnRequest":    "السعر عند الطلب"
   }
 }

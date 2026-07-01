@@ -286,6 +286,8 @@
     "orderedOn":         "بەرواری داواکاری",
     "statusRecorded":    "تۆمارکراوە",
     "deleteItem":        "ئەم دەرمانە لابردن",
-    "group":             "گرووپ"
+    "group":             "گرووپ",
+    "total":             "کۆی گشتی",
+    "priceOnRequest":    "نرخ لەسەر داواکاری"
   }
 }

@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { getSessionFromCookies } from '@/lib/auth';
 import { query } from '@/lib/db';
 
-// Ensure one open cart exists for this patient (never creates duplicates)
 async function ensureCart(patientId: string): Promise<number> {
   const ex = await query<{ id: number }>(
     `SELECT id FROM carts WHERE patient_id = $1 AND status = 'open' LIMIT 1`,
@@ -17,14 +16,38 @@ async function ensureCart(patientId: string): Promise<number> {
   return cr.rows[0].id;
 }
 
-// GET /api/cart — open cart with all items, scoped to session patient
+async function catalogPrice(name: string): Promise<number | null> {
+  const res = await query<{ price: string | null }>(
+    `SELECT price FROM medications_catalog
+     WHERE available = TRUE AND (
+       LOWER(name) = LOWER($1)
+       OR LOWER($1) LIKE '%' || LOWER(name) || '%'
+       OR LOWER(name) LIKE '%' || LOWER($1) || '%'
+       OR LOWER(SPLIT_PART($1::TEXT, ' ', 1)) = LOWER(name)
+     )
+     ORDER BY
+       CASE
+         WHEN LOWER(name) = LOWER($1)                               THEN 0
+         WHEN LOWER($1) LIKE '%' || LOWER(name) || '%'             THEN 1
+         WHEN LOWER(name) LIKE '%' || LOWER($1) || '%'             THEN 2
+         ELSE 3
+       END
+     LIMIT 1`,
+    [name],
+  );
+  if (!res.rows.length || res.rows[0].price == null) return null;
+  return Number(res.rows[0].price);
+}
+
+// GET /api/cart — open cart with all items
 export async function GET() {
   const session = await getSessionFromCookies();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const result = await query<{
     cart_id: number; item_id: number; medication_id: string;
-    name_snapshot: string; quantity: number; group_id: string | null; group_name: string | null;
+    name_snapshot: string; quantity: number; group_id: string | null;
+    group_name: string | null; price_snapshot: string | null;
   }>(
     `SELECT c.id AS cart_id,
             ci.id AS item_id,
@@ -32,7 +55,8 @@ export async function GET() {
             ci.name_snapshot,
             ci.quantity,
             ci.group_id,
-            ci.group_name
+            ci.group_name,
+            ci.price_snapshot
      FROM carts c
      LEFT JOIN cart_items ci ON ci.cart_id = c.id
      WHERE c.patient_id = $1 AND c.status = 'open'
@@ -54,13 +78,13 @@ export async function GET() {
       quantity:     r.quantity,
       groupId:      r.group_id,
       groupName:    r.group_name,
+      price:        r.price_snapshot != null ? Number(r.price_snapshot) : null,
     }));
 
   return NextResponse.json({ cartId, items, totalItems: items.length });
 }
 
 // POST /api/cart — add one or more items
-// Body: { items: Array<{ medicationId, name, groupId?, groupName? }> }
 const itemSchema = z.object({
   medicationId: z.string().min(1),
   name:         z.string().min(1),
@@ -79,12 +103,14 @@ export async function POST(req: NextRequest) {
   const cartId = await ensureCart(session.patientId);
 
   for (const item of parsed.data.items) {
+    const price = await catalogPrice(item.name);
     await query(
-      `INSERT INTO cart_items (cart_id, medication_id, name_snapshot, quantity, group_id, group_name)
-       VALUES ($1, $2, $3, 1, $4, $5)
+      `INSERT INTO cart_items
+         (cart_id, medication_id, name_snapshot, quantity, group_id, group_name, price_snapshot)
+       VALUES ($1, $2, $3, 1, $4, $5, $6)
        ON CONFLICT (cart_id, medication_id)
        DO UPDATE SET quantity = cart_items.quantity + 1`,
-      [cartId, item.medicationId, item.name, item.groupId ?? null, item.groupName ?? null],
+      [cartId, item.medicationId, item.name, item.groupId ?? null, item.groupName ?? null, price],
     );
   }
 

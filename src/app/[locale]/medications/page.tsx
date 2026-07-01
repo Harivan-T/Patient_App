@@ -9,6 +9,17 @@ import type { Medication, DispensedMed } from '@/types';
 type Tab      = 'current' | 'past';
 type AddState = 'idle' | 'adding' | 'added';
 
+function formatIQD(amount: number, locale: string): string {
+  try {
+    return new Intl.NumberFormat(locale === 'ar' ? 'ar-IQ' : 'en-US', {
+      style: 'currency', currency: 'IQD',
+      minimumFractionDigits: 0, maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `IQD ${Math.round(amount).toLocaleString()}`;
+  }
+}
+
 interface AddItem {
   medicationId: string;
   name:         string;
@@ -29,6 +40,20 @@ export default function MedicationsPage({ params }: { params: { locale: string }
   const [expanded, setExpanded]   = useState<Set<string>>(new Set());
   const [renewalStates, setRenewalStates] = useState<Record<string, 'idle' | 'sending' | 'sent' | 'error'>>({});
   const [addStates, setAddStates] = useState<Record<string, AddState>>({});
+  const [catalogPrices, setCatalogPrices] = useState<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    fetch('/api/catalog')
+      .then((r) => r.json())
+      .then((items: Array<{ name: string; price: number | null }>) => {
+        const map = new Map<string, number>();
+        for (const item of items) {
+          if (item.price != null) map.set(item.name.toLowerCase(), Number(item.price));
+        }
+        setCatalogPrices(map);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch('/api/medications')
@@ -135,6 +160,17 @@ export default function MedicationsPage({ params }: { params: { locale: string }
       }));
     });
     if (items.length) addToCart(items, '_all_current');
+  }
+
+  function getCatalogPrice(drugName: string): number | null {
+    const lower = drugName.toLowerCase();
+    const exact = catalogPrices.get(lower);
+    if (exact !== undefined) return exact;
+    const entries = Array.from(catalogPrices.entries());
+    for (const [catName, price] of entries) {
+      if (lower.includes(catName)) return price;
+    }
+    return null;
   }
 
   // Add every dispensed med shown
@@ -251,9 +287,14 @@ export default function MedicationsPage({ params }: { params: { locale: string }
                   </p>
                 )}
                 {filtered.map((med) => {
-                  const renewState = renewalStates[med.id] ?? 'idle';
-                  const isOpen     = expanded.has(med.id);
-                  const grpKey     = `grp-${med.id}`;
+                  const renewState  = renewalStates[med.id] ?? 'idle';
+                  const isOpen      = expanded.has(med.id);
+                  const grpKey      = `grp-${med.id}`;
+                  const drugs       = med.drugs ?? [];
+                  const grpPrices   = drugs.map((d) => getCatalogPrice(d.name));
+                  const grpTotal    = grpPrices.every((p) => p != null)
+                    ? grpPrices.reduce((s, p) => s + (p ?? 0), 0)
+                    : drugs.length === 0 ? getCatalogPrice(med.name) : null;
                   return (
                     <div key={med.id} className="card overflow-hidden">
 
@@ -293,11 +334,17 @@ export default function MedicationsPage({ params }: { params: { locale: string }
                           {med.drugs && med.drugs.length > 0 && (
                             <div className="px-5 py-4 divide-y divide-gray-100 dark:divide-slate-700">
                               {med.drugs.map((drug, i) => {
-                                const drugKey = `drug-${med.id}:${drug.name}`;
+                                const drugKey   = `drug-${med.id}:${drug.name}`;
+                                const drugPrice = getCatalogPrice(drug.name);
                                 return (
                                   <div key={i} className={`text-sm ${i > 0 ? 'pt-3' : ''} ${i < med.drugs!.length - 1 ? 'pb-3' : ''}`}>
                                     <div className="flex items-center justify-between gap-2 mb-1.5">
-                                      <p className="font-semibold text-gray-800 dark:text-gray-200">{drug.name}</p>
+                                      <div>
+                                        <p className="font-semibold text-gray-800 dark:text-gray-200">{drug.name}</p>
+                                        <p className="text-xs mt-0.5 text-gray-400">
+                                          {drugPrice != null ? formatIQD(drugPrice, locale) : tc('priceOnRequest')}
+                                        </p>
+                                      </div>
                                       <AddBtn
                                         state={addStates[drugKey] ?? 'idle'} size="xs"
                                         label={tc('add')} addingLabel={tc('adding')} addedLabel={tc('added')}
@@ -332,11 +379,18 @@ export default function MedicationsPage({ params }: { params: { locale: string }
 
                       {/* ── Per-group Add bar — always visible ── */}
                       <div className="px-5 py-2.5 border-t border-gray-100 dark:border-slate-700/50 flex items-center justify-between gap-2">
-                        <span className="text-xs" style={{ color: 'var(--color-muted)' }}>
-                          {(med.drugs?.length ?? 0) > 1
-                            ? `${med.drugs!.length} medications`
-                            : med.drugs?.[0]?.name ?? med.name}
-                        </span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                            {(med.drugs?.length ?? 0) > 1
+                              ? `${med.drugs!.length} medications`
+                              : med.drugs?.[0]?.name ?? med.name}
+                          </span>
+                          {grpTotal != null && (
+                            <span className="text-xs font-semibold shrink-0" style={{ color: 'var(--color-primary)' }}>
+                              {formatIQD(grpTotal, locale)}
+                            </span>
+                          )}
+                        </div>
                         <AddBtn
                           state={addStates[grpKey] ?? 'idle'}
                           label={(med.drugs?.length ?? 0) > 1 ? tc('addGroup') : tc('add')}
