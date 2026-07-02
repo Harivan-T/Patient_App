@@ -128,9 +128,11 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
     finally { setSubmitting(false); }
   }
 
-  // Derived cart total (null if any item has no price)
-  const cartTotal = cartItems.length > 0 && cartItems.every((i) => i.price != null)
-    ? cartItems.reduce((s, i) => s + (i.price ?? 0) * i.quantity, 0)
+  // Derived cart total — sum only items that have a resolved price so that a single
+  // unpriced item ("—") doesn't zero-out the whole total.
+  const pricedItems = cartItems.filter((i) => i.price != null);
+  const cartTotal   = pricedItems.length > 0
+    ? pricedItems.reduce((s, i) => s + (i.price ?? 0) * i.quantity, 0)
     : null;
 
   if (submitted) {
@@ -408,11 +410,11 @@ function CartRow({
     <div className="px-4 py-3 flex items-center gap-3" style={{ opacity: busy ? 0.5 : 1, transition: 'opacity 0.15s' }}>
       <div className="flex-1 min-w-0">
         <p className="font-medium text-sm leading-snug" style={{ color: 'var(--color-heading)' }}>{item.name}</p>
-        {item.price != null && (
-          <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
-            {formatIQD(item.price, locale)} × {item.quantity} = {formatIQD(item.price * item.quantity, locale)}
-          </p>
-        )}
+        <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
+          {item.price != null
+            ? `${formatIQD(item.price, locale)} × ${item.quantity} = ${formatIQD(item.price * item.quantity, locale)}`
+            : '—'}
+        </p>
       </div>
       {/* Qty stepper */}
       <div className="flex items-center gap-1 shrink-0">

@@ -138,5 +138,22 @@ export async function POST() {
     );
   }
 
+  // ── home_collection_requests ──
+  await query(`
+    CREATE TABLE IF NOT EXISTS home_collection_requests (
+      id                 SERIAL PRIMARY KEY,
+      patient_id         TEXT NOT NULL,
+      lab_order_id       TEXT NOT NULL,
+      address            TEXT NOT NULL,
+      preferred_datetime TIMESTAMPTZ NOT NULL,
+      phone              TEXT NOT NULL,
+      notes              TEXT,
+      status             TEXT NOT NULL DEFAULT 'requested'
+                         CHECK (status IN ('requested','confirmed','completed','cancelled')),
+      created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (patient_id, lab_order_id)
+    )
+  `);
+
   return NextResponse.json({ ok: true, message: 'Migration complete.' });
 }

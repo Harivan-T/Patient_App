@@ -178,7 +178,30 @@
     "resultsFound": "نتائج وجدت",
     "searchPlaceholder": "ابحث بالفحص أو الطبيب أو التاريخ...",
     "noResults": "لا توجد نتائج مطابقة",
-    "noResultsYet": "لا توجد نتائج مختبر بعد"
+    "noResultsYet": "لا توجد نتائج مختبر بعد",
+    "homeCollection": {
+      "formTitle":        "جمع عينات في المنزل",
+      "request":          "طلب فحص منزلي",
+      "requested":        "تم طلب الفحص المنزلي",
+      "address":          "العنوان",
+      "preferredDatetime":"التاريخ والوقت المفضل",
+      "preferredTime":    "الوقت المفضل",
+      "phone":            "رقم الهاتف",
+      "notes":            "ملاحظات (اختياري)",
+      "submit":           "إرسال الطلب",
+      "submitting":       "جارٍ الإرسال...",
+      "cancel":           "إلغاء",
+      "validationError":  "يرجى إدخال العنوان والتاريخ والوقت المفضل",
+      "viewAll":          "الطلبات المنزلية",
+      "backToLabs":       "رجوع",
+      "noRequests":       "لا توجد طلبات جمع منزلي حتى الآن",
+      "requestedOn":      "تاريخ الطلب",
+      "labOrder":         "طلب مختبر",
+      "statusRequested":  "مطلوب",
+      "statusScheduled":  "مجدول",
+      "statusCompleted":  "مكتمل",
+      "statusCancelled":  "ملغى"
+    }
   },
   "bodymap": {
     "title": "تقرير الألم",
@@ -286,6 +309,8 @@
     "orderedOn":         "تاريخ الطلب",
     "statusRecorded":    "مسجل",
     "deleteItem":        "إزالة هذا الدواء",
+    "deleteGroup":       "إزالة المجموعة",
+    "unitPrice":         "سعر الوحدة",
     "group":             "مجموعة",
     "total":             "الإجمالي",
     "priceOnRequest":    "السعر عند الطلب"

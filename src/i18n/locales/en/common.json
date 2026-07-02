@@ -178,7 +178,30 @@
     "resultsFound": "results found",
     "searchPlaceholder": "Search by test, doctor or date...",
     "noResults": "No matches found",
-    "noResultsYet": "No lab results yet"
+    "noResultsYet": "No lab results yet",
+    "homeCollection": {
+      "formTitle":        "Home Sample Collection",
+      "request":          "Request home order",
+      "requested":        "Home order requested",
+      "address":          "Address",
+      "preferredDatetime":"Preferred date & time",
+      "preferredTime":    "Preferred time",
+      "phone":            "Phone",
+      "notes":            "Notes (optional)",
+      "submit":           "Submit Request",
+      "submitting":       "Submitting...",
+      "cancel":           "Cancel",
+      "validationError":  "Please provide an address and preferred date & time",
+      "viewAll":          "Home Requests",
+      "backToLabs":       "Back",
+      "noRequests":       "No home collection requests yet",
+      "requestedOn":      "Requested on",
+      "labOrder":         "Lab order",
+      "statusRequested":  "Requested",
+      "statusScheduled":  "Scheduled",
+      "statusCompleted":  "Completed",
+      "statusCancelled":  "Cancelled"
+    }
   },
   "bodymap": {
     "title": "Pain Report",
@@ -286,6 +309,8 @@
     "orderedOn":         "Ordered on",
     "statusRecorded":    "Recorded",
     "deleteItem":        "Remove medication",
+    "deleteGroup":       "Remove group",
+    "unitPrice":         "Unit price",
     "group":             "Group",
     "total":             "Total",
     "priceOnRequest":    "Price on request"

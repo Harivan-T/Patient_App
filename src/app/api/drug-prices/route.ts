@@ -4,22 +4,24 @@ import { query } from '@/lib/db';
 
 // POST /api/drug-prices
 // Body: { names: string[] }
-// Returns: Record<string, number | null>  (drug name → IQD price or null)
+// Returns: Record<string, number | null>
 //
-// Lookup order per drug:
-//   1. pharmacy_order_items.price  (EHR/pharmacy system)
-//   2. hospital_items.price        (hospital ERP)
-//   3. medications_catalog.price   (admin-maintained fallback)
+// Lookup order per drug name (all read-only):
+//   1. drug_batches.sellingprice via drugs.name/genericname   (inventory)
+//   2. pos_sale_items.unitprice via drugname                  (POS sales)
+//   3. pharmacy_order_items.unitprice via drugname            (pharmacy orders)
+//   4. pharmacy_invoice_lines.unitprice via description       (invoices)
+//   5. medications_catalog.price                              (admin fallback)
+
 export async function POST(req: NextRequest) {
   const session = await getSessionFromCookies();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await req.json().catch(() => null);
-  const names: string[] = Array.isArray(body?.names) ? body.names : [];
+  const body = await req.json().catch(() => null) as { names?: unknown } | null;
+  const names: string[] = Array.isArray(body?.names) ? (body.names as string[]) : [];
   if (!names.length) return NextResponse.json({});
 
   const result: Record<string, number | null> = {};
-
   for (const name of names) {
     result[name] = await lookupPrice(name);
   }
@@ -28,56 +30,80 @@ export async function POST(req: NextRequest) {
 }
 
 async function lookupPrice(name: string): Promise<number | null> {
-  // 1. pharmacy_order_items
+  // 1. Inventory: drug_batches.sellingprice via drugs.name / genericname
   try {
     const r = await query<{ price: string | null }>(
-      `SELECT MAX(poi.price) AS price
-       FROM pharmacy_order_items poi
-       WHERE poi.price IS NOT NULL
-         AND (LOWER(poi.drugname) = LOWER($1)
-              OR LOWER($1) LIKE '%' || LOWER(poi.drugname) || '%'
-              OR LOWER(poi.drugname) LIKE '%' || LOWER($1) || '%')`,
+      `SELECT MAX(b.sellingprice) AS price
+       FROM drug_batches b
+       JOIN drugs d ON d.drugid = b.drugid
+       WHERE b.sellingprice IS NOT NULL AND b.sellingprice > 0
+         AND (LOWER(d.name)        = LOWER($1)
+              OR LOWER(d.genericname) = LOWER($1)
+              OR LOWER($1) LIKE '%' || LOWER(d.name) || '%'
+              OR LOWER(d.name) LIKE '%' || LOWER($1) || '%')`,
       [name],
     );
-    if (r.rows.length && r.rows[0].price != null) return Number(r.rows[0].price);
-  } catch { /* column absent */ }
+    if (r.rows[0]?.price != null) return Number(r.rows[0].price);
+  } catch { /* table absent */ }
 
-  // 2. hospital_items
+  // 2. POS sales: pos_sale_items.unitprice via drugname
   try {
     const r = await query<{ price: string | null }>(
-      `SELECT hi.price
-       FROM hospital_items hi
-       WHERE hi.price IS NOT NULL
-         AND (LOWER(COALESCE(hi.name, '')) = LOWER($1)
-              OR LOWER($1) LIKE '%' || LOWER(COALESCE(hi.name, '')) || '%'
-              OR LOWER(COALESCE(hi.name, '')) LIKE '%' || LOWER($1) || '%'
-              OR LOWER(COALESCE(hi.generic_name, '')) = LOWER($1))
+      `SELECT unitprice AS price
+       FROM pos_sale_items
+       WHERE unitprice IS NOT NULL AND unitprice > 0
+         AND (LOWER(drugname) = LOWER($1)
+              OR LOWER($1) LIKE '%' || LOWER(drugname) || '%'
+              OR LOWER(drugname) LIKE '%' || LOWER($1) || '%')
+       ORDER BY CASE WHEN LOWER(drugname) = LOWER($1) THEN 0 ELSE 1 END,
+                unitprice DESC
        LIMIT 1`,
       [name],
     );
-    if (r.rows.length && r.rows[0].price != null) return Number(r.rows[0].price);
-  } catch { /* column absent */ }
+    if (r.rows[0]?.price != null) return Number(r.rows[0].price);
+  } catch { /* table absent */ }
 
-  // 3. medications_catalog
+  // 3. Pharmacy orders: pharmacy_order_items.unitprice via drugname
+  try {
+    const r = await query<{ price: string | null }>(
+      `SELECT MAX(unitprice) AS price
+       FROM pharmacy_order_items
+       WHERE unitprice IS NOT NULL AND unitprice > 0
+         AND (LOWER(drugname) = LOWER($1)
+              OR LOWER($1) LIKE '%' || LOWER(drugname) || '%'
+              OR LOWER(drugname) LIKE '%' || LOWER($1) || '%')`,
+      [name],
+    );
+    if (r.rows[0]?.price != null) return Number(r.rows[0].price);
+  } catch { /* table absent */ }
+
+  // 4. Invoice lines: pharmacy_invoice_lines.unitprice via description
+  try {
+    const r = await query<{ price: string | null }>(
+      `SELECT MAX(unitprice) AS price
+       FROM pharmacy_invoice_lines
+       WHERE unitprice IS NOT NULL AND unitprice > 0
+         AND (LOWER(description) = LOWER($1)
+              OR LOWER($1) LIKE '%' || LOWER(description) || '%'
+              OR LOWER(description) LIKE '%' || LOWER($1) || '%')`,
+      [name],
+    );
+    if (r.rows[0]?.price != null) return Number(r.rows[0].price);
+  } catch { /* table absent */ }
+
+  // 5. Admin fallback: medications_catalog
   try {
     const r = await query<{ price: string | null }>(
       `SELECT price FROM medications_catalog
-       WHERE available = TRUE AND price IS NOT NULL AND (
-         LOWER(name) = LOWER($1)
-         OR LOWER($1) LIKE '%' || LOWER(name) || '%'
-         OR LOWER(name) LIKE '%' || LOWER($1) || '%'
-         OR LOWER(SPLIT_PART($1::TEXT, ' ', 1)) = LOWER(name)
-       )
-       ORDER BY
-         CASE
-           WHEN LOWER(name) = LOWER($1)                       THEN 0
-           WHEN LOWER($1) LIKE '%' || LOWER(name) || '%'     THEN 1
-           ELSE 2
-         END
+       WHERE available = TRUE AND price IS NOT NULL
+         AND (LOWER(name) = LOWER($1)
+              OR LOWER($1) LIKE '%' || LOWER(name) || '%'
+              OR LOWER(name) LIKE '%' || LOWER($1) || '%')
+       ORDER BY CASE WHEN LOWER(name) = LOWER($1) THEN 0 ELSE 1 END
        LIMIT 1`,
       [name],
     );
-    if (r.rows.length && r.rows[0].price != null) return Number(r.rows[0].price);
+    if (r.rows[0]?.price != null) return Number(r.rows[0].price);
   } catch { /* table absent */ }
 
   return null;

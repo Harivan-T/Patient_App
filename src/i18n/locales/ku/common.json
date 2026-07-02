@@ -178,7 +178,30 @@
     "resultsFound": "ئەنجام دۆزرایەوە",
     "searchPlaceholder": "بگەڕێ بە تاقیکردنەوە، دکتۆر یان بەروار...",
     "noResults": "هیچ دۆزراوەیەک نەدۆزرایەوە",
-    "noResultsYet": "هێشتا هیچ ئەنجامی تاقیگەیەک نییە"
+    "noResultsYet": "هێشتا هیچ ئەنجامی تاقیگەیەک نییە",
+    "homeCollection": {
+      "formTitle":        "کۆکردنەوەی نموونە لە ماڵ",
+      "request":          "داواکردنی داواکاری لە ماڵ",
+      "requested":        "داواکاری لە ماڵ تۆمارکرا",
+      "address":          "ناونیشان",
+      "preferredDatetime":"بەروار و کاتی دڵخوازتان",
+      "preferredTime":    "کاتی دڵخواز",
+      "phone":            "ژمارەی تەلەفۆن",
+      "notes":            "تێبینی (ئایا)",
+      "submit":           "ناردنی داواکاری",
+      "submitting":       "دەنێردرێت...",
+      "cancel":           "هەڵوەشاندنەوە",
+      "validationError":  "تکایە ناونیشان و بەرواری دڵخوازتان داخڵ بکە",
+      "viewAll":          "داواکارییەکانی لە ماڵ",
+      "backToLabs":       "گەڕانەوە",
+      "noRequests":       "هێشتا هیچ داواکاری کۆکردنەوەی لە ماڵ نییە",
+      "requestedOn":      "بەرواری داواکاری",
+      "labOrder":         "داواکاری تاقیگە",
+      "statusRequested":  "داواکراو",
+      "statusScheduled":  "پلاندراو",
+      "statusCompleted":  "تەواوبوو",
+      "statusCancelled":  "هەڵوەشێندراوەتەوە"
+    }
   },
   "bodymap": {
     "title": "ڕاپۆرتی ئێش",
@@ -286,6 +309,8 @@
     "orderedOn":         "بەرواری داواکاری",
     "statusRecorded":    "تۆمارکراوە",
     "deleteItem":        "ئەم دەرمانە لابردن",
+    "deleteGroup":       "گرووپ لابردن",
+    "unitPrice":         "نرخی یەکەیی",
     "group":             "گرووپ",
     "total":             "کۆی گشتی",
     "priceOnRequest":    "نرخ لەسەر داواکاری"
