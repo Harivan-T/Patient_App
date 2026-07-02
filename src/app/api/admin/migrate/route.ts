@@ -20,50 +20,8 @@ export async function POST() {
     )
   `);
 
-  type CatalogRow = [string, string, string, number, string];
-  const catalog: CatalogRow[] = [
-    ['Metformin',        'Tablet',    '500 mg',        3500,  'Type 2 diabetes management'],
-    ['Insulin Glargine', 'Injection', '100 IU/mL',    35000,  'Long-acting insulin for diabetes'],
-    ['Insulin Regular',  'Injection', '100 IU/mL',    25000,  'Short-acting insulin for diabetes'],
-    ['Lisinopril',       'Tablet',    '10 mg',         4500,  'ACE inhibitor for hypertension'],
-    ['Amlodipine',       'Tablet',    '5 mg',          3500,  'Calcium channel blocker for hypertension'],
-    ['Atorvastatin',     'Tablet',    '20 mg',         8000,  'Statin for high cholesterol'],
-    ['Aspirin',          'Tablet',    '100 mg',        2000,  'Antiplatelet for cardiovascular protection'],
-    ['Furosemide',       'Tablet',    '40 mg',         3000,  'Loop diuretic for heart failure / oedema'],
-    ['Carvedilol',       'Tablet',    '25 mg',         7500,  'Beta-blocker for heart failure'],
-    ['Bisoprolol',       'Tablet',    '5 mg',          6000,  'Beta-blocker for heart failure / hypertension'],
-    ['Metoprolol',       'Tablet',    '50 mg',         5500,  'Beta-blocker for hypertension / angina'],
-    ['Salbutamol',       'Inhaler',   '100 mcg/dose',  8500,  'Short-acting bronchodilator for asthma'],
-    ['Budesonide',       'Inhaler',   '200 mcg/dose', 15000,  'Inhaled corticosteroid for asthma'],
-    ['Omeprazole',       'Capsule',   '20 mg',         4500,  'Proton pump inhibitor for acid reflux'],
-    ['Paracetamol',      'Tablet',    '500 mg',        2500,  'Analgesic / antipyretic'],
-    ['Amoxicillin',      'Capsule',   '500 mg',        5000,  'Broad-spectrum antibiotic'],
-    ['Levothyroxine',    'Tablet',    '50 mcg',        5500,  'Thyroid hormone replacement'],
-    ['Warfarin',         'Tablet',    '5 mg',          4000,  'Anticoagulant'],
-    ['Losartan',         'Tablet',    '50 mg',         6500,  'ARB for hypertension'],
-    ['Ramipril',         'Tablet',    '5 mg',          5000,  'ACE inhibitor for hypertension / heart failure'],
-    ['Spironolactone',   'Tablet',    '25 mg',         4500,  'Potassium-sparing diuretic for heart failure'],
-    ['Glibenclamide',    'Tablet',    '5 mg',          3000,  'Sulfonylurea for type 2 diabetes'],
-    ['Sitagliptin',      'Tablet',    '100 mg',       18000,  'DPP-4 inhibitor for type 2 diabetes'],
-    ['Rosuvastatin',     'Tablet',    '10 mg',         9000,  'Statin for high cholesterol'],
-    ['Allopurinol',      'Tablet',    '300 mg',        4000,  'Xanthine oxidase inhibitor for gout'],
-    ['Codeine',          'Tablet',    '30 mg',         6000,  'Opioid analgesic'],
-    ['Prednisolone',     'Tablet',    '5 mg',          3500,  'Corticosteroid for inflammation'],
-    ['Azithromycin',     'Tablet',    '500 mg',        9000,  'Macrolide antibiotic'],
-    ['Cetirizine',       'Tablet',    '10 mg',         2500,  'Antihistamine for allergies'],
-    ['Ibuprofen',        'Tablet',    '400 mg',        3000,  'NSAID analgesic / anti-inflammatory'],
-  ];
-
-  for (const [name, form, strength, price, description] of catalog) {
-    await query(
-      `INSERT INTO medications_catalog (name, form, strength, price, description, available)
-       VALUES ($1, $2, $3, $4, $5, TRUE)
-       ON CONFLICT (name) DO UPDATE
-         SET form = EXCLUDED.form, strength = EXCLUDED.strength,
-             price = EXCLUDED.price, description = EXCLUDED.description`,
-      [name, form, strength, price, description],
-    );
-  }
+  // No demo seed — prices are read from pharmacy_order_items / hospital_items in the EHR/ERP,
+  // or entered manually into medications_catalog by staff.
 
   // ── carts: one open cart per patient ──
   await query(`

@@ -42,18 +42,33 @@ export default function MedicationsPage({ params }: { params: { locale: string }
   const [addStates, setAddStates] = useState<Record<string, AddState>>({});
   const [catalogPrices, setCatalogPrices] = useState<Map<string, number>>(new Map());
 
+  // Fetch drug prices after medications load — build the name list from current meds
   useEffect(() => {
-    fetch('/api/catalog')
+    if (current.length === 0) return;
+    const names = Array.from(
+      new Set(
+        current.flatMap((med) =>
+          med.drugs && med.drugs.length > 0
+            ? med.drugs.map((d) => d.name)
+            : [med.name],
+        ),
+      ),
+    );
+    fetch('/api/drug-prices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ names }),
+    })
       .then((r) => r.json())
-      .then((items: Array<{ name: string; price: number | null }>) => {
+      .then((priceMap: Record<string, number | null>) => {
         const map = new Map<string, number>();
-        for (const item of items) {
-          if (item.price != null) map.set(item.name.toLowerCase(), Number(item.price));
+        for (const [name, price] of Object.entries(priceMap)) {
+          if (price != null) map.set(name.toLowerCase(), price);
         }
         setCatalogPrices(map);
       })
       .catch(() => {});
-  }, []);
+  }, [current]);
 
   useEffect(() => {
     fetch('/api/medications')

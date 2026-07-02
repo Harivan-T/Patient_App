@@ -17,26 +17,60 @@ async function ensureCart(patientId: string): Promise<number> {
 }
 
 async function catalogPrice(name: string): Promise<number | null> {
-  const res = await query<{ price: string | null }>(
-    `SELECT price FROM medications_catalog
-     WHERE available = TRUE AND (
-       LOWER(name) = LOWER($1)
-       OR LOWER($1) LIKE '%' || LOWER(name) || '%'
-       OR LOWER(name) LIKE '%' || LOWER($1) || '%'
-       OR LOWER(SPLIT_PART($1::TEXT, ' ', 1)) = LOWER(name)
-     )
-     ORDER BY
-       CASE
-         WHEN LOWER(name) = LOWER($1)                               THEN 0
-         WHEN LOWER($1) LIKE '%' || LOWER(name) || '%'             THEN 1
-         WHEN LOWER(name) LIKE '%' || LOWER($1) || '%'             THEN 2
-         ELSE 3
-       END
-     LIMIT 1`,
-    [name],
-  );
-  if (!res.rows.length || res.rows[0].price == null) return null;
-  return Number(res.rows[0].price);
+  // 1. pharmacy_order_items (EHR/pharmacy source — silently skips if price column absent)
+  try {
+    const pharma = await query<{ price: string | null }>(
+      `SELECT MAX(poi.price) AS price
+       FROM pharmacy_order_items poi
+       WHERE poi.price IS NOT NULL
+         AND (LOWER(poi.drugname) = LOWER($1)
+              OR LOWER($1) LIKE '%' || LOWER(poi.drugname) || '%'
+              OR LOWER(poi.drugname) LIKE '%' || LOWER($1) || '%')`,
+      [name],
+    );
+    if (pharma.rows.length && pharma.rows[0].price != null) return Number(pharma.rows[0].price);
+  } catch { /* price column doesn't exist in this DB */ }
+
+  // 2. hospital_items (silently skips if price column absent)
+  try {
+    const hosp = await query<{ price: string | null }>(
+      `SELECT hi.price AS price
+       FROM hospital_items hi
+       WHERE hi.price IS NOT NULL
+         AND (LOWER(COALESCE(hi.name, '')) = LOWER($1)
+              OR LOWER($1) LIKE '%' || LOWER(COALESCE(hi.name, '')) || '%'
+              OR LOWER(COALESCE(hi.name, '')) LIKE '%' || LOWER($1) || '%'
+              OR LOWER(COALESCE(hi.generic_name, '')) = LOWER($1))
+       LIMIT 1`,
+      [name],
+    );
+    if (hosp.rows.length && hosp.rows[0].price != null) return Number(hosp.rows[0].price);
+  } catch { /* price column doesn't exist in this DB */ }
+
+  // 3. medications_catalog (Neon DB admin-maintained prices)
+  try {
+    const cat = await query<{ price: string | null }>(
+      `SELECT price FROM medications_catalog
+       WHERE available = TRUE AND price IS NOT NULL AND (
+         LOWER(name) = LOWER($1)
+         OR LOWER($1) LIKE '%' || LOWER(name) || '%'
+         OR LOWER(name) LIKE '%' || LOWER($1) || '%'
+         OR LOWER(SPLIT_PART($1::TEXT, ' ', 1)) = LOWER(name)
+       )
+       ORDER BY
+         CASE
+           WHEN LOWER(name) = LOWER($1)                           THEN 0
+           WHEN LOWER($1) LIKE '%' || LOWER(name) || '%'         THEN 1
+           WHEN LOWER(name) LIKE '%' || LOWER($1) || '%'         THEN 2
+           ELSE 3
+         END
+       LIMIT 1`,
+      [name],
+    );
+    if (cat.rows.length && cat.rows[0].price != null) return Number(cat.rows[0].price);
+  } catch { /* table doesn't exist yet */ }
+
+  return null;
 }
 
 // GET /api/cart — open cart with all items
