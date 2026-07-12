@@ -172,6 +172,7 @@ export default function SettingsPage({ params }: { params: { locale: string } })
 
   async function handleLogout() {
     setLoggingOut(true);
+    try { sessionStorage.removeItem('hp-me'); } catch { /* ignore */ }
     await fetch('/api/auth/logout', { method: 'POST' });
     router.replace(`/${locale}/login`);
   }

@@ -33,14 +33,19 @@ async function fetchFromGNews(topic: Topic): Promise<NewsArticle[]> {
   }));
 }
 
-async function ensureTable() {
-  await query(
-    `CREATE TABLE IF NOT EXISTS news_cache (
-       topic      TEXT        PRIMARY KEY,
-       articles   JSONB       NOT NULL,
-       fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-     )`,
-  );
+// Table creation runs once per process, not per request
+let tableReady: Promise<void> | null = null;
+function ensureTable(): Promise<void> {
+  if (!tableReady) {
+    tableReady = query(
+      `CREATE TABLE IF NOT EXISTS news_cache (
+         topic      TEXT        PRIMARY KEY,
+         articles   JSONB       NOT NULL,
+         fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+       )`,
+    ).then(() => undefined).catch((e) => { tableReady = null; throw e; });
+  }
+  return tableReady;
 }
 
 async function getCached(topic: Topic): Promise<{ articles: NewsArticle[]; fresh: boolean }> {

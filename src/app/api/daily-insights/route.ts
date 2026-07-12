@@ -235,7 +235,16 @@ const LANG_FALLBACK: Record<string, string[]> = {
 
 // ── Table setup ────────────────────────────────────────────────────────────────
 
-async function ensureTable() {
+// Table creation runs once per process, not per request
+let tableReady: Promise<void> | null = null;
+function ensureTable(): Promise<void> {
+  if (!tableReady) {
+    tableReady = createTable().catch((e) => { tableReady = null; throw e; });
+  }
+  return tableReady;
+}
+
+async function createTable() {
   await query(`
     CREATE TABLE IF NOT EXISTS daily_insights (
       category     TEXT NOT NULL,

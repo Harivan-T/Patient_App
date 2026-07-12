@@ -138,6 +138,17 @@ export async function POST() {
     );
   }
 
+  // ── translation_cache: memoized Anthropic translations (ar/ku UI strings) ──
+  await query(`
+    CREATE TABLE IF NOT EXISTS translation_cache (
+      locale      TEXT NOT NULL,
+      source_hash TEXT NOT NULL,
+      translated  TEXT NOT NULL,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (locale, source_hash)
+    )
+  `);
+
   // ── home_collection_requests ──
   await query(`
     CREATE TABLE IF NOT EXISTS home_collection_requests (

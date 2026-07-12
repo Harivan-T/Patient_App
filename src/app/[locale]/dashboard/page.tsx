@@ -1,10 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { AppShell } from '@/components/layout/AppShell';
-import { BodyMapContent } from '@/components/bodymap/BodyMapContent';
+import { PageLoader } from '@/components/ui/LoadingSpinner';
 import type { DailyInsight } from '@/app/api/daily-insights/route';
+
+// Lazy — the body map (largest component in the app) only loads if the
+// "My Doctor" tab is actually opened.
+const BodyMapContent = dynamic(
+  () => import('@/components/bodymap/BodyMapContent').then((m) => m.BodyMapContent),
+  { ssr: false, loading: () => <PageLoader /> },
+);
 
 type Tab      = 'updates' | 'mydoctor';
 type Category = 'health' | 'food' | 'sports';
@@ -35,7 +43,7 @@ function InsightCard({
         <div className="px-5 py-4 flex flex-col gap-2">
           {item.image_url && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.image_url} alt="" className="w-full h-36 object-cover rounded-lg" />
+            <img src={item.image_url} alt="" loading="lazy" decoding="async" className="w-full h-36 object-cover rounded-lg" />
           )}
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-snug">{item.title}</p>
           {item.snippet && (
