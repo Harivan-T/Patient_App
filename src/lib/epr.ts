@@ -29,14 +29,6 @@ export async function query<T = unknown>(sql: string, params?: unknown[]): Promi
   }
 }
 
-export async function patientIdExists(nationalId: string): Promise<boolean> {
-  const rows = await query<{ exists: boolean }>(
-    `SELECT EXISTS(SELECT 1 FROM patients WHERE nationalid = $1) AS exists`,
-    [nationalId]
-  );
-  return rows[0]?.exists ?? false;
-}
-
 // patientId in app = nationalid in DB (Iraqi 12-digit national card number)
 const PATIENT_SELECT = `
   SELECT p.patientid AS id,

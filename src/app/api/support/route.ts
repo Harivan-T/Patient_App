@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSessionFromCookies } from '@/lib/auth';
 import { query } from '@/lib/epr';
 
 async function ensureTable() {
@@ -14,6 +15,9 @@ async function ensureTable() {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getSessionFromCookies();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   await ensureTable();
   const body = await req.json().catch(() => null);
   const name    = (body?.name    ?? '').trim();

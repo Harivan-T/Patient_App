@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getSessionFromCookies } from '@/lib/auth';
 import { query } from '@/lib/epr';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +21,7 @@ async function fetchFromGNews(topic: Topic): Promise<NewsArticle[]> {
   if (!key || key === 'your_gnews_api_key') return [];
 
   const url = `https://gnews.io/api/v4/top-headlines?topic=${topic}&lang=en&max=6&apikey=${key}`;
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
   if (!res.ok) return [];
 
   const data = await res.json();
@@ -62,6 +63,9 @@ async function upsertCache(topic: Topic, articles: NewsArticle[]) {
 }
 
 export async function GET() {
+  const session = await getSessionFromCookies();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   await ensureTable();
 
   const result: Record<Topic, NewsArticle[]> = { sports: [], health: [] };

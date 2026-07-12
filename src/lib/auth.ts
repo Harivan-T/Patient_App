@@ -1,10 +1,14 @@
 import { SignJWT, jwtVerify, type JWTPayload as JosePayload } from 'jose';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
 import type { JWTPayload } from '@/types';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? 'fallback-secret-change-in-production'
-);
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production — refusing to start with the built-in dev secret.');
+}
+
+const JWT_SECRET_STRING = process.env.JWT_SECRET ?? 'fallback-secret-change-in-production';
+const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_STRING);
 const TOKEN_COOKIE = 'hp_token';
 const OTP_COOKIE   = 'hp_otp';
 const SESSION_TIMEOUT = 10 * 365 * 24 * 60 * 60; // 10 years — expires only on logout
@@ -56,34 +60,43 @@ export function buildClearCookie(): string {
 // The OTP is stored as a signed JWT in an HttpOnly cookie so that both the
 // send-otp and verify-otp API routes always read from the same place,
 // regardless of Next.js bundle/module isolation.
+//
+// Only an HMAC of the OTP is stored — JWT payloads are base64url-encoded, not
+// encrypted, so storing the plaintext code would hand it to whoever holds the
+// cookie (i.e. the very client trying to prove they received the SMS).
 
 interface OtpPayload {
   patientId: string;
   phone:     string;
-  otp:       string;
+  otpHash:   string;
   attempts:  number;
+  exp:       number;
 }
 
 function generateOtp(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function hashOtp(otp: string): string {
+  return createHmac('sha256', JWT_SECRET_STRING).update(otp).digest('hex');
+}
+
+const OTP_COOKIE_FLAGS = [
+  'HttpOnly',
+  'SameSite=Strict',
+  'Path=/',
+  ...(process.env.NODE_ENV === 'production' ? ['Secure'] : []),
+];
+
 export async function createOtpCookie(patientId: string, phone: string): Promise<{ otp: string; cookie: string }> {
   const otp = generateOtp();
-  const token = await new SignJWT({ patientId, phone, otp, attempts: 0 } as JosePayload)
+  const token = await new SignJWT({ patientId, phone, otpHash: hashOtp(otp), attempts: 0 } as JosePayload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${OTP_TTL}s`)
     .sign(JWT_SECRET);
 
-  const flags = [
-    `Max-Age=${OTP_TTL}`,
-    'HttpOnly',
-    'SameSite=Strict',
-    'Path=/',
-    ...(process.env.NODE_ENV === 'production' ? ['Secure'] : []),
-  ];
-  const cookie = `${OTP_COOKIE}=${token}; ${flags.join('; ')}`;
+  const cookie = `${OTP_COOKIE}=${token}; Max-Age=${OTP_TTL}; ${OTP_COOKIE_FLAGS.join('; ')}`;
   return { otp, cookie };
 }
 
@@ -92,19 +105,41 @@ export async function verifyOtpCookie(
   patientId: string,
   phone: string,
   submittedOtp: string
-): Promise<'valid' | 'invalid' | 'expired' | 'too_many'> {
+): Promise<{ status: 'valid' | 'invalid' | 'expired' | 'too_many'; retryCookie?: string }> {
   let payload: OtpPayload;
   try {
     const result = await jwtVerify(otpToken, JWT_SECRET);
     payload = result.payload as unknown as OtpPayload;
   } catch {
-    return 'expired';
+    return { status: 'expired' };
   }
 
-  if (payload.patientId !== patientId || payload.phone !== phone) return 'invalid';
-  if (payload.attempts >= 5) return 'too_many';
-  if (payload.otp !== submittedOtp) return 'invalid';
-  return 'valid';
+  if (payload.attempts >= 5) return { status: 'too_many' };
+
+  const submitted = Buffer.from(hashOtp(submittedOtp), 'hex');
+  const expected  = Buffer.from(payload.otpHash ?? '', 'hex');
+  const otpMatches = submitted.length === expected.length && timingSafeEqual(submitted, expected);
+
+  if (payload.patientId !== patientId || payload.phone !== phone || !otpMatches) {
+    // Re-issue the cookie with attempts+1 (preserving the original expiry) so
+    // the 5-attempt cap actually persists across requests.
+    const remaining = payload.exp - Math.floor(Date.now() / 1000);
+    if (remaining <= 0) return { status: 'expired' };
+    const token = await new SignJWT({
+      patientId: payload.patientId,
+      phone:     payload.phone,
+      otpHash:   payload.otpHash,
+      attempts:  payload.attempts + 1,
+    } as JosePayload)
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime(payload.exp)
+      .sign(JWT_SECRET);
+    const retryCookie = `${OTP_COOKIE}=${token}; Max-Age=${remaining}; ${OTP_COOKIE_FLAGS.join('; ')}`;
+    return { status: 'invalid', retryCookie };
+  }
+
+  return { status: 'valid' };
 }
 
 export function buildClearOtpCookie(): string {
@@ -140,6 +175,7 @@ export async function sendSmsOtp(phone: string, otp: string): Promise<string | n
     method:  'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body:    body.toString(),
+    signal:  AbortSignal.timeout(10_000),
   });
 
   const data = await res.json() as { messages: Array<{ status: string; 'error-text'?: string }> };

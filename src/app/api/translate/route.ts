@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSessionFromCookies } from '@/lib/auth';
 
 const LANG_NAMES: Record<string, string> = {
   ar: 'Arabic',
   ku: 'Kurdish (Sorani)',
 };
 
+const MAX_TEXTS = 50;
+const MAX_TEXT_LENGTH = 500;
+
 export async function POST(req: NextRequest) {
+  const session = await getSessionFromCookies();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   const { texts, locale } = await req.json() as { texts: string[]; locale: string };
-  if (!texts?.length || !locale || !LANG_NAMES[locale]) {
+  if (
+    !Array.isArray(texts) || !texts.length || texts.length > MAX_TEXTS ||
+    texts.some((t) => typeof t !== 'string' || t.length > MAX_TEXT_LENGTH) ||
+    !locale || !LANG_NAMES[locale]
+  ) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
 
