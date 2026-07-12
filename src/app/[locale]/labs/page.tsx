@@ -4,7 +4,11 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { isRTL } from '@/i18n/config';
 import { AppShell } from '@/components/layout/AppShell';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { SearchBar } from '@/components/ui/SearchBar';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SkeletonCards } from '@/components/ui/Skeleton';
+import { ChevronDownIcon } from '@/components/ui/icons';
 import type { LabOrder, LabTest, LabResultPanel, LabAnalyte } from '@/types';
 
 const BRAND = 'var(--color-primary)';
@@ -123,8 +127,8 @@ function HomeCollectionForm({
       className="fixed inset-0 z-50 flex items-end justify-center"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-2xl shadow-xl">
+      <div className="absolute inset-0 bg-black/40 animate-fade-in" onClick={onClose} />
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-2xl shadow-xl animate-sheet-up">
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-slate-600" />
         </div>
@@ -537,28 +541,29 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
 
           {/* Seg-toggle — hidden in collections view */}
           {tab !== 'collections' && (
-            <div className="seg-toggle mb-3">
-              {(['orders', 'results'] as const).map((id) => (
-                <button
-                  key={id}
-                  onClick={() => setTab(id)}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
-                    tab === id ? 'bg-[var(--color-primary)] text-white shadow-sm' : 'text-gray-600 dark:text-gray-400'
-                  }`}
-                >
-                  {t(id)}
-                  {id === 'results' && (() => {
-                    const count = results.length + orders.filter((o: LabOrder) => o.completedTests?.length > 0).length;
-                    return count > 0 ? (
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold text-white"
-                        style={{ background: BRAND }}>
-                        {count}
-                      </span>
-                    ) : null;
-                  })()}
-                </button>
-              ))}
-            </div>
+            <SegmentedTabs
+              className="mb-3"
+              tabs={(['orders', 'results'] as const).map((id) => ({
+                id,
+                label: (
+                  <span className="inline-flex items-center justify-center gap-1.5">
+                    {t(id)}
+                    {id === 'results' && (() => {
+                      const count = results.length + orders.filter((o: LabOrder) => o.completedTests?.length > 0).length;
+                      return count > 0 ? (
+                        <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold transition-colors ${
+                          tab === 'results' ? 'bg-white/30 text-white' : 'bg-[var(--color-primary)] text-white'
+                        }`}>
+                          {count}
+                        </span>
+                      ) : null;
+                    })()}
+                  </span>
+                ),
+              }))}
+              active={tab as 'orders' | 'results'}
+              onChange={setTab}
+            />
           )}
         </div>
 
@@ -566,28 +571,7 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
         {tab !== 'collections' && (
           <div className="pb-2">
             <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-2 border border-border rounded-lg px-2.5 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent" style={{ background: 'var(--card-bg)' }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-                  strokeLinecap="round" className="w-3.5 h-3.5 text-gray-400 shrink-0">
-                  <circle cx="10.5" cy="10.5" r="6.5" />
-                  <line x1="15.5" y1="15.5" x2="20" y2="20" />
-                </svg>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t('searchPlaceholder')}
-                  autoComplete="off" autoCorrect="off" spellCheck={false}
-                  className="flex-1 py-1.5 bg-transparent text-sm focus:outline-none" style={{ color: 'var(--color-heading)' }}
-                />
-                {search && (
-                  <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                    </svg>
-                  </button>
-                )}
-              </div>
+              <SearchBar className="flex-1" value={search} onChange={setSearch} placeholder={t('searchPlaceholder')} />
               <button
                 onClick={() => fetchData(true)}
                 disabled={refreshing}
@@ -615,13 +599,13 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
             hcStatusLabel={hcStatusLabel}
           />
         ) : loading ? (
-          <PageLoader />
+          <SkeletonCards count={4} cardClassName="h-20" />
         ) : tab === 'orders' ? (
           /* ── LAB ORDERS TAB ── */
           filteredOrders.length === 0 ? (
-            <Empty icon={<LabIcon />} text={search ? t('noResults') : t('noOrders')} />
+            <EmptyState icon={<LabIcon />} title={search ? t('noResults') : t('noOrders')} />
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 stagger-children">
               {search && <p className="text-xs text-gray-400 px-1">{filteredOrders.length} {t('resultsFound')}</p>}
               {filteredOrders.map((order: LabOrder) => {
                 const isExpanded = expanded.has(order.id);
@@ -656,10 +640,7 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
                           {order.tests.length} {t('tests')}
                         </p>
                       </div>
-                      <svg viewBox="0 0 24 24" fill="currentColor"
-                        className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
-                      </svg>
+                      <ChevronDownIcon className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                     </button>
 
                     {isExpanded && (
@@ -714,10 +695,10 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
             const limsResultOrders = orders.filter((o: LabOrder) => o.completedTests.length > 0);
             const hasAny = filteredResults.length > 0 || limsResultOrders.length > 0;
             if (!hasAny) {
-              return <Empty icon={<ResultIcon />} text={search ? t('noResults') : t('noResultsYet')} />;
+              return <EmptyState icon={<ResultIcon />} title={search ? t('noResults') : t('noResultsYet')} />;
             }
             return (
-              <div className="space-y-3">
+              <div className="space-y-3 stagger-children">
                 {limsResultOrders.map((order: LabOrder) => {
                   const isExpanded = expanded.has(`res-${order.id}`);
                   const hasAbnormal = order.completedTests.some((t: LabTest) => t.isAbnormal);
@@ -744,10 +725,7 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
                             {order.completedTests.length} {t('tests')}
                           </p>
                         </div>
-                        <svg viewBox="0 0 24 24" fill="currentColor"
-                          className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
-                        </svg>
+                        <ChevronDownIcon className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                       </button>
                       {isExpanded && (
                         <div className="border-t border-gray-100 dark:border-slate-700">
@@ -793,10 +771,7 @@ export default function LabsPage({ params }: { params: { locale: string } }) {
                             {formatDate(panel.date)} · {panel.analytes.length} {t('tests')}
                           </p>
                         </div>
-                        <svg viewBox="0 0 24 24" fill="currentColor"
-                          className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
-                        </svg>
+                        <ChevronDownIcon className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                       </button>
                       {isExpanded && panel.analytes.length > 0 && (
                         <div className="border-t border-gray-100 dark:border-slate-700">
@@ -897,15 +872,6 @@ function ResultAnalyteRow({ analyte }: { analyte: LabAnalyte }) {
         {analyte.units || '—'}
       </td>
     </tr>
-  );
-}
-
-function Empty({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-      <div className="w-14 h-14 mx-auto mb-3 opacity-30">{icon}</div>
-      <p className="text-sm">{text}</p>
-    </div>
   );
 }
 

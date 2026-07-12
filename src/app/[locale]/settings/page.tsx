@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { InfoRow } from '@/components/ui/InfoRow';
+import { CheckIcon, ChevronDownIcon } from '@/components/ui/icons';
 import type { Patient } from '@/types';
 
 type Tab = 'settings' | 'help';
@@ -25,14 +28,6 @@ function formatDOB(dob?: string | null): string {
   return d.toISOString().split('T')[0];
 }
 
-function Row({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-1 py-3 border-b border-gray-100 dark:border-slate-700 last:border-0">
-      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 sm:w-40 shrink-0">{label}</span>
-      <span className="text-sm text-gray-900 dark:text-gray-100">{value || '—'}</span>
-    </div>
-  );
-}
 
 function ContactForm({ fullName }: { fullName: string }) {
   const [open, setOpen] = useState(false);
@@ -183,21 +178,15 @@ export default function SettingsPage({ params }: { params: { locale: string } })
     <AppShell locale={locale} title={t('settings')}>
       <div className="max-w-2xl mx-auto">
         {/* Tab bar */}
-        <div className="seg-toggle mb-6">
-          {(['settings', 'help'] as Tab[]).map((id) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                tab === id
-                  ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {id === 'settings' ? t('settings') : t('help')}
-            </button>
-          ))}
-        </div>
+        <SegmentedTabs
+          className="mb-6"
+          tabs={(['settings', 'help'] as Tab[]).map((id) => ({
+            id,
+            label: id === 'settings' ? t('settings') : t('help'),
+          }))}
+          active={tab}
+          onChange={setTab}
+        />
 
         {tab === 'settings' && (
           <div className="card divide-y divide-gray-100 dark:divide-slate-700">
@@ -208,17 +197,18 @@ export default function SettingsPage({ params }: { params: { locale: string } })
                 className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
               >
                 <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{t('info')}</span>
-                <svg
-                  viewBox="0 0 24 24" fill="currentColor"
-                  className={`w-4 h-4 text-gray-400 transition-transform ${infoOpen ? 'rotate-180' : ''}`}
-                >
-                  <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
-                </svg>
+                <ChevronDownIcon className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${infoOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {infoOpen && (
                 <div className="px-6 pb-5">
-                  {loadingPatient ? <PageLoader /> : (
+                  {loadingPatient ? (
+                    <div className="space-y-3">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Skeleton key={i} className="h-5 w-full" />
+                      ))}
+                    </div>
+                  ) : (
                     <>
                       <div className="flex justify-end mb-2">
                         <button
@@ -228,13 +218,13 @@ export default function SettingsPage({ params }: { params: { locale: string } })
                           {revealed ? 'Hide' : 'Show'}
                         </button>
                       </div>
-                      <Row label={t('name')} value={fullName} />
-                      <Row label={t('patientId')} value={revealed ? (patient?.patientId ?? '—') : MASK} />
-                      <Row label={t('dob')} value={revealed ? formatDOB(patient?.dateOfBirth) : MASK} />
-                      <Row label={t('gender')} value={revealed ? (patient?.gender ?? '—') : MASK} />
-                      <Row label={t('phone')} value={revealed ? (patient?.phoneNumber ?? '—') : MASK} />
-                      <Row label={t('address')} value={revealed ? (patient?.address ?? '—') : MASK} />
-                      <Row label={t('bloodType')} value={revealed ? (patient?.bloodType ?? '—') : MASK} />
+                      <InfoRow label={t('name')} value={fullName} />
+                      <InfoRow label={t('patientId')} value={revealed ? (patient?.patientId ?? '—') : MASK} />
+                      <InfoRow label={t('dob')} value={revealed ? formatDOB(patient?.dateOfBirth) : MASK} />
+                      <InfoRow label={t('gender')} value={revealed ? (patient?.gender ?? '—') : MASK} />
+                      <InfoRow label={t('phone')} value={revealed ? (patient?.phoneNumber ?? '—') : MASK} />
+                      <InfoRow label={t('address')} value={revealed ? (patient?.address ?? '—') : MASK} />
+                      <InfoRow label={t('bloodType')} value={revealed ? (patient?.bloodType ?? '—') : MASK} />
                     </>
                   )}
                 </div>
@@ -276,11 +266,7 @@ export default function SettingsPage({ params }: { params: { locale: string } })
                     }`}
                   >
                     <span>{label}</span>
-                    {locale === code && (
-                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                      </svg>
-                    )}
+                    {locale === code && <CheckIcon />}
                   </button>
                 ))}
               </div>

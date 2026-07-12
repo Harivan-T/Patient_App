@@ -3,7 +3,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { AppShell } from '@/components/layout/AppShell';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { SearchBar } from '@/components/ui/SearchBar';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SkeletonCards } from '@/components/ui/Skeleton';
 import type { Appointment } from '@/types';
 
 type Tab = 'upcoming' | 'past';
@@ -82,63 +85,31 @@ export default function AppointmentsPage({ params }: { params: { locale: string 
       <div className="max-w-2xl mx-auto">
         {/* Inner tab nav — transparent, sticks at top of scroll area */}
         <div className="sticky z-30" style={{ top: 'var(--inner-nav-top)' }}>
-          <div className="seg-toggle mb-3">
-            {(['upcoming', 'past'] as Tab[]).map((id) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                  tab === id
-                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                {t(id)}
-              </button>
-            ))}
-          </div>
+          <SegmentedTabs
+            className="mb-3"
+            tabs={(['upcoming', 'past'] as Tab[]).map((id) => ({ id, label: t(id) }))}
+            active={tab}
+            onChange={setTab}
+          />
         </div>
         {/* Search bar */}
         <div className="pb-2">
-          <div className="flex items-center gap-2 border border-border rounded-lg px-2.5 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent" style={{ background: 'var(--card-bg)' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-              strokeLinecap="round" className="w-3.5 h-3.5 text-gray-400 shrink-0">
-              <circle cx="10.5" cy="10.5" r="6.5" />
-              <line x1="15.5" y1="15.5" x2="20" y2="20" />
-            </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t('searchPlaceholder')}
-              autoComplete="off" autoCorrect="off" spellCheck={false}
-              className="flex-1 py-1.5 bg-transparent text-sm focus:outline-none" style={{ color: 'var(--color-heading)' }}
-            />
-            {search && (
-              <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                </svg>
-              </button>
-            )}
-          </div>
+          <SearchBar value={search} onChange={setSearch} placeholder={t('searchPlaceholder')} />
         </div>
 
         {loading ? (
-          <PageLoader />
+          <SkeletonCards count={4} cardClassName="h-20" />
         ) : filteredList.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-14 h-14 mx-auto mb-3 opacity-30">
-              <path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z" />
-            </svg>
-            <p className="text-sm">
-              {search
-                ? t('noResults')
-                : t(tab === 'upcoming' ? 'noUpcoming' : 'noPast')}
-            </p>
-          </div>
+          <EmptyState
+            icon={
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z" />
+              </svg>
+            }
+            title={search ? t('noResults') : t(tab === 'upcoming' ? 'noUpcoming' : 'noPast')}
+          />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 stagger-children">
             {filteredList.map((appt) => (
               <AppointmentCard key={appt.id} appt={appt} t={t} tx={tx} />
             ))}

@@ -4,7 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { SkeletonCards } from '@/components/ui/Skeleton';
+import { ChevronDownIcon, TrashIcon } from '@/components/ui/icons';
 
 interface CartItem {
   itemId:       number;
@@ -138,8 +140,8 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
   if (submitted) {
     return (
       <AppShell locale={locale}>
-        <div className="max-w-md mx-auto text-center py-16 px-4">
-          <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
+        <div className="max-w-md mx-auto text-center py-16 px-4 animate-fade-up">
+          <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-5 animate-scale-in">
             <svg viewBox="0 0 24 24" fill="currentColor" className="w-9 h-9 text-green-600 dark:text-green-400">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
             </svg>
@@ -173,31 +175,30 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
 
         {/* Tab header */}
         <div className="sticky z-30 mb-4" style={{ top: 'var(--inner-nav-top)' }}>
-          <div className="seg-toggle">
-            {(['cart', 'history'] as PageTab[]).map((id) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                  tab === id
-                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                {t(id)}
-                {id === 'cart' && cartItems.length > 0 && (
-                  <span className="ml-1.5 text-xs bg-white/30 text-white px-1.5 py-0.5 rounded-full">
-                    {cartItems.length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+          <SegmentedTabs
+            tabs={(['cart', 'history'] as PageTab[]).map((id) => ({
+              id,
+              label: (
+                <>
+                  {t(id)}
+                  {id === 'cart' && cartItems.length > 0 && (
+                    <span className={`ms-1.5 text-xs px-1.5 py-0.5 rounded-full transition-colors ${
+                      tab === 'cart' ? 'bg-white/30 text-white' : 'bg-[var(--tibbna-light)] text-[var(--color-primary)]'
+                    }`}>
+                      {cartItems.length}
+                    </span>
+                  )}
+                </>
+              ),
+            }))}
+            active={tab}
+            onChange={setTab}
+          />
         </div>
 
         {/* ══ CART TAB ══ */}
         {tab === 'cart' && (
-          loading ? <PageLoader /> :
+          loading ? <SkeletonCards count={3} cardClassName="h-16" /> :
           cartItems.length === 0 ? (
             <EmptyState
               icon="cart"
@@ -259,7 +260,7 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
 
         {/* ══ HISTORY TAB ══ */}
         {tab === 'history' && (
-          histLoading ? <PageLoader /> :
+          histLoading ? <SkeletonCards count={3} cardClassName="h-14" /> :
           orders.length === 0 ? (
             <EmptyState
               icon="history"
@@ -267,7 +268,7 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
               sub={t('emptyHistorySub')}
             />
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 stagger-children">
               {orders.map((order) => {
                 const isOpen     = expandedOrders.has(order.id);
                 const firstName  = order.items[0]?.name ?? '';
@@ -306,16 +307,7 @@ export default function BasketPage({ params }: { params: { locale: string } }) {
                           )}
                         </p>
                       </div>
-                      <svg
-                        viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" strokeWidth="2.5"
-                        strokeLinecap="round" strokeLinejoin="round"
-                        className={`w-4 h-4 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                        style={{ color: 'var(--color-muted)' }}
-                        aria-hidden="true"
-                      >
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
+                      <ChevronDownIcon className={`w-4 h-4 shrink-0 text-[var(--color-muted)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {/* Expanded item list + total footer */}
@@ -370,7 +362,7 @@ function GroupedItemList({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 stagger-children">
       {Array.from(groups.entries()).map(([gid, { name, rows }]) => (
         <div key={gid} className="card overflow-hidden">
           <div className="px-4 py-2.5 border-b border-gray-100 dark:border-slate-700/60">
@@ -419,22 +411,20 @@ function CartRow({
       {/* Qty stepper */}
       <div className="flex items-center gap-1 shrink-0">
         <button onClick={() => onChangeQty(item.itemId, -1, item.quantity)} disabled={busy}
-          className="w-7 h-7 rounded-full flex items-center justify-center text-base font-bold transition-colors hover:bg-gray-100 dark:hover:bg-slate-700"
+          className="pressable w-7 h-7 rounded-full flex items-center justify-center text-base font-bold hover:bg-gray-100 dark:hover:bg-slate-700"
           style={{ color: 'var(--color-primary)' }}>−</button>
         <span className="w-5 text-center text-sm font-semibold" style={{ color: 'var(--color-heading)' }}>
           {item.quantity}
         </span>
         <button onClick={() => onChangeQty(item.itemId, +1, item.quantity)} disabled={busy}
-          className="w-7 h-7 rounded-full flex items-center justify-center text-base font-bold transition-colors hover:bg-gray-100 dark:hover:bg-slate-700"
+          className="pressable w-7 h-7 rounded-full flex items-center justify-center text-base font-bold hover:bg-gray-100 dark:hover:bg-slate-700"
           style={{ color: 'var(--color-primary)' }}>+</button>
       </div>
       {/* Delete */}
       <button onClick={() => onRemove(item.itemId)} disabled={busy}
-        className="shrink-0 p-1.5 rounded-lg transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400"
+        className="pressable shrink-0 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400"
         aria-label={removeLabel}>
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm3-8h2v7H9v-7zm4 0h2v7h-2v-7zM15.5 4l-1-1h-5l-1 1H5v2h14V4h-3.5z" />
-        </svg>
+        <TrashIcon />
       </button>
     </div>
   );

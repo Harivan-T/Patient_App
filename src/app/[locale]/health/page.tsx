@@ -3,7 +3,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { AppShell } from '@/components/layout/AppShell';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { SearchBar } from '@/components/ui/SearchBar';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SkeletonCards } from '@/components/ui/Skeleton';
+import { ChevronDownIcon } from '@/components/ui/icons';
 import type { Diagnosis, Vital, CarePlan } from '@/types';
 
 type Tab = 'diagnoses' | 'vitals' | 'carePlan';
@@ -88,52 +92,22 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
       <div className="max-w-2xl mx-auto">
         {/* Inner tab nav — transparent, sticks at top of scroll area */}
         <div className="sticky z-30" style={{ top: 'var(--inner-nav-top)' }}>
-          <div className="seg-toggle mb-3 overflow-x-auto">
-            {TABS.map((id) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`flex-1 py-2 px-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${
-                  tab === id
-                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                {t(id)}
-              </button>
-            ))}
-          </div>
+          <SegmentedTabs
+            className="mb-3"
+            tabs={TABS.map((id) => ({ id, label: t(id) }))}
+            active={tab}
+            onChange={setTab}
+          />
         </div>
         {/* Search bar — diagnoses tab only */}
         {tab === 'diagnoses' && (
           <div className="pb-2">
-            <div className="flex items-center gap-2 border border-border rounded-lg px-2.5 focus-within:ring-2 focus-within:border-transparent" style={{ background: 'var(--card-bg)', '--tw-ring-color': BRAND } as React.CSSProperties}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-3.5 h-3.5 text-gray-400 shrink-0">
-                <circle cx="10.5" cy="10.5" r="6.5" /><line x1="15.5" y1="15.5" x2="20" y2="20" />
-              </svg>
-              <input
-                type="text"
-                value={diagSearch}
-                onChange={(e) => setDiagSearch(e.target.value)}
-                placeholder={t('searchPlaceholder')}
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck={false}
-                className="flex-1 py-1.5 bg-transparent text-sm focus:outline-none" style={{ color: 'var(--color-heading)' }}
-              />
-              {diagSearch && (
-                <button onClick={() => setDiagSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                  </svg>
-                </button>
-              )}
-            </div>
+            <SearchBar value={diagSearch} onChange={setDiagSearch} placeholder={t('searchPlaceholder')} />
           </div>
         )}
 
         {loading ? (
-          <PageLoader />
+          <SkeletonCards count={4} cardClassName="h-16" />
         ) : (
           <>
             {tab === 'diagnoses' && (
@@ -142,12 +116,12 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
                   <div className="text-center py-16 text-gray-400">
                     {diagSearch
                       ? <p className="text-sm">{t('noResults')}</p>
-                      : <Empty icon={<DiagnosisIcon />} text={t('noDiagnoses')} />
+                      : <EmptyState icon={<DiagnosisIcon />} title={t('noDiagnoses')} />
                     }
                   </div>
                 )
                 : (
-                  <div className="space-y-3">
+                  <div className="space-y-3 stagger-children">
                     {diagSearch && (
                       <p className="text-xs text-gray-400 px-1">{filteredDiagnoses.length} {t('results')}</p>
                     )}
@@ -163,12 +137,7 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
                             <p className="font-semibold text-gray-900 dark:text-gray-100 flex-1 min-w-0">{tx(d.name)}</p>
                             <div className="flex items-center gap-2 shrink-0">
                               <span className={`badge-${d.status}`}>{t(`status.${d.status}`)}</span>
-                              <svg
-                                viewBox="0 0 24 24" fill="currentColor"
-                                className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                              >
-                                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
-                              </svg>
+                              <ChevronDownIcon className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                             </div>
                           </button>
 
@@ -223,9 +192,9 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
 
             {tab === 'vitals' && (
               data.vitals.length === 0
-                ? <Empty icon={<VitalsIcon />} text={t('noVitals')} />
+                ? <EmptyState icon={<VitalsIcon />} title={t('noVitals')} />
                 : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 stagger-children">
                     {data.vitals.map((v, i) => (
                       <div key={i} className="card p-4">
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{tx(v.type)}</p>
@@ -245,7 +214,7 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
 
             {tab === 'carePlan' && (
               !data.carePlan
-                ? <Empty icon={<CarePlanIcon />} text={t('noCarePlan')} />
+                ? <EmptyState icon={<CarePlanIcon />} title={t('noCarePlan')} />
                 : (
                   <div className="card overflow-hidden">
                     {/* Always-visible summary row */}
@@ -265,12 +234,7 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
                           )}
                         </div>
                       </div>
-                      <svg
-                        viewBox="0 0 24 24" fill="currentColor"
-                        className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${carePlanExpanded ? 'rotate-180' : ''}`}
-                      >
-                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
-                      </svg>
+                      <ChevronDownIcon className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-300 ${carePlanExpanded ? 'rotate-180' : ''}`} />
                     </button>
 
                     {/* Expanded details */}
@@ -309,15 +273,6 @@ export default function HealthPage({ params }: { params: { locale: string } }) {
         )}
       </div>
     </AppShell>
-  );
-}
-
-function Empty({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-      <div className="w-14 h-14 mx-auto mb-3 opacity-30">{icon}</div>
-      <p className="text-sm">{text}</p>
-    </div>
   );
 }
 

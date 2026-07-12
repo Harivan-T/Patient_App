@@ -3,7 +3,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { AppShell } from '@/components/layout/AppShell';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { SearchBar } from '@/components/ui/SearchBar';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SkeletonCards } from '@/components/ui/Skeleton';
+import { ChevronDownIcon } from '@/components/ui/icons';
 import type { Medication, DispensedMed } from '@/types';
 
 type Tab      = 'current' | 'past';
@@ -203,46 +207,18 @@ export default function MedicationsPage({ params }: { params: { locale: string }
 
         {/* ── Tab nav ── */}
         <div className="sticky z-30" style={{ top: 'var(--inner-nav-top)' }}>
-          <div className="seg-toggle mb-3">
-            {(['current', 'past'] as Tab[]).map((id) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                  tab === id
-                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                {t(id)}
-              </button>
-            ))}
-          </div>
+          <SegmentedTabs
+            className="mb-3"
+            tabs={(['current', 'past'] as Tab[]).map((id) => ({ id, label: t(id) }))}
+            active={tab}
+            onChange={setTab}
+          />
         </div>
 
         {/* ── Search bar (Current tab only) ── */}
         {tab === 'current' && (
           <div className="pb-2">
-            <div className="flex items-center gap-2 border border-border rounded-lg px-2.5 focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent" style={{ background: 'var(--card-bg)' }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-                strokeLinecap="round" className="w-3.5 h-3.5 text-gray-400 shrink-0">
-                <circle cx="10.5" cy="10.5" r="6.5" /><line x1="15.5" y1="15.5" x2="20" y2="20" />
-              </svg>
-              <input
-                type="text" value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('searchPlaceholder')}
-                autoComplete="off" autoCorrect="off" spellCheck={false}
-                className="flex-1 py-1.5 bg-transparent text-sm focus:outline-none" style={{ color: 'var(--color-heading)' }}
-              />
-              {search && (
-                <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 shrink-0">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                  </svg>
-                </button>
-              )}
-            </div>
+            <SearchBar value={search} onChange={setSearch} placeholder={t('searchPlaceholder')} />
           </div>
         )}
 
@@ -285,17 +261,19 @@ export default function MedicationsPage({ params }: { params: { locale: string }
             )}
 
             {loading ? (
-              <PageLoader />
+              <SkeletonCards count={4} cardClassName="h-20" />
             ) : filtered.length === 0 ? (
-              <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 mx-auto mb-3 opacity-30">
-                  <path d="M6.5 10h-2v4h2v-4zm3 0h-2v4h2v-4zm3 0h-2v4h2v-4zm3 0h-2v4h2v-4zM3 18h18v2H3v-2zm0-10h18v2H3V8zM3 4h18v2H3V4z" />
-                </svg>
-                <p className="text-sm">{search ? t('noResults') : t('noCurrent')}</p>
-                {search && <p className="text-xs text-gray-400 mt-1">&ldquo;{search}&rdquo;</p>}
-              </div>
+              <EmptyState
+                icon={
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6.5 10h-2v4h2v-4zm3 0h-2v4h2v-4zm3 0h-2v4h2v-4zm3 0h-2v4h2v-4zM3 18h18v2H3v-2zm0-10h18v2H3V8zM3 4h18v2H3V4z" />
+                  </svg>
+                }
+                title={search ? t('noResults') : t('noCurrent')}
+                subtitle={search || undefined}
+              />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 stagger-children">
                 {search && (
                   <p className="text-xs text-gray-400 px-1">
                     {filtered.length} {filtered.length === 1 ? t('resultSingular') : t('resultPlural')}
@@ -327,10 +305,7 @@ export default function MedicationsPage({ params }: { params: { locale: string }
                             {med.prescribingDoctor && <span className="text-xs text-gray-400">{med.prescribingDoctor}</span>}
                           </div>
                         </div>
-                        <svg viewBox="0 0 24 24" fill="currentColor"
-                          className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}>
-                          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
-                        </svg>
+                        <ChevronDownIcon className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                       </button>
 
                       {/* Instructions — always visible */}
@@ -519,18 +494,20 @@ function DispensedSection({
     setExpanded((p) => { const n = new Set(p); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   }
 
-  if (loading) return <div className="space-y-3">{[1,2,3].map((i) => <div key={i} className="card h-24 animate-pulse bg-gray-100 dark:bg-slate-700" />)}</div>;
+  if (loading) return <SkeletonCards count={3} cardClassName="h-16" />;
   if (items.length === 0) return (
-    <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 mx-auto mb-3 opacity-30">
-        <path d="M20 6h-2.18c.07-.44.18-.88.18-1.34C18 2.99 16.98 2 15.66 2c-.88 0-1.62.48-2.05 1.19L12 5.5l-1.61-2.31C9.96 2.48 9.22 2 8.34 2 7.02 2 6 2.99 6 4.66c0 .46.11.9.18 1.34H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" />
-      </svg>
-      <p className="text-sm">No medications picked up yet</p>
-    </div>
+    <EmptyState
+      icon={
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 6h-2.18c.07-.44.18-.88.18-1.34C18 2.99 16.98 2 15.66 2c-.88 0-1.62.48-2.05 1.19L12 5.5l-1.61-2.31C9.96 2.48 9.22 2 8.34 2 7.02 2 6 2.99 6 4.66c0 .46.11.9.18 1.34H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" />
+        </svg>
+      }
+      title="No medications picked up yet"
+    />
   );
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 stagger-children">
       {items.map((med) => {
         const isOpen = expanded.has(med.id);
         const { primary, trailing } = parseDosageString(med.dosage);
@@ -546,11 +523,7 @@ function DispensedSection({
               </p>
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">{med.source}</span>
-                <svg viewBox="0 0 24 24" fill="currentColor"
-                  className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                  style={{ color: 'var(--color-primary)' }}>
-                  <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
-                </svg>
+                <ChevronDownIcon className={`w-4 h-4 text-[var(--color-primary)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
               </div>
             </button>
             {isOpen && (

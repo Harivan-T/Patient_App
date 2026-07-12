@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { InfoRow } from '@/components/ui/InfoRow';
+import { CheckIcon } from '@/components/ui/icons';
 import type { Patient } from '@/types';
 
 type Tab = 'info' | 'settings' | 'help';
@@ -75,38 +78,32 @@ export default function ProfilePage({ params }: { params: { locale: string } }) 
     <AppShell locale={locale} title={t('title')}>
       <div className="max-w-2xl mx-auto">
         {/* Tab bar */}
-        <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 mb-6">
-          {(['info', 'settings', 'help'] as Tab[]).map((id) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                tab === id
-                  ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-              
-            >
-              {t(id)}
-            </button>
-          ))}
-        </div>
+        <SegmentedTabs
+          className="mb-6"
+          tabs={(['info', 'settings', 'help'] as Tab[]).map((id) => ({ id, label: t(id) }))}
+          active={tab}
+          onChange={setTab}
+        />
 
         {/* Info tab */}
         {tab === 'info' && (
           <>
             {loading ? (
-              <PageLoader />
+              <div className="card p-6 space-y-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-6 w-full" />
+                ))}
+              </div>
             ) : (
               <div className="card p-6 space-y-4">
-                <Row label={t('patientId')} value={patient?.patientId} />
-                <Row label={t('name')} value={`${patient?.firstName ?? ''} ${patient?.lastName ?? ''}`.trim()} />
-                <Row label={t('dob')} value={formatDOB(patient?.dateOfBirth)} />
-                <Row label={t('gender')} value={patient?.gender} />
-                <Row label={t('phone')} value="••••••••••" />
-                <Row label={t('address')} value={patient?.address} />
-                <Row label={t('bloodType')} value={patient?.bloodType} />
-                <Row
+                <InfoRow label={t('patientId')} value={patient?.patientId} />
+                <InfoRow label={t('name')} value={`${patient?.firstName ?? ''} ${patient?.lastName ?? ''}`.trim()} />
+                <InfoRow label={t('dob')} value={formatDOB(patient?.dateOfBirth)} />
+                <InfoRow label={t('gender')} value={patient?.gender} />
+                <InfoRow label={t('phone')} value="••••••••••" />
+                <InfoRow label={t('address')} value={patient?.address} />
+                <InfoRow label={t('bloodType')} value={patient?.bloodType} />
+                <InfoRow
                   label={t('allergies')}
                   value={
                     patient?.allergies && patient.allergies.length > 0
@@ -155,11 +152,7 @@ export default function ProfilePage({ params }: { params: { locale: string } }) 
                     }`}
                   >
                     <span>{label}</span>
-                    {locale === code && (
-                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                      </svg>
-                    )}
+                    {locale === code && <CheckIcon />}
                   </button>
                 ))}
               </div>
@@ -190,11 +183,3 @@ export default function ProfilePage({ params }: { params: { locale: string } }) 
   );
 }
 
-function Row({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-1 py-2 border-b border-gray-100 dark:border-slate-700 last:border-0">
-      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 sm:w-40 shrink-0">{label}</span>
-      <span className="text-sm text-gray-900 dark:text-gray-100">{value || '—'}</span>
-    </div>
-  );
-}

@@ -7,7 +7,7 @@
 
 export interface SegTab<T extends string> {
   id: T;
-  label: string;
+  label: React.ReactNode;
 }
 
 export function SegmentedTabs<T extends string>({
