@@ -31,6 +31,30 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],
       },
+      keyframes: {
+        'fade-up': {
+          from: { opacity: '0', transform: 'translateY(8px)' },
+          to:   { opacity: '1', transform: 'translateY(0)' },
+        },
+        'fade-in': {
+          from: { opacity: '0' },
+          to:   { opacity: '1' },
+        },
+        'scale-in': {
+          from: { opacity: '0', transform: 'scale(0.96)' },
+          to:   { opacity: '1', transform: 'scale(1)' },
+        },
+        shimmer: {
+          from: { backgroundPosition: '200% 0' },
+          to:   { backgroundPosition: '-200% 0' },
+        },
+      },
+      animation: {
+        'fade-up':  'fade-up 0.35s ease-out both',
+        'fade-in':  'fade-in 0.3s ease-out both',
+        'scale-in': 'scale-in 0.25s ease-out both',
+        shimmer:    'shimmer 1.8s linear infinite',
+      },
     },
   },
   plugins: [],

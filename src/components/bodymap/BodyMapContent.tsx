@@ -357,12 +357,12 @@ export function BodyMapContent() {
     <div className="max-w-lg mx-auto">
       {submitted ? (
         <div className="text-center py-8 space-y-4">
-          <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{ background: '#d1fae5' }}>
+          <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{ background: 'rgba(34,197,94,0.18)' }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" className="w-8 h-8">
               <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">{t('success.title')}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('success.title')}</h2>
           <p className="text-sm text-gray-500">{t('success.subtitle')}</p>
           <button onClick={resetForm} className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-white text-sm font-semibold transition-opacity hover:opacity-90" style={{ background: BRAND }}>
             {t('buttons.startNew')}
@@ -376,7 +376,7 @@ export function BodyMapContent() {
                 <div className="flex flex-col items-center gap-1">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-                    style={{ background: i + 1 <= step ? BRAND : '#e5e7eb', color: i + 1 <= step ? 'white' : '#9ca3af' }}
+                    style={{ background: i + 1 <= step ? BRAND : 'var(--color-border)', color: i + 1 <= step ? 'white' : 'var(--color-muted)' }}
                   >
                     {i + 1 < step ? (
                       <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -387,7 +387,7 @@ export function BodyMapContent() {
                   <span className="text-[10px] text-gray-400 hidden sm:block">{label}</span>
                 </div>
                 {i < STEP_LABELS.length - 1 && (
-                  <div className="flex-1 h-0.5 mx-1 transition-colors" style={{ background: i + 1 < step ? BRAND : '#e5e7eb' }} />
+                  <div className="flex-1 h-0.5 mx-1 transition-colors" style={{ background: i + 1 < step ? BRAND : 'var(--color-border)' }} />
                 )}
               </div>
             ))}
@@ -395,23 +395,23 @@ export function BodyMapContent() {
 
           {step === 1 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-1">{t('step1.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('step1.heading')}</h2>
               <p className="text-sm text-gray-500 mb-4">{t('step1.subtitle')}</p>
               <div className="flex items-center justify-between mb-4">
-                <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+                <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 w-fit">
                   {(['front', 'back'] as const).map((s) => (
                     <button key={s} onClick={() => setSide(s)}
                       className="py-1.5 px-5 rounded-lg text-sm font-medium transition-colors"
-                      style={side === s ? { background: 'white', color: BRAND, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: '#6b7280' }}>
+                      style={side === s ? { background: 'var(--card-bg)', color: BRAND, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: 'var(--color-muted)' }}>
                       {s === 'front' ? t('step1.front') : t('step1.back')}
                     </button>
                   ))}
                 </div>
-                <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+                <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 w-fit">
                   {(['male', 'female'] as const).map((g) => (
                     <button key={g} onClick={() => setGender(g)}
                       className="py-1.5 px-3 rounded-lg text-sm font-medium transition-colors"
-                      style={gender === g ? { background: 'white', color: BRAND, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: '#6b7280' }}>
+                      style={gender === g ? { background: 'var(--card-bg)', color: BRAND, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: 'var(--color-muted)' }}>
                       {g === 'male' ? '♂' : '♀'}
                     </button>
                   ))}
@@ -441,7 +441,7 @@ export function BodyMapContent() {
 
           {step === 2 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-1">{t('step2.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('step2.heading')}</h2>
               <p className="text-sm text-gray-500 mb-4">{t('step2.subtitle')}</p>
               {selectedGroups.map((group, gIdx) => (
                 <div key={group} className={gIdx > 0 ? 'mt-5' : ''}>
@@ -449,7 +449,7 @@ export function BodyMapContent() {
                     <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: BRAND }}>
                       {(tAreaSymptoms as (k: string) => string)(`${group}.label`)}
                     </span>
-                    <div className="flex-1 h-px bg-gray-100" />
+                    <div className="flex-1 h-px bg-gray-100 dark:bg-slate-700" />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {(AREA_SYMPTOM_KEYS[group] ?? []).map((symptomKey, sIdx) => {
@@ -458,7 +458,7 @@ export function BodyMapContent() {
                         <button key={symptomKey}
                           onClick={() => toggleAreaSymptom(group, symptomKey)}
                           className="relative py-3 px-4 rounded-xl border-2 text-sm font-medium text-start transition-all"
-                          style={{ borderColor: isActive ? BRAND : '#e5e7eb', background: isActive ? 'var(--tibbna-light)' : 'white', color: isActive ? '#0e7490' : '#374151' }}>
+                          style={{ borderColor: isActive ? BRAND : 'var(--color-border)', background: isActive ? 'var(--tibbna-light)' : 'white', color: isActive ? 'var(--color-primary)' : 'var(--color-heading)' }}>
                           {(tAreaSymptoms as (k: string) => string)(`${group}.${symptomKey}`)}
                           {sIdx < 3 && !isActive && (
                             <span className="absolute top-1.5 end-1.5 w-1.5 h-1.5 rounded-full" style={{ background: BRAND, opacity: 0.4 }} />
@@ -488,7 +488,7 @@ export function BodyMapContent() {
 
           {step === 3 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-1">{t('step3.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('step3.heading')}</h2>
               <p className="text-sm text-gray-500 mb-6">{t('step3.subtitle')}</p>
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
@@ -506,12 +506,12 @@ export function BodyMapContent() {
                 </div>
               </div>
               <div className="mb-2">
-                <p className="text-sm font-medium text-gray-700 mb-2">{t('step3.duration')}</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('step3.duration')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {DURATION_KEYS.map((key) => (
                     <button key={key} onClick={() => setDuration(key)}
                       className="py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition-all"
-                      style={{ borderColor: duration === key ? BRAND : '#e5e7eb', background: duration === key ? 'var(--tibbna-light)' : 'white', color: duration === key ? '#0e7490' : '#374151' }}>
+                      style={{ borderColor: duration === key ? BRAND : 'var(--color-border)', background: duration === key ? 'var(--tibbna-light)' : 'white', color: duration === key ? 'var(--color-primary)' : 'var(--color-heading)' }}>
                       {t(`durations.${key}`)}
                     </button>
                   ))}
@@ -536,23 +536,23 @@ export function BodyMapContent() {
 
           {step === 4 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-1">{t('step4.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('step4.heading')}</h2>
               <p className="text-sm text-gray-500 mb-4">{t('step4.subtitle')}</p>
               <div className="space-y-3 mb-5">
                 {QUESTION_KEYS.map((key) => {
                   const val = answers[key];
                   return (
-                    <div key={key} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50">
-                      <span className="text-sm text-gray-700 pe-4">{t(`questions.${key}`)}</span>
+                    <div key={key} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+                      <span className="text-sm text-gray-700 dark:text-gray-300 pe-4">{t(`questions.${key}`)}</span>
                       <div className="flex gap-2 shrink-0">
                         {([true, false] as const).map((v) => (
                           <button key={String(v)}
                             onClick={() => setAnswers((a) => ({ ...a, [key]: v }))}
                             className="px-3 py-1 rounded-lg text-sm font-medium border transition-all"
                             style={{
-                              borderColor: val === v ? (v ? '#22c55e' : '#ef4444') : '#e5e7eb',
-                              background: val === v ? (v ? '#f0fdf4' : '#fef2f2') : 'white',
-                              color: val === v ? (v ? '#16a34a' : '#dc2626') : '#6b7280',
+                              borderColor: val === v ? (v ? '#22c55e' : '#ef4444') : 'var(--color-border)',
+                              background: val === v ? (v ? 'rgba(34,197,94,0.14)' : 'rgba(239,68,68,0.14)') : 'white',
+                              color: val === v ? (v ? '#16a34a' : '#dc2626') : 'var(--color-muted)',
                             }}>
                             {v ? tCommon('yes') : tCommon('no')}
                           </button>
@@ -563,7 +563,7 @@ export function BodyMapContent() {
                 })}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   {t('step4.notes')} <span className="text-gray-400 font-normal">({t('step4.notesOptional')})</span>
                 </label>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)}
@@ -588,7 +588,7 @@ export function BodyMapContent() {
 
           {step === 5 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-4">{t('step5.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('step5.heading')}</h2>
               <div className="space-y-3 text-sm">
                 <SummaryRow label={t('step5.affectedAreas')}>
                   <div className="flex flex-wrap gap-1 justify-end">

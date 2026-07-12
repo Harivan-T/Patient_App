@@ -154,4 +154,49 @@
   .badge-pending {
     @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
   }
+
+  /* Shimmer placeholder — pairs with animate-shimmer via the Skeleton component */
+  .skeleton {
+    @apply animate-shimmer;
+    background: linear-gradient(
+      90deg,
+      var(--color-surface) 25%,
+      var(--color-border) 50%,
+      var(--color-surface) 75%
+    );
+    background-size: 200% 100%;
+  }
+
+  /* Staggered list entrance — apply to a parent; direct children fade up in sequence.
+     Capped at 10 children; anything later appears with the last delay. */
+  .stagger-children > * {
+    animation: fade-up 0.35s ease-out both;
+  }
+  .stagger-children > *:nth-child(1)  { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2)  { animation-delay: 40ms; }
+  .stagger-children > *:nth-child(3)  { animation-delay: 80ms; }
+  .stagger-children > *:nth-child(4)  { animation-delay: 120ms; }
+  .stagger-children > *:nth-child(5)  { animation-delay: 160ms; }
+  .stagger-children > *:nth-child(6)  { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(7)  { animation-delay: 240ms; }
+  .stagger-children > *:nth-child(8)  { animation-delay: 280ms; }
+  .stagger-children > *:nth-child(9)  { animation-delay: 320ms; }
+  .stagger-children > *:nth-child(n+10) { animation-delay: 360ms; }
+
+  /* Tactile press feedback for interactive elements */
+  .pressable {
+    @apply transition-transform duration-150 active:scale-[0.97];
+  }
+}
+
+/* Universal reduced-motion opt-out — kills all animation/transition durations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

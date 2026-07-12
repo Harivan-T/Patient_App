@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { isRTL } from '@/i18n/config';
 import { AppShell } from '@/components/layout/AppShell';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import type { LabOrder, LabTest, LabResultPanel, LabAnalyte } from '@/types';
@@ -71,7 +72,7 @@ function HomeCollectionForm({
   orderId, locale, prefillAddress, prefillPhone, onClose, onSuccess,
 }: HomeCollectionFormProps) {
   const t = useTranslations('labs');
-  const isRtl = locale === 'ar';
+  const isRtl = isRTL(locale);
 
   const [address,    setAddress]    = useState(prefillAddress);
   const [datetime,   setDatetime]   = useState('');
@@ -200,7 +201,7 @@ interface HCListProps {
 
 function HCList({ requests, orders, locale, expanded, onToggle, hcStatusLabel }: HCListProps) {
   const t    = useTranslations('labs');
-  const isRtl = locale === 'ar';
+  const isRtl = isRTL(locale);
 
   if (requests.length === 0) {
     return (

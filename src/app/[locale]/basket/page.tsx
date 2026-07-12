@@ -477,7 +477,7 @@ function HistoryRow({ item, locale }: { item: OrderItem; locale: string }) {
   return (
     <div className="px-4 py-2.5 flex items-center justify-between border-b border-gray-50 dark:border-slate-700/40 last:border-0">
       <p className="text-sm flex-1 min-w-0 truncate" style={{ color: 'var(--color-heading)' }}>{item.name}</p>
-      <div className="flex flex-col items-end ml-4 shrink-0">
+      <div className="flex flex-col items-end ms-4 shrink-0">
         <span className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>×{item.quantity}</span>
         {item.price != null && (
           <span className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>
