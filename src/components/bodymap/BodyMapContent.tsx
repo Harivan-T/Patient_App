@@ -36,33 +36,43 @@ interface ZoneDef {
 const ZONES: ZoneDef[] = [
   // Front zones - adjusted for PNG image alignment
   { id: 'neck',          side: 'front', shape: { type: 'rect',    x: 85,  y: 55,  w: 30,  h: 20, rx: 5 } },
-  { id: 'l-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 60, cy: 75, rx: 18, ry: 15 } },
-  { id: 'r-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 140,cy: 75, rx: 18, ry: 15 } },
-  { id: 'chest',         side: 'front', shape: { type: 'rect',    x: 70,  y: 85,  w: 60,  h: 45, rx: 5 } },
-  { id: 'abdomen',       side: 'front', shape: { type: 'rect',    x: 72,  y: 130, w: 56,  h: 40, rx: 5 } },
-  { id: 'l-upper-arm',   side: 'front', shape: { type: 'rect',    x: 35,  y: 75,  w: 25,  h: 55, rx: 8 } },
-  { id: 'r-upper-arm',   side: 'front', shape: { type: 'rect',    x: 140, y: 75,  w: 25,  h: 55, rx: 8 } },
-  { id: 'l-forearm',     side: 'front', shape: { type: 'rect',    x: 30,  y: 130, w: 22,  h: 50, rx: 7 } },
-  { id: 'r-forearm',     side: 'front', shape: { type: 'rect',    x: 148, y: 130, w: 22,  h: 50, rx: 7 } },
-  { id: 'pelvis',        side: 'front', shape: { type: 'rect',    x: 65,  y: 170, w: 70,  h: 30, rx: 8 } },
-  { id: 'l-thigh',       side: 'front', shape: { type: 'rect',    x: 65,  y: 200, w: 30,  h: 60, rx: 8 } },
-  { id: 'r-thigh',       side: 'front', shape: { type: 'rect',    x: 105, y: 200, w: 30,  h: 60, rx: 8 } },
-  { id: 'l-knee',        side: 'front', shape: { type: 'ellipse', cx: 80, cy: 265, rx: 15, ry: 12 } },
-  { id: 'r-knee',        side: 'front', shape: { type: 'ellipse', cx: 120,cy: 265, rx: 15, ry: 12 } },
-  { id: 'l-shin',        side: 'front', shape: { type: 'rect',    x: 65,  y: 277, w: 25,  h: 45, rx: 6 } },
-  { id: 'r-shin',        side: 'front', shape: { type: 'rect',    x: 110, y: 277, w: 25,  h: 45, rx: 6 } },
-  { id: 'l-foot',        side: 'front', shape: { type: 'ellipse', cx: 75, cy: 325, rx: 18, ry: 10 } },
-  { id: 'r-foot',        side: 'front', shape: { type: 'ellipse', cx: 125,cy: 325, rx: 18, ry: 10 } },
+  { id: 'l-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 67, cy: 70, rx: 15, ry: 8 } },
+  { id: 'r-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 133,cy: 70, rx: 15, ry: 8 } },
+  { id: 'chest',         side: 'front', shape: { type: 'rect',    x: 70,  y: 70,  w: 60,  h: 45, rx: 5 } },
+  { id: 'abdomen',       side: 'front', shape: { type: 'rect',    x: 72,  y: 120, w: 56,  h: 34, rx: 5 } },
+  { id: 'l-upper-arm',   side: 'front', shape: { type: 'rect',    x: 54,  y: 75,  w: 16,  h: 55, rx: 8 } },
+  { id: 'r-upper-arm',   side: 'front', shape: { type: 'rect',    x: 125, y: 75,  w: 16,  h: 55, rx: 8 } },
+  { id: 'l-forearm',     side: 'front', shape: { type: 'rect',    x: 53,  y: 130, w: 12,  h: 50, rx: 7 } },
+  { id: 'r-forearm',     side: 'front', shape: { type: 'rect',    x: 131, y: 130, w: 12,  h: 50, rx: 7 } },
+  { id: 'l-hand',        side: 'front', shape: { type: 'ellipse', cx: 57, cy: 192, rx: 7, ry: 12 } },
+  { id: 'r-hand',        side: 'front', shape: { type: 'ellipse', cx: 143,cy: 192, rx: 7, ry: 12 } },
+  { id: 'pelvis',        side: 'front', shape: { type: 'rect',    x: 65,  y: 156, w: 70,  h: 30, rx: 8 } },
+  { id: 'l-thigh',       side: 'front', shape: { type: 'rect',    x: 67,  y: 180, w: 30,  h: 60, rx: 8 } },
+  { id: 'r-thigh',       side: 'front', shape: { type: 'rect',    x: 103, y: 180, w: 30,  h: 60, rx: 8 } },
+  { id: 'l-knee',        side: 'front', shape: { type: 'ellipse', cx: 85, cy: 250, rx: 10, ry: 8 } },
+  { id: 'r-knee',        side: 'front', shape: { type: 'ellipse', cx: 115,cy: 250, rx: 10, ry: 8 } },
+  { id: 'l-shin',        side: 'front', shape: { type: 'rect',    x: 73,  y: 259, w: 23,  h: 45, rx: 6 } },
+  { id: 'r-shin',        side: 'front', shape: { type: 'rect',    x: 102, y: 259, w: 23,  h: 45, rx: 6 } },
+  { id: 'l-ankle',       side: 'front', shape: { type: 'ellipse', cx: 75, cy: 310, rx: 10, ry: 7 } },
+  { id: 'r-ankle',       side: 'front', shape: { type: 'ellipse', cx: 125,cy: 310, rx: 10, ry: 7 } },
+  { id: 'l-foot',        side: 'front', shape: { type: 'ellipse', cx: 81, cy: 338, rx: 9, ry: 14 } },
+  { id: 'r-foot',        side: 'front', shape: { type: 'ellipse', cx: 119,cy: 338, rx: 9, ry: 14 } },
   // Back zones - adjusted for PNG image alignment
-  { id: 'head-b',        side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 35, rx: 30, ry: 35 } },
-  { id: 'neck-b',        side: 'back',  shape: { type: 'rect',    x: 85,  y: 55,  w: 30,  h: 20, rx: 5 } },
-  { id: 'l-trap',        side: 'back',  shape: { type: 'ellipse', cx: 68, cy: 75, rx: 20, ry: 15 } },
-  { id: 'r-trap',        side: 'back',  shape: { type: 'ellipse', cx: 132,cy: 75, rx: 20, ry: 15 } },
-  { id: 'upper-back',    side: 'back',  shape: { type: 'rect',    x: 70,  y: 85,  w: 60,  h: 35, rx: 5 } },
-  { id: 'mid-back',      side: 'back',  shape: { type: 'rect',    x: 72,  y: 120, w: 56,  h: 30, rx: 5 } },
-  { id: 'lower-back',    side: 'back',  shape: { type: 'rect',    x: 72,  y: 150, w: 56,  h: 25, rx: 5 } },
+  { id: 'head-b',        side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 26, rx: 20, ry: 24 } },
+  { id: 'neck-b',        side: 'back',  shape: { type: 'rect',    x: 85,  y: 47,  w: 30,  h: 20, rx: 5 } },
+  { id: 'l-trap',        side: 'back',  shape: { type: 'ellipse', cx: 68, cy: 75, rx: 16, ry: 8 } },
+  { id: 'r-trap',        side: 'back',  shape: { type: 'ellipse', cx: 132,cy: 75, rx: 16, ry: 8 } },
+  { id: 'upper-back',    side: 'back',  shape: { type: 'rect',    x: 70,  y: 83,  w: 60,  h: 27, rx: 5 } },
+  { id: 'mid-back',      side: 'back',  shape: { type: 'rect',    x: 72,  y: 117, w: 56,  h: 24, rx: 5 } },
+  { id: 'lower-back',    side: 'back',  shape: { type: 'rect',    x: 72,  y: 150, w: 56,  h: 21, rx: 5 } },
   { id: 'l-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 35,  y: 75,  w: 25,  h: 55, rx: 8 } },
   { id: 'r-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 140, y: 75,  w: 25,  h: 55, rx: 8 } },
+  { id: 'l-elbow-b',     side: 'back',  shape: { type: 'ellipse', cx: 62, cy: 131.5, rx: 10, ry: 8 } },
+  { id: 'r-elbow-b',     side: 'back',  shape: { type: 'ellipse', cx: 138,cy: 131.5, rx: 10, ry: 8 } },
+  { id: 'l-forearm-b',   side: 'back',  shape: { type: 'rect',    x: 40,  y: 135, w: 15,  h: 50, rx: 7 } },
+  { id: 'r-forearm-b',   side: 'back',  shape: { type: 'rect',    x: 145, y: 135, w: 15,  h: 50, rx: 7 } },
+  { id: 'l-hand-b',      side: 'back',  shape: { type: 'ellipse', cx: 56, cy: 194, rx: 8, ry: 12 } },
+  { id: 'r-hand-b',      side: 'back',  shape: { type: 'ellipse', cx: 145,cy: 194, rx: 8, ry: 12 } },
   { id: 'l-buttock',     side: 'back',  shape: { type: 'rect',    x: 65,  y: 175, w: 32,  h: 32, rx: 8 } },
   { id: 'r-buttock',     side: 'back',  shape: { type: 'rect',    x: 103, y: 175, w: 32,  h: 32, rx: 8 } },
   { id: 'l-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 65,  y: 207, w: 30,  h: 60, rx: 8 } },
@@ -72,6 +82,8 @@ const ZONES: ZoneDef[] = [
 ];
 
 function zoneKey(id: string): string {
+  const backSpecific = ['l-forearm-b', 'r-forearm-b', 'l-hand-b', 'r-hand-b', 'l-elbow-b', 'r-elbow-b'];
+  if (backSpecific.includes(id)) return id.replace(/-/g, '_');
   return id.replace(/-b$/, '').replace(/-/g, '_');
 }
 
@@ -117,15 +129,168 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
       onClick: () => onToggle(z.id),
     };
     if (z.shape.type === 'ellipse') {
-      return <ellipse key={z.id} cx={z.shape.cx} cy={z.shape.cy} rx={z.shape.rx} ry={z.shape.ry} {...sharedProps} />;
+      let cx = z.shape.cx;
+      let cy = z.shape.cy;
+      let rx = z.shape.rx;
+      let ry = z.shape.ry;
+      if (z.id === 'l-shoulder' && gender === 'female') {
+        cx += 7;
+        cy += 7;
+      } else if (z.id === 'r-shoulder' && gender === 'female') {
+        cx -= 7;
+        cy += 7;
+      } else if (z.id === 'l-knee') {
+        if (gender === 'female') { cx += 2; cy -= 2; }
+        else if (gender === 'male') cx -= 1;
+      } else if (z.id === 'r-knee') {
+        if (gender === 'female') { cx -= 2; cy -= 2; }
+        else if (gender === 'male') cx += 1;
+      } else if (z.id === 'l-ankle') {
+        if (gender === 'female') { cx += 15; cy += 2; }
+        else if (gender === 'male') { cx += 6; cy += 2; }
+      } else if (z.id === 'r-ankle') {
+        if (gender === 'female') { cx -= 15; cy += 2; }
+        else if (gender === 'male') { cx -= 6; cy += 2; }
+      } else if (z.id === 'l-foot') {
+        if (gender === 'female') { cx += 8; cy -= 4; }
+        else if (gender === 'male') { cx += 1; cy -= 2; }
+      } else if (z.id === 'r-foot') {
+        if (gender === 'female') { cx -= 8; cy -= 4; }
+        else if (gender === 'male') { cx -= 1; cy -= 2; }
+      } else if ((z.id === 'l-trap' || z.id === 'r-trap') && gender === 'female') {
+        cy += 2;
+        if (z.id === 'l-trap') cx += 6;
+        else if (z.id === 'r-trap') cx -= 6;
+      } else if ((z.id === 'l-trap' || z.id === 'r-trap') && gender === 'male') {
+        cy -= 5;
+        if (z.id === 'l-trap') cx += 2;
+        else if (z.id === 'r-trap') cx -= 2;
+      }
+      if (gender === 'female' && z.side === 'back' && z.id !== 'head-b') {
+        rx *= 0.8;
+        ry *= 0.8;
+      }
+      return <ellipse key={z.id} cx={cx} cy={cy} rx={rx} ry={ry} {...sharedProps} />;
     }
-    return <rect key={z.id} x={z.shape.x} y={z.shape.y} width={z.shape.w} height={z.shape.h} rx={z.shape.rx ?? 0} {...sharedProps} />;
+    let y =
+      (z.id === 'neck' || z.id === 'upper-back') && gender === 'male'
+        ? z.shape.y - 5
+        : z.id === 'mid-back' && gender === 'male'
+          ? z.shape.y - 10
+          : z.id === 'lower-back' && gender === 'male'
+            ? z.shape.y - 18
+            : (z.id === 'l-back-thigh' || z.id === 'r-back-thigh') && gender === 'male'
+              ? z.shape.y - 18
+              : (z.id === 'l-calf' || z.id === 'r-calf') && gender === 'male'
+                ? z.shape.y - 10
+                : z.id === 'chest' && gender === 'female'
+                  ? z.shape.y + 4
+                  : z.shape.y;
+    let w =
+      (z.id === 'l-thigh' || z.id === 'r-thigh') && gender === 'female'
+        ? z.shape.w - 3
+        : (z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'male'
+          ? z.shape.w - 6
+          : (z.id === 'l-back-thigh' || z.id === 'r-back-thigh') && gender === 'male'
+            ? z.shape.w - 4
+            : (z.id === 'l-calf' || z.id === 'r-calf') && gender === 'male'
+              ? z.shape.w - 7
+              : z.shape.w;
+    let h = z.shape.h;
+    if ((z.id === 'l-back-thigh' || z.id === 'r-back-thigh') && gender === 'male') {
+      h -= 4;
+    } else if ((z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'male') {
+      h -= 3;
+    }
+    let x = z.shape.x;
+    if (z.id === 'l-thigh' && gender === 'female') {
+      x += 2;
+    } else if (z.id === 'l-forearm' && gender === 'male') {
+      x -= 1;
+    } else if (z.id === 'r-shin' && gender === 'male') {
+      x += 2;
+    } else if ((z.id === 'r-upper-arm' || z.id === 'r-forearm') && gender === 'male') {
+      x += 5;
+    } else if (z.id === 'l-back-thigh' && gender === 'male') {
+      x += 3;
+    } else if (z.id === 'l-calf' && gender === 'male') {
+      x += 8;
+    } else if (z.id === 'r-calf' && gender === 'male') {
+      x -= 2;
+    } else if ((z.id === 'l-forearm-b' || z.id === 'r-forearm-b')) {
+      if (z.id === 'l-forearm-b') x = z.shape.x + 7;
+      else if (z.id === 'r-forearm-b') x = z.shape.x - 7;
+    } else if ((z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'male') {
+      if (z.id === 'l-upper-arm-b') x += 15;
+      else if (z.id === 'r-upper-arm-b') x -= 10;
+    } else if ((z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'female') {
+      if (z.id === 'l-upper-arm-b') x += 16;
+      else if (z.id === 'r-upper-arm-b') x -= 16;
+    }
+    if ((z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'female') {
+      w -= 2;
+    }
+    if ((z.id === 'l-buttock' || z.id === 'r-buttock') && gender === 'male') {
+      y -= 17;
+      w -= 4;
+      h -= 4;
+      x += 2;
+      if (z.id === 'l-buttock') x += 3;
+      else if (z.id === 'r-buttock') x -= 3;
+    }
+    if (gender === 'female' && z.side === 'back' && z.id !== 'head-b') {
+      const dx = w * 0.1;
+      const dy = h * 0.1;
+      x += dx;
+      y += dy;
+      w *= 0.8;
+      h *= 0.8;
+    }
+    if (z.id === 'neck-b' && gender === 'female') {
+      y += 5;
+    }
+    if (z.id === 'mid-back' && gender === 'female') {
+      y -= 9;
+    }
+    if (z.id === 'lower-back' && gender === 'female') {
+      w += 6;
+      x -= 3;
+      y -= 16;
+    }
+    if ((z.id === 'l-buttock' || z.id === 'r-buttock') && gender === 'female') {
+      y -= 17;
+      w += 4;
+      h += 2;
+      x -= 2;
+      y -= 1;
+    }
+    if ((z.id === 'l-back-thigh' || z.id === 'r-back-thigh') && gender === 'female') {
+      y -= 21;
+      if (z.id === 'l-back-thigh') x += 5;
+      else if (z.id === 'r-back-thigh') x -= 5;
+    }
+    if ((z.id === 'l-calf' || z.id === 'r-calf') && gender === 'female') {
+      w -= 3;
+      h += 16;
+      x += 1.5;
+      y -= 21;
+      if (z.id === 'l-calf') x += 10;
+      else if (z.id === 'r-calf') x -= 10;
+    }
+    let transform: string | undefined;
+    if (z.id === 'l-forearm-b' || z.id === 'r-forearm-b') {
+      const angle = z.id === 'l-forearm-b' ? 10 : -10;
+      const pivotX = x + w / 2;
+      const pivotY = y + h;
+      transform = `rotate(${angle}, ${pivotX}, ${pivotY})`;
+    }
+    return <rect key={z.id} x={x} y={y} width={w} height={h} rx={z.shape.rx ?? 0} transform={transform} {...sharedProps} />;
   }
 
   return (
     <svg viewBox="0 0 200 350" className="w-full max-w-[320px] mx-auto select-none">
       {/* ── Real body background image ─────────────────────────────── */}
-      <image href={imgSrc} x="0" y="0" width="200" height="350" />
+      <image href={imgSrc} x="0" y="0" width="200" height="350" transform={gender === 'male' ? 'translate(0 2)' : undefined} />
 
       {/* ── Body zones (non-head) ─────────────────────────────────── */}
       {zones.map((z) => renderShape(z, selectedZones.includes(z.id)))}
@@ -133,19 +298,19 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
       {/* ── Front head: 6 flat hit zones directly tappable at normal scale ── */}
       {/* Render order = priority: later elements win clicks on overlap areas */}
       {isFront && (
-        <>
+        <g transform={gender === 'male' ? 'translate(0 -8)' : undefined}>
           {/* Full head ellipse — catches forehead, skull, chin (background layer) */}
-          <ellipse cx="100" cy="35" rx="22" ry="26" {...headHit('head-scalp')} />
+          <ellipse cx="100" cy="35" rx="18" ry="26" {...headHit('head-scalp')} />
           {/* Ear zones — cover ear protrusions + side edges of head */}
-          <ellipse cx="78"  cy="35" rx="10" ry="14" {...headHit('head-ear-l')} />
-          <ellipse cx="122" cy="35" rx="10" ry="14" {...headHit('head-ear-r')} />
+          <ellipse cx={gender === 'female' ? 82.5 : 82.5} cy={gender === 'female' ? 40 : 39} rx="3.5" ry="5.5" {...headHit('head-ear-l')} />
+          <ellipse cx={gender === 'female' ? 117.5 : 117.5} cy={gender === 'female' ? 40 : 39} rx="3.5" ry="5.5" {...headHit('head-ear-r')} />
           {/* Eyes band — upper horizontal strip (both eyes, overrides ear overlap) */}
-          <rect x="85" y="22" width="30" height="14" {...headHit('head-eyes')} />
+          <rect x="85" y={gender === 'female' ? 34.5 : 33} width="30" height="5" {...headHit('head-eyes')} />
           {/* Nose zone — center strip */}
-          <rect x="92" y="36" width="16" height="12" {...headHit('head-nose')} />
+          <rect x={gender === 'female' ? 94.5 : 94} y="38" width={gender === 'female' ? 11 : 12} height="9" {...headHit('head-nose')} />
           {/* Teeth/mouth zone — lower strip */}
-          <rect x="90" y="48" width="20" height="12" {...headHit('head-teeth')} />
-        </>
+          <rect x="92" y="48.5" width="16" height="8" {...headHit('head-teeth')} />
+        </g>
       )}
     </svg>
   );
