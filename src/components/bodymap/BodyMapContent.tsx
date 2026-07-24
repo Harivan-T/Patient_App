@@ -34,39 +34,41 @@ interface ZoneDef {
 }
 
 const ZONES: ZoneDef[] = [
-  { id: 'neck',          side: 'front', shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
-  { id: 'l-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 65, cy: 73, rx: 14, ry: 11 } },
-  { id: 'r-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 135,cy: 73, rx: 14, ry: 11 } },
-  { id: 'chest',         side: 'front', shape: { type: 'rect',    x: 73,  y: 82,  w: 54,  h: 36, rx: 4 } },
-  { id: 'abdomen',       side: 'front', shape: { type: 'rect',    x: 73,  y: 118, w: 54,  h: 38, rx: 4 } },
-  { id: 'l-upper-arm',   side: 'front', shape: { type: 'rect',    x: 40,  y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'r-upper-arm',   side: 'front', shape: { type: 'rect',    x: 138, y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'l-forearm',     side: 'front', shape: { type: 'rect',    x: 36,  y: 118, w: 18,  h: 34, rx: 6 } },
-  { id: 'r-forearm',     side: 'front', shape: { type: 'rect',    x: 146, y: 118, w: 18,  h: 34, rx: 6 } },
-  { id: 'pelvis',        side: 'front', shape: { type: 'rect',    x: 68,  y: 156, w: 64,  h: 22, rx: 4 } },
-  { id: 'l-thigh',       side: 'front', shape: { type: 'rect',    x: 68,  y: 178, w: 24,  h: 48, rx: 6 } },
-  { id: 'r-thigh',       side: 'front', shape: { type: 'rect',    x: 108, y: 178, w: 24,  h: 48, rx: 6 } },
-  { id: 'l-knee',        side: 'front', shape: { type: 'ellipse', cx: 79, cy: 233, rx: 12, ry: 10 } },
-  { id: 'r-knee',        side: 'front', shape: { type: 'ellipse', cx: 121,cy: 233, rx: 12, ry: 10 } },
-  { id: 'l-shin',        side: 'front', shape: { type: 'rect',    x: 66,  y: 244, w: 20,  h: 36, rx: 5 } },
-  { id: 'r-shin',        side: 'front', shape: { type: 'rect',    x: 114, y: 244, w: 20,  h: 36, rx: 5 } },
-  { id: 'l-foot',        side: 'front', shape: { type: 'ellipse', cx: 72, cy: 285, rx: 12, ry: 7 } },
-  { id: 'r-foot',        side: 'front', shape: { type: 'ellipse', cx: 128,cy: 285, rx: 12, ry: 7 } },
-  { id: 'head-b',        side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 32, rx: 26, ry: 30 } },
-  { id: 'neck-b',        side: 'back',  shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
-  { id: 'l-trap',        side: 'back',  shape: { type: 'ellipse', cx: 73, cy: 74, rx: 16, ry: 11 } },
-  { id: 'r-trap',        side: 'back',  shape: { type: 'ellipse', cx: 127,cy: 74, rx: 16, ry: 11 } },
-  { id: 'upper-back',    side: 'back',  shape: { type: 'rect',    x: 73,  y: 82,  w: 54,  h: 30, rx: 4 } },
-  { id: 'mid-back',      side: 'back',  shape: { type: 'rect',    x: 73,  y: 112, w: 54,  h: 26, rx: 4 } },
-  { id: 'lower-back',    side: 'back',  shape: { type: 'rect',    x: 73,  y: 138, w: 54,  h: 22, rx: 4 } },
-  { id: 'l-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 40,  y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'r-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 138, y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'l-buttock',     side: 'back',  shape: { type: 'rect',    x: 68,  y: 158, w: 28,  h: 28, rx: 6 } },
-  { id: 'r-buttock',     side: 'back',  shape: { type: 'rect',    x: 104, y: 158, w: 28,  h: 28, rx: 6 } },
-  { id: 'l-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 68,  y: 186, w: 24,  h: 50, rx: 6 } },
-  { id: 'r-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 108, y: 186, w: 24,  h: 50, rx: 6 } },
-  { id: 'l-calf',        side: 'back',  shape: { type: 'rect',    x: 66,  y: 242, w: 20,  h: 36, rx: 5 } },
-  { id: 'r-calf',        side: 'back',  shape: { type: 'rect',    x: 114, y: 242, w: 20,  h: 36, rx: 5 } },
+  // Front zones - adjusted for PNG image alignment
+  { id: 'neck',          side: 'front', shape: { type: 'rect',    x: 85,  y: 55,  w: 30,  h: 20, rx: 5 } },
+  { id: 'l-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 60, cy: 75, rx: 18, ry: 15 } },
+  { id: 'r-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 140,cy: 75, rx: 18, ry: 15 } },
+  { id: 'chest',         side: 'front', shape: { type: 'rect',    x: 70,  y: 85,  w: 60,  h: 45, rx: 5 } },
+  { id: 'abdomen',       side: 'front', shape: { type: 'rect',    x: 72,  y: 130, w: 56,  h: 40, rx: 5 } },
+  { id: 'l-upper-arm',   side: 'front', shape: { type: 'rect',    x: 35,  y: 75,  w: 25,  h: 55, rx: 8 } },
+  { id: 'r-upper-arm',   side: 'front', shape: { type: 'rect',    x: 140, y: 75,  w: 25,  h: 55, rx: 8 } },
+  { id: 'l-forearm',     side: 'front', shape: { type: 'rect',    x: 30,  y: 130, w: 22,  h: 50, rx: 7 } },
+  { id: 'r-forearm',     side: 'front', shape: { type: 'rect',    x: 148, y: 130, w: 22,  h: 50, rx: 7 } },
+  { id: 'pelvis',        side: 'front', shape: { type: 'rect',    x: 65,  y: 170, w: 70,  h: 30, rx: 8 } },
+  { id: 'l-thigh',       side: 'front', shape: { type: 'rect',    x: 65,  y: 200, w: 30,  h: 60, rx: 8 } },
+  { id: 'r-thigh',       side: 'front', shape: { type: 'rect',    x: 105, y: 200, w: 30,  h: 60, rx: 8 } },
+  { id: 'l-knee',        side: 'front', shape: { type: 'ellipse', cx: 80, cy: 265, rx: 15, ry: 12 } },
+  { id: 'r-knee',        side: 'front', shape: { type: 'ellipse', cx: 120,cy: 265, rx: 15, ry: 12 } },
+  { id: 'l-shin',        side: 'front', shape: { type: 'rect',    x: 65,  y: 277, w: 25,  h: 45, rx: 6 } },
+  { id: 'r-shin',        side: 'front', shape: { type: 'rect',    x: 110, y: 277, w: 25,  h: 45, rx: 6 } },
+  { id: 'l-foot',        side: 'front', shape: { type: 'ellipse', cx: 75, cy: 325, rx: 18, ry: 10 } },
+  { id: 'r-foot',        side: 'front', shape: { type: 'ellipse', cx: 125,cy: 325, rx: 18, ry: 10 } },
+  // Back zones - adjusted for PNG image alignment
+  { id: 'head-b',        side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 35, rx: 30, ry: 35 } },
+  { id: 'neck-b',        side: 'back',  shape: { type: 'rect',    x: 85,  y: 55,  w: 30,  h: 20, rx: 5 } },
+  { id: 'l-trap',        side: 'back',  shape: { type: 'ellipse', cx: 68, cy: 75, rx: 20, ry: 15 } },
+  { id: 'r-trap',        side: 'back',  shape: { type: 'ellipse', cx: 132,cy: 75, rx: 20, ry: 15 } },
+  { id: 'upper-back',    side: 'back',  shape: { type: 'rect',    x: 70,  y: 85,  w: 60,  h: 35, rx: 5 } },
+  { id: 'mid-back',      side: 'back',  shape: { type: 'rect',    x: 72,  y: 120, w: 56,  h: 30, rx: 5 } },
+  { id: 'lower-back',    side: 'back',  shape: { type: 'rect',    x: 72,  y: 150, w: 56,  h: 25, rx: 5 } },
+  { id: 'l-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 35,  y: 75,  w: 25,  h: 55, rx: 8 } },
+  { id: 'r-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 140, y: 75,  w: 25,  h: 55, rx: 8 } },
+  { id: 'l-buttock',     side: 'back',  shape: { type: 'rect',    x: 65,  y: 175, w: 32,  h: 32, rx: 8 } },
+  { id: 'r-buttock',     side: 'back',  shape: { type: 'rect',    x: 103, y: 175, w: 32,  h: 32, rx: 8 } },
+  { id: 'l-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 65,  y: 207, w: 30,  h: 60, rx: 8 } },
+  { id: 'r-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 105, y: 207, w: 30,  h: 60, rx: 8 } },
+  { id: 'l-calf',        side: 'back',  shape: { type: 'rect',    x: 65,  y: 272, w: 25,  h: 45, rx: 6 } },
+  { id: 'r-calf',        side: 'back',  shape: { type: 'rect',    x: 110, y: 272, w: 25,  h: 45, rx: 6 } },
 ];
 
 function zoneKey(id: string): string {
@@ -89,6 +91,7 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
   const isFront  = side === 'front';
   const isFemale = gender === 'female';
   const zones    = ZONES.filter((z) => z.side === side);
+  const imgSrc = `/${gender === 'female' ? 'Female' : 'Male'}-${side}.PNG`;
 
   const headHit = (id: string) => {
     const sel = selectedZones.includes(id);
@@ -120,71 +123,9 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
   }
 
   return (
-    <svg viewBox="0 0 200 300" className="w-full max-w-[220px] mx-auto select-none">
-      {/* ── Body base outline ─────────────────────────────────────── */}
-      <g fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1">
-        <ellipse cx="100" cy="32" rx="26" ry="30" />
-        {/* Ear outlines */}
-        <ellipse cx="73"  cy="32" rx="5" ry="8" />
-        <ellipse cx="127" cy="32" rx="5" ry="8" />
-        <rect x="91" y="52" width="18" height="14" rx="4" />
-        {isFemale ? (
-          <>
-            <path d="M70 64 L130 64 Q136 112 132 155 Q116 162 100 162 Q84 162 68 155 Q64 112 70 64 Z" />
-            <path d="M70 70 L50 76 L44 148 L60 148 L65 80 Z" />
-            <path d="M130 70 L150 76 L156 148 L140 148 L135 80 Z" />
-            <path d="M66 155 Q58 164 60 280 L82 280 L90 165 Q100 170 110 165 L118 280 L140 280 Q142 164 134 155 Q116 164 100 164 Q84 164 66 155 Z" />
-          </>
-        ) : (
-          <>
-            <path d="M60 64 L140 64 L138 158 L62 158 Z" />
-            <path d="M60 70 L38 76 L32 150 L50 150 L58 80 Z" />
-            <path d="M140 70 L162 76 L168 150 L150 150 L142 80 Z" />
-            <path d="M68 158 L60 280 L82 280 L90 162 Z" />
-            <path d="M132 158 L140 280 L118 280 L110 162 Z" />
-          </>
-        )}
-        <ellipse cx="71" cy="285" rx="11" ry="7" />
-        <ellipse cx="129" cy="285" rx="11" ry="7" />
-      </g>
-
-      {/* ── Face / body decorative details (non-interactive) ─────── */}
-      {isFront ? (
-        <g style={{ pointerEvents: 'none' }}>
-          {/* Eyebrows */}
-          <path d="M84 23 Q89 19 95 22" fill="none" stroke="#7a9fae" strokeWidth="0.9" strokeLinecap="round" />
-          <path d="M105 22 Q111 19 117 23" fill="none" stroke="#7a9fae" strokeWidth="0.9" strokeLinecap="round" />
-          {/* Eyes */}
-          <circle cx="89" cy="27" r="3" fill="#7a9fae" />
-          <circle cx="111" cy="27" r="3" fill="#7a9fae" />
-          {/* Nose dots */}
-          <circle cx="99" cy="37" r="1" fill="#94a3b8" />
-          <circle cx="101" cy="37" r="1" fill="#94a3b8" />
-          {/* Smile */}
-          <path d="M92 41 Q100 47 108 41" fill="none" stroke="#7a9fae" strokeWidth="1.5" strokeLinecap="round" />
-          {/* Ear inner curves */}
-          <path d="M72 28 Q68 32 72 36" fill="none" stroke="#b0bec5" strokeWidth="0.7" strokeLinecap="round" />
-          <path d="M128 28 Q132 32 128 36" fill="none" stroke="#b0bec5" strokeWidth="0.7" strokeLinecap="round" />
-          {/* Body centerline */}
-          <line x1="100" y1="68" x2="100" y2="156" stroke="#94a3b8" strokeWidth="0.8" strokeDasharray="3,3" />
-          {isFemale && (
-            <>
-              <ellipse cx="89" cy="102" rx="9" ry="7" fill="#d1dae5" stroke="#cbd5e1" strokeWidth="0.8" />
-              <ellipse cx="111" cy="102" rx="9" ry="7" fill="#d1dae5" stroke="#cbd5e1" strokeWidth="0.8" />
-            </>
-          )}
-        </g>
-      ) : (
-        <g style={{ pointerEvents: 'none' }}>
-          <line x1="100" y1="68" x2="100" y2="156" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4,4" />
-          <ellipse cx="82" cy="92" rx="12" ry="18" fill="#d1dae5" />
-          <ellipse cx="118" cy="92" rx="12" ry="18" fill="#d1dae5" />
-          <ellipse cx="100" cy="26" rx="23" ry="14" fill="#d1dae5" />
-          {isFemale && (
-            <path d="M78 145 Q100 152 122 145" fill="none" stroke="#cbd5e1" strokeWidth="1.5" />
-          )}
-        </g>
-      )}
+    <svg viewBox="0 0 200 350" className="w-full max-w-[320px] mx-auto select-none">
+      {/* ── Real body background image ─────────────────────────────── */}
+      <image href={imgSrc} x="0" y="0" width="200" height="350" />
 
       {/* ── Body zones (non-head) ─────────────────────────────────── */}
       {zones.map((z) => renderShape(z, selectedZones.includes(z.id)))}
@@ -194,16 +135,16 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
       {isFront && (
         <>
           {/* Full head ellipse — catches forehead, skull, chin (background layer) */}
-          <ellipse cx="100" cy="32" rx="26" ry="30" {...headHit('head-scalp')} />
+          <ellipse cx="100" cy="35" rx="22" ry="26" {...headHit('head-scalp')} />
           {/* Ear zones — cover ear protrusions + side edges of head */}
-          <ellipse cx="75"  cy="31" rx="11" ry="16" {...headHit('head-ear-l')} />
-          <ellipse cx="125" cy="31" rx="11" ry="16" {...headHit('head-ear-r')} />
+          <ellipse cx="78"  cy="35" rx="10" ry="14" {...headHit('head-ear-l')} />
+          <ellipse cx="122" cy="35" rx="10" ry="14" {...headHit('head-ear-r')} />
           {/* Eyes band — upper horizontal strip (both eyes, overrides ear overlap) */}
-          <rect x="82" y="15" width="36" height="16" {...headHit('head-eyes')} />
+          <rect x="85" y="22" width="30" height="14" {...headHit('head-eyes')} />
           {/* Nose zone — center strip */}
-          <rect x="89" y="31" width="22" height="14" {...headHit('head-nose')} />
+          <rect x="92" y="36" width="16" height="12" {...headHit('head-nose')} />
           {/* Teeth/mouth zone — lower strip */}
-          <rect x="86" y="45" width="28" height="15" {...headHit('head-teeth')} />
+          <rect x="90" y="48" width="20" height="12" {...headHit('head-teeth')} />
         </>
       )}
     </svg>
