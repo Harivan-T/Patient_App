@@ -66,9 +66,17 @@ export async function getPatientByCredentials(
   nationalId: string,
   phone: string
 ): Promise<Patient | null> {
+  const normalizedNationalId = nationalId.replace(/\D/g, '');
+  const normalizedPhone = phone.replace(/\D/g, '');
   const rows = await query<Patient>(
-    `${PATIENT_SELECT} WHERE p.nationalid = $1 AND p.phone = $2 LIMIT 1`,
-    [nationalId, phone]
+    `${PATIENT_SELECT}
+     WHERE regexp_replace(p.nationalid, '\\D', '', 'g') = $1
+       AND (
+         regexp_replace(p.phone, '\\D', '', 'g') = $2
+         OR right(regexp_replace(p.phone, '\\D', '', 'g'), 10) = right($2, 10)
+       )
+     LIMIT 1`,
+    [normalizedNationalId, normalizedPhone]
   );
   return rows[0] ?? null;
 }

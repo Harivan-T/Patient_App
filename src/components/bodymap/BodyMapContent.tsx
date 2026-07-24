@@ -513,15 +513,6 @@ export function BodyMapContent() {
                     </button>
                   ))}
                 </div>
-                <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
-                  {(['male', 'female'] as const).map((g) => (
-                    <button key={g} onClick={() => setGender(g)}
-                      className="py-1.5 px-3 rounded-lg text-sm font-medium transition-colors"
-                      style={gender === g ? { background: 'white', color: BRAND, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: '#6b7280' }}>
-                      {g === 'male' ? '♂' : '♀'}
-                    </button>
-                  ))}
-                </div>
               </div>
               <BodySVG side={side} selectedZones={zones} onToggle={toggleZone} gender={gender} />
               {zones.length > 0 && (
