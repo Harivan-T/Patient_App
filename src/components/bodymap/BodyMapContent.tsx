@@ -353,6 +353,9 @@ export function BodyMapContent() {
   const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
   const [history, setHistory]                   = useState<PainRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [aiResult, setAiResult] = useState<{ possibleDiagnoses: string[]; urgency: 'low' | 'medium' | 'high'; advice: string; disclaimer: string } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   function getZoneLabel(id: string): string {
     return t(`zones.${zoneKey(id)}` as Parameters<typeof t>[0]);
@@ -440,6 +443,33 @@ export function BodyMapContent() {
     } finally { setLoadingHistory(false); }
   }
 
+  async function getAiDiagnosis() {
+    setAiLoading(true);
+    setAiError('');
+    setAiResult(null);
+    try {
+      const res = await fetch('/api/diagnose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          zones,
+          areaSymptoms,
+          painLevel,
+          duration,
+          notes,
+          ...answers,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'AI request failed');
+      setAiResult(data);
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'AI request failed');
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   useEffect(() => {
     loadHistory();
     fetch('/api/profile').then(r => r.json()).then(data => {
@@ -452,6 +482,7 @@ export function BodyMapContent() {
     setPainLevel(5); setDuration(''); setNotes('');
     setAnswers({ movementPain: false, nightPain: false, takingMedication: false, hasFever: false });
     setSubmitted(false); setBookStep5Open(false);
+    setAiResult(null); setAiError('');
   }
 
   const STEP_LABELS = [
@@ -722,6 +753,43 @@ export function BodyMapContent() {
                   </SummaryRow>
                 )}
               </div>
+
+              {/* AI initial diagnosis — demo only */}
+              <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={getAiDiagnosis}
+                  disabled={aiLoading}
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-white font-semibold text-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60"
+                  style={{ background: 'var(--color-primary)' }}
+                >
+                  {aiLoading ? 'Analyzing...' : 'Get AI Initial Assessment'}
+                </button>
+                {aiError && (
+                  <p className="text-sm text-red-600 mt-2">{aiError}</p>
+                )}
+                {aiResult && (
+                  <div className="mt-3 p-4 rounded-2xl border bg-amber-50 border-amber-200 text-sm">
+                    <p className="text-xs text-amber-700 font-medium mb-2 uppercase tracking-wide">
+                      AI Triage Suggestion — Not a Diagnosis
+                    </p>
+                    <div className="space-y-2 text-gray-800">
+                      <p><span className="font-semibold">Possible causes:</span> {aiResult.possibleDiagnoses.join(', ')}</p>
+                      <p><span className="font-semibold">Urgency:</span>{' '}
+                        <span
+                          className="capitalize font-semibold"
+                          style={{ color: { low: '#22c55e', medium: '#f59e0b', high: '#ef4444' }[aiResult.urgency] }}
+                        >
+                          {aiResult.urgency}
+                        </span>
+                      </p>
+                      <p><span className="font-semibold">Advice:</span> {aiResult.advice}</p>
+                    </div>
+                    <p className="text-xs text-amber-700 mt-3">{aiResult.disclaimer}</p>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-between mt-6">
                 <button onClick={() => setStep(4)} className="btn-secondary">{t('buttons.edit')}</button>
                 <button onClick={handleSubmit} disabled={submitting} className="btn-primary">
