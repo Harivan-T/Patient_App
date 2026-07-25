@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const SYSTEM_PROMPT = `You are a medical triage assistant for a demo healthcare app.
 Based on the patient-provided information below, produce a short differential
@@ -14,75 +13,142 @@ Respond ONLY as a JSON object with this exact structure:
 
 Patient information:`;
 
+function buildPrompt(body: any): { info: string; prompt: string } {
+  const {
+    zones,
+    areaSymptoms,
+    painLevel,
+    duration,
+    notes,
+    movementPain,
+    nightPain,
+    takingMedication,
+    hasFever,
+  } = body;
+
+  const info = [
+    `Affected body areas: ${(zones || []).join(', ') || 'none'}`,
+    `Symptoms by area: ${JSON.stringify(areaSymptoms || {})}`,
+    `Pain level: ${painLevel || 'not specified'}/10`,
+    `Duration: ${duration || 'not specified'}`,
+    `Patient notes: ${notes || 'none'}`,
+    `Movement worsens pain: ${movementPain ? 'yes' : 'no'}`,
+    `Night pain: ${nightPain ? 'yes' : 'no'}`,
+    `Taking medication: ${takingMedication ? 'yes' : 'no'}`,
+    `Fever: ${hasFever ? 'yes' : 'no'}`,
+  ].join('\n');
+
+  return { info, prompt: `${SYSTEM_PROMPT}\n${info}\n\nJSON response:` };
+}
+
+async function fetchGemini(prompt: string): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY is not configured');
+
+  const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json' },
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    console.error('[diagnose] Gemini error', err);
+    throw new Error(`Gemini request failed: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+async function fetchOllama(prompt: string): Promise<string> {
+  const baseUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+  const model = process.env.OLLAMA_MODEL || 'llama3';
+  const res = await fetch(`${baseUrl}/api/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model,
+      prompt,
+      stream: false,
+      format: 'json',
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Ollama request failed: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.response || '';
+}
+
+function getDemoResult(body: any) {
+  const painLevel = typeof body.painLevel === 'number' ? body.painLevel : 5;
+  const hasFever = !!body.hasFever;
+  const urgency = painLevel >= 7 || hasFever ? 'medium' : 'low';
+
+  return {
+    possibleDiagnoses: ['Minor soft-tissue strain', 'Non-specific pain syndrome'],
+    urgency,
+    advice:
+      'Rest the affected area, avoid activities that worsen the pain, and monitor symptoms. Seek medical care if the pain worsens, persists beyond a few days, or is accompanied by fever, numbness, or severe limitation.',
+    source: 'demo-fallback',
+  };
+}
+
+function parseAiText(text: string): any {
+  const cleaned = text
+    .replace(/```json\s?/gi, '')
+    .replace(/```\s?/gi, '')
+    .trim();
+  return JSON.parse(cleaned);
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const {
-      zones,
-      areaSymptoms,
-      painLevel,
-      duration,
-      notes,
-      movementPain,
-      nightPain,
-      takingMedication,
-      hasFever,
-    } = body;
-
-    const info = [
-      `Affected body areas: ${(zones || []).join(', ') || 'none'}`,
-      `Symptoms by area: ${JSON.stringify(areaSymptoms || {})}`,
-      `Pain level: ${painLevel || 'not specified'}/10`,
-      `Duration: ${duration || 'not specified'}`,
-      `Patient notes: ${notes || 'none'}`,
-      `Movement worsens pain: ${movementPain ? 'yes' : 'no'}`,
-      `Night pain: ${nightPain ? 'yes' : 'no'}`,
-      `Taking medication: ${takingMedication ? 'yes' : 'no'}`,
-      `Fever: ${hasFever ? 'yes' : 'no'}`,
-    ].join('\n');
+    const { prompt } = buildPrompt(body);
 
     const provider = process.env.AI_PROVIDER || 'gemini';
-
     let text = '';
-    if (provider === 'ollama') {
-      const baseUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-      const model = process.env.OLLAMA_MODEL || 'llama3';
-      const res = await fetch(`${baseUrl}/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model,
-          prompt: `${SYSTEM_PROMPT}\n${info}\n\nJSON response:`,
-          stream: false,
-          format: 'json',
-        }),
-      });
-      if (!res.ok) {
-        return NextResponse.json({ error: 'Ollama request failed' }, { status: 502 });
+
+    try {
+      if (provider === 'ollama') {
+        text = await fetchOllama(prompt);
+      } else {
+        text = await fetchGemini(prompt);
       }
-      const data = await res.json();
-      text = data.response || '';
-    } else {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        return NextResponse.json(
-          { error: 'GEMINI_API_KEY is not configured' },
-          { status: 503 }
-        );
+    } catch (firstErr) {
+      console.warn('[diagnose] primary provider failed, trying fallback', firstErr);
+
+      // If Gemini failed and Ollama is configured, try it
+      if (provider !== 'ollama' && process.env.OLLAMA_URL) {
+        try {
+          text = await fetchOllama(prompt);
+        } catch (ollamaErr) {
+          console.warn('[diagnose] Ollama fallback failed', ollamaErr);
+        }
       }
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const result = await model.generateContent(
-        `${SYSTEM_PROMPT}\n${info}\n\nJSON response:`
-      );
-      text = result.response.text();
     }
 
-    const cleaned = text
-      .replace(/```json\s?/gi, '')
-      .replace(/```\s?/gi, '')
-      .trim();
-    const parsed = JSON.parse(cleaned);
+    // If no text was returned, use the demo fallback so the UI always works
+    if (!text) {
+      return NextResponse.json({
+        ...getDemoResult(body),
+        disclaimer:
+          'This is a demo AI triage suggestion, not a medical diagnosis. Please consult a healthcare professional.',
+      });
+    }
+
+    const parsed = parseAiText(text);
 
     return NextResponse.json({
       ...parsed,

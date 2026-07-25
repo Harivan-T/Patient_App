@@ -6,6 +6,14 @@ import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { BookDoctorOptions } from '@/components/ui/BookDoctorOptions';
 import { AREA_SYMPTOM_KEYS, ZONE_TO_GROUP } from '@/data/areaSymptoms';
 
+interface AiDiagnosis {
+  possibleDiagnoses: string[];
+  urgency: 'low' | 'medium' | 'high';
+  advice: string;
+  disclaimer?: string;
+  source?: string;
+}
+
 interface PainRecord {
   id: string;
   zones: string[];
@@ -19,6 +27,7 @@ interface PainRecord {
   hasFever: boolean;
   notes: string;
   recordedAt: string;
+  aiDiagnosis?: AiDiagnosis | null;
 }
 
 const BRAND = 'var(--color-primary)';
@@ -353,7 +362,7 @@ export function BodyMapContent() {
   const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
   const [history, setHistory]                   = useState<PainRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
-  const [aiResult, setAiResult] = useState<{ possibleDiagnoses: string[]; urgency: 'low' | 'medium' | 'high'; advice: string; disclaimer: string } | null>(null);
+  const [aiResult, setAiResult] = useState<AiDiagnosis | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
 
@@ -425,10 +434,29 @@ export function BodyMapContent() {
   async function handleSubmit() {
     setSubmitting(true);
     try {
+      let diagnosis = aiResult;
+      if (!diagnosis) {
+        try {
+          diagnosis = await fetchAiDiagnosis();
+          setAiResult(diagnosis);
+        } catch (err) {
+          console.warn('[BodyMapContent] AI diagnosis failed before submit', err);
+        }
+      }
+
       const res = await fetch('/api/pain-record', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ zones, symptoms: allSymptoms, areaSymptoms, painLevel, duration, ...answers, notes }),
+        body: JSON.stringify({
+          zones,
+          symptoms: allSymptoms,
+          areaSymptoms,
+          painLevel,
+          duration,
+          ...answers,
+          notes,
+          aiDiagnosis: diagnosis ?? undefined,
+        }),
       });
       if (res.ok) { setSubmitted(true); loadHistory(); }
     } finally { setSubmitting(false); }
@@ -443,26 +471,31 @@ export function BodyMapContent() {
     } finally { setLoadingHistory(false); }
   }
 
+  async function fetchAiDiagnosis(): Promise<AiDiagnosis | null> {
+    const res = await fetch('/api/diagnose', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        zones,
+        areaSymptoms,
+        painLevel,
+        duration,
+        notes,
+        ...answers,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'AI request failed');
+    return data as AiDiagnosis;
+  }
+
   async function getAiDiagnosis() {
     setAiLoading(true);
     setAiError('');
     setAiResult(null);
     try {
-      const res = await fetch('/api/diagnose', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          zones,
-          areaSymptoms,
-          painLevel,
-          duration,
-          notes,
-          ...answers,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'AI request failed');
-      setAiResult(data);
+      const result = await fetchAiDiagnosis();
+      setAiResult(result);
     } catch (err) {
       setAiError(err instanceof Error ? err.message : 'AI request failed');
     } finally {
@@ -984,6 +1017,30 @@ export function BodyMapContent() {
                             <div>
                               <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-muted)' }}>{t('step5.notes')}</p>
                               <p className="text-xs" style={{ color: 'var(--color-heading)' }}>{rec.notes}</p>
+                            </div>
+                          )}
+
+                          {/* AI initial diagnosis */}
+                          {rec.aiDiagnosis && (
+                            <div className="p-3 rounded-xl border bg-amber-50 border-amber-200 text-xs">
+                              <p className="text-[10px] text-amber-700 font-semibold mb-1.5 uppercase tracking-wide">
+                                AI Triage Suggestion — Not a Diagnosis
+                              </p>
+                              <div className="space-y-1.5 text-gray-800">
+                                <p><span className="font-semibold">Possible causes:</span> {rec.aiDiagnosis.possibleDiagnoses.join(', ')}</p>
+                                <p><span className="font-semibold">Urgency:</span>{' '}
+                                  <span
+                                    className="capitalize font-semibold"
+                                    style={{ color: { low: '#22c55e', medium: '#f59e0b', high: '#ef4444' }[rec.aiDiagnosis.urgency] }}
+                                  >
+                                    {rec.aiDiagnosis.urgency}
+                                  </span>
+                                </p>
+                                <p><span className="font-semibold">Advice:</span> {rec.aiDiagnosis.advice}</p>
+                              </div>
+                              {rec.aiDiagnosis.disclaimer && (
+                                <p className="text-[10px] text-amber-700 mt-1.5">{rec.aiDiagnosis.disclaimer}</p>
+                              )}
                             </div>
                           )}
                         </div>
