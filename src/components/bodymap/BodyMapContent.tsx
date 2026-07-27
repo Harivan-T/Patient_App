@@ -111,7 +111,7 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
 }) {
   const isFront  = side === 'front';
   const zones    = ZONES.filter((z) => z.side === side);
-  const imgSrc = `/${gender === 'female' ? 'Female' : 'Male'}-${side}.PNG`;
+  const imgSrc = `/${gender === 'female' ? 'Female' : 'Male'}-${side}.png`;
 
   const headHit = (id: string) => {
     const sel = selectedZones.includes(id);
