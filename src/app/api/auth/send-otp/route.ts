@@ -34,9 +34,10 @@ export async function POST(req: NextRequest) {
     const smsPhone = phone.startsWith('+') ? phone : `+964${phone.replace(/^0/, '')}`;
     const devOtp = await sendSmsOtp(smsPhone, otp);
 
-    // Never expose the OTP in the response outside local development
-    const exposeDevOtp = devOtp && process.env.NODE_ENV !== 'production';
-    const res = NextResponse.json({ success: true, ...(exposeDevOtp ? { devOtp } : {}) });
+    // devOtp is only ever set when sendSmsOtp() didn't actually send an SMS
+    // (no real Vonage credentials configured) — expose it whenever that's true,
+    // on every environment including Vercel, so the login screen can show it.
+    const res = NextResponse.json({ success: true, ...(devOtp ? { devOtp } : {}) });
     res.headers.set('Set-Cookie', cookie);
     return res;
   } catch (err) {
