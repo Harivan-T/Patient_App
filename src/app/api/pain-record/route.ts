@@ -14,6 +14,13 @@ const schema = z.object({
   takingMedication:  z.boolean().default(false),
   hasFever:          z.boolean().default(false),
   notes:             z.string().max(500).default(''),
+  aiDiagnosis:       z.object({
+    possibleDiagnoses: z.array(z.string()),
+    urgency: z.enum(['low', 'medium', 'high']),
+    advice: z.string(),
+    disclaimer: z.string().optional(),
+    source: z.string().optional(),
+  }).optional().nullable(),
 });
 
 export async function POST(req: NextRequest) {

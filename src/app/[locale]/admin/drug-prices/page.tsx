@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
+import { SkeletonCards } from '@/components/ui/Skeleton';
 
 interface CatalogEntry {
   id:          number;
@@ -232,7 +233,7 @@ export default function DrugPricesPage({ params }: { params: { locale: string } 
 
         {/* Table */}
         {loading ? (
-          <p className="text-sm text-[var(--color-muted)] py-8 text-center">Loading…</p>
+          <SkeletonCards count={3} cardClassName="h-10" />
         ) : filtered.length === 0 ? (
           <p className="text-sm text-[var(--color-muted)] py-8 text-center">
             {search ? 'No results.' : 'No drug prices set yet. Add the first one above.'}
@@ -253,7 +254,7 @@ export default function DrugPricesPage({ params }: { params: { locale: string } 
                 {filtered.map((entry, i) => (
                   <tr
                     key={entry.id}
-                    className={`border-b border-[var(--color-border)] last:border-0 ${!entry.available ? 'opacity-40' : ''} ${i % 2 === 0 ? '' : 'bg-black/[0.02]'}`}
+                    className={`border-b border-[var(--color-border)] last:border-0 ${!entry.available ? 'opacity-40' : ''} ${i % 2 === 0 ? '' : 'bg-black/[0.02] dark:bg-white/[0.03]'}`}
                   >
                     <td className="px-4 py-3 font-medium text-[var(--color-heading)]">{entry.name}</td>
                     <td className="px-4 py-3 text-[var(--color-muted)] hidden sm:table-cell">
@@ -281,7 +282,7 @@ export default function DrugPricesPage({ params }: { params: { locale: string } 
                         </button>
                         <button
                           onClick={() => deleteEntry(entry)}
-                          className="px-2 py-1 rounded-lg text-xs border border-red-200 text-red-600 hover:bg-red-50"
+                          className="px-2 py-1 rounded-lg text-xs border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20"
                         >
                           Delete
                         </button>

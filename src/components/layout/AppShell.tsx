@@ -24,9 +24,23 @@ export function AppShell({
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
+    // Name/ID basically never change — cache per browser session so every page
+    // navigation doesn't re-hit /api/me.
+    try {
+      const cached = sessionStorage.getItem('hp-me');
+      if (cached) {
+        setUser(JSON.parse(cached));
+        return;
+      }
+    } catch { /* sessionStorage unavailable */ }
     fetch('/api/me')
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => setUser(data))
+      .then((data) => {
+        setUser(data);
+        if (data) {
+          try { sessionStorage.setItem('hp-me', JSON.stringify(data)); } catch { /* ignore */ }
+        }
+      })
       .catch(() => {});
   }, []);
 

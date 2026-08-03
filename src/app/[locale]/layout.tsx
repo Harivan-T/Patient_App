@@ -28,8 +28,17 @@ export default async function LocaleLayout({
   const dir = isRTL(locale) ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} dir={dir}>
-      <body className={`${inter.variable} min-h-screen bg-background dark:bg-gray-900 text-foreground dark:text-gray-100 font-sans antialiased`}>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <head>
+        {/* Apply the saved theme before first paint — prevents the light flash
+            for dark-mode users. Mirrors applyTheme() in settings/profile. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('hp-theme');if(t==='dark'||(t!=='light'&&t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className={`${inter.variable} min-h-screen bg-background text-foreground font-sans antialiased`}>
         <NextIntlClientProvider locale={locale as Locale} messages={messages}>
           {children}
         </NextIntlClientProvider>

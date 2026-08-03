@@ -235,7 +235,16 @@ const LANG_FALLBACK: Record<string, string[]> = {
 
 // ── Table setup ────────────────────────────────────────────────────────────────
 
-async function ensureTable() {
+// Table creation runs once per process, not per request
+let tableReady: Promise<void> | null = null;
+function ensureTable(): Promise<void> {
+  if (!tableReady) {
+    tableReady = createTable().catch((e) => { tableReady = null; throw e; });
+  }
+  return tableReady;
+}
+
+async function createTable() {
   await query(`
     CREATE TABLE IF NOT EXISTS daily_insights (
       category     TEXT NOT NULL,
@@ -337,7 +346,10 @@ async function fetchFromNewsData(
   try {
     const params = new URLSearchParams({ apikey: key, category: 'health', language });
     if (q) params.set('q', q);
-    const res = await fetch(`https://newsdata.io/api/1/latest?${params}`, { cache: 'no-store' });
+    const res = await fetch(`https://newsdata.io/api/1/latest?${params}`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(8000),
+    });
     if (!res.ok) return null;
     const data = await res.json();
     const results: RawArticle[] = data?.results ?? [];
@@ -398,6 +410,9 @@ async function fetchSection(
 // ── Handler ────────────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
+  const session = await getSessionFromCookies();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   await ensureTable();
 
   const locale = req.nextUrl.searchParams.get('locale') ?? 'en';

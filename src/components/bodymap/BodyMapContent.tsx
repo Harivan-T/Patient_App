@@ -6,6 +6,14 @@ import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { BookDoctorOptions } from '@/components/ui/BookDoctorOptions';
 import { AREA_SYMPTOM_KEYS, ZONE_TO_GROUP } from '@/data/areaSymptoms';
 
+interface AiDiagnosis {
+  possibleDiagnoses: string[];
+  urgency: 'low' | 'medium' | 'high';
+  advice: string;
+  disclaimer?: string;
+  source?: string;
+}
+
 interface PainRecord {
   id: string;
   zones: string[];
@@ -19,6 +27,7 @@ interface PainRecord {
   hasFever: boolean;
   notes: string;
   recordedAt: string;
+  aiDiagnosis?: AiDiagnosis | null;
 }
 
 const BRAND = 'var(--color-primary)';
@@ -34,42 +43,56 @@ interface ZoneDef {
 }
 
 const ZONES: ZoneDef[] = [
-  { id: 'neck',          side: 'front', shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
-  { id: 'l-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 65, cy: 73, rx: 14, ry: 11 } },
-  { id: 'r-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 135,cy: 73, rx: 14, ry: 11 } },
-  { id: 'chest',         side: 'front', shape: { type: 'rect',    x: 73,  y: 82,  w: 54,  h: 36, rx: 4 } },
-  { id: 'abdomen',       side: 'front', shape: { type: 'rect',    x: 73,  y: 118, w: 54,  h: 38, rx: 4 } },
-  { id: 'l-upper-arm',   side: 'front', shape: { type: 'rect',    x: 40,  y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'r-upper-arm',   side: 'front', shape: { type: 'rect',    x: 138, y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'l-forearm',     side: 'front', shape: { type: 'rect',    x: 36,  y: 118, w: 18,  h: 34, rx: 6 } },
-  { id: 'r-forearm',     side: 'front', shape: { type: 'rect',    x: 146, y: 118, w: 18,  h: 34, rx: 6 } },
-  { id: 'pelvis',        side: 'front', shape: { type: 'rect',    x: 68,  y: 156, w: 64,  h: 22, rx: 4 } },
-  { id: 'l-thigh',       side: 'front', shape: { type: 'rect',    x: 68,  y: 178, w: 24,  h: 48, rx: 6 } },
-  { id: 'r-thigh',       side: 'front', shape: { type: 'rect',    x: 108, y: 178, w: 24,  h: 48, rx: 6 } },
-  { id: 'l-knee',        side: 'front', shape: { type: 'ellipse', cx: 79, cy: 233, rx: 12, ry: 10 } },
-  { id: 'r-knee',        side: 'front', shape: { type: 'ellipse', cx: 121,cy: 233, rx: 12, ry: 10 } },
-  { id: 'l-shin',        side: 'front', shape: { type: 'rect',    x: 66,  y: 244, w: 20,  h: 36, rx: 5 } },
-  { id: 'r-shin',        side: 'front', shape: { type: 'rect',    x: 114, y: 244, w: 20,  h: 36, rx: 5 } },
-  { id: 'l-foot',        side: 'front', shape: { type: 'ellipse', cx: 72, cy: 285, rx: 12, ry: 7 } },
-  { id: 'r-foot',        side: 'front', shape: { type: 'ellipse', cx: 128,cy: 285, rx: 12, ry: 7 } },
-  { id: 'head-b',        side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 32, rx: 26, ry: 30 } },
-  { id: 'neck-b',        side: 'back',  shape: { type: 'rect',    x: 91,  y: 52,  w: 18,  h: 14, rx: 4 } },
-  { id: 'l-trap',        side: 'back',  shape: { type: 'ellipse', cx: 73, cy: 74, rx: 16, ry: 11 } },
-  { id: 'r-trap',        side: 'back',  shape: { type: 'ellipse', cx: 127,cy: 74, rx: 16, ry: 11 } },
-  { id: 'upper-back',    side: 'back',  shape: { type: 'rect',    x: 73,  y: 82,  w: 54,  h: 30, rx: 4 } },
-  { id: 'mid-back',      side: 'back',  shape: { type: 'rect',    x: 73,  y: 112, w: 54,  h: 26, rx: 4 } },
-  { id: 'lower-back',    side: 'back',  shape: { type: 'rect',    x: 73,  y: 138, w: 54,  h: 22, rx: 4 } },
-  { id: 'l-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 40,  y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'r-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 138, y: 74,  w: 22,  h: 42, rx: 6 } },
-  { id: 'l-buttock',     side: 'back',  shape: { type: 'rect',    x: 68,  y: 158, w: 28,  h: 28, rx: 6 } },
-  { id: 'r-buttock',     side: 'back',  shape: { type: 'rect',    x: 104, y: 158, w: 28,  h: 28, rx: 6 } },
-  { id: 'l-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 68,  y: 186, w: 24,  h: 50, rx: 6 } },
-  { id: 'r-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 108, y: 186, w: 24,  h: 50, rx: 6 } },
-  { id: 'l-calf',        side: 'back',  shape: { type: 'rect',    x: 66,  y: 242, w: 20,  h: 36, rx: 5 } },
-  { id: 'r-calf',        side: 'back',  shape: { type: 'rect',    x: 114, y: 242, w: 20,  h: 36, rx: 5 } },
+  // Front zones - adjusted for PNG image alignment
+  { id: 'neck',          side: 'front', shape: { type: 'rect',    x: 85,  y: 55,  w: 30,  h: 20, rx: 5 } },
+  { id: 'l-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 67, cy: 70, rx: 15, ry: 8 } },
+  { id: 'r-shoulder',    side: 'front', shape: { type: 'ellipse', cx: 133,cy: 70, rx: 15, ry: 8 } },
+  { id: 'chest',         side: 'front', shape: { type: 'rect',    x: 70,  y: 70,  w: 60,  h: 45, rx: 5 } },
+  { id: 'abdomen',       side: 'front', shape: { type: 'rect',    x: 72,  y: 120, w: 56,  h: 34, rx: 5 } },
+  { id: 'l-upper-arm',   side: 'front', shape: { type: 'rect',    x: 54,  y: 75,  w: 16,  h: 55, rx: 8 } },
+  { id: 'r-upper-arm',   side: 'front', shape: { type: 'rect',    x: 125, y: 75,  w: 16,  h: 55, rx: 8 } },
+  { id: 'l-forearm',     side: 'front', shape: { type: 'rect',    x: 53,  y: 130, w: 12,  h: 50, rx: 7 } },
+  { id: 'r-forearm',     side: 'front', shape: { type: 'rect',    x: 131, y: 130, w: 12,  h: 50, rx: 7 } },
+  { id: 'l-hand',        side: 'front', shape: { type: 'ellipse', cx: 57, cy: 192, rx: 7, ry: 12 } },
+  { id: 'r-hand',        side: 'front', shape: { type: 'ellipse', cx: 143,cy: 192, rx: 7, ry: 12 } },
+  { id: 'pelvis',        side: 'front', shape: { type: 'rect',    x: 65,  y: 156, w: 70,  h: 30, rx: 8 } },
+  { id: 'l-thigh',       side: 'front', shape: { type: 'rect',    x: 67,  y: 180, w: 30,  h: 60, rx: 8 } },
+  { id: 'r-thigh',       side: 'front', shape: { type: 'rect',    x: 103, y: 180, w: 30,  h: 60, rx: 8 } },
+  { id: 'l-knee',        side: 'front', shape: { type: 'ellipse', cx: 85, cy: 250, rx: 10, ry: 8 } },
+  { id: 'r-knee',        side: 'front', shape: { type: 'ellipse', cx: 115,cy: 250, rx: 10, ry: 8 } },
+  { id: 'l-shin',        side: 'front', shape: { type: 'rect',    x: 73,  y: 259, w: 23,  h: 45, rx: 6 } },
+  { id: 'r-shin',        side: 'front', shape: { type: 'rect',    x: 102, y: 259, w: 23,  h: 45, rx: 6 } },
+  { id: 'l-ankle',       side: 'front', shape: { type: 'ellipse', cx: 75, cy: 310, rx: 10, ry: 7 } },
+  { id: 'r-ankle',       side: 'front', shape: { type: 'ellipse', cx: 125,cy: 310, rx: 10, ry: 7 } },
+  { id: 'l-foot',        side: 'front', shape: { type: 'ellipse', cx: 81, cy: 338, rx: 9, ry: 14 } },
+  { id: 'r-foot',        side: 'front', shape: { type: 'ellipse', cx: 119,cy: 338, rx: 9, ry: 14 } },
+  // Back zones - adjusted for PNG image alignment
+  { id: 'head-b',        side: 'back',  shape: { type: 'ellipse', cx: 100, cy: 26, rx: 20, ry: 24 } },
+  { id: 'neck-b',        side: 'back',  shape: { type: 'rect',    x: 85,  y: 47,  w: 30,  h: 20, rx: 5 } },
+  { id: 'l-trap',        side: 'back',  shape: { type: 'ellipse', cx: 68, cy: 75, rx: 16, ry: 8 } },
+  { id: 'r-trap',        side: 'back',  shape: { type: 'ellipse', cx: 132,cy: 75, rx: 16, ry: 8 } },
+  { id: 'upper-back',    side: 'back',  shape: { type: 'rect',    x: 70,  y: 83,  w: 60,  h: 27, rx: 5 } },
+  { id: 'mid-back',      side: 'back',  shape: { type: 'rect',    x: 72,  y: 117, w: 56,  h: 24, rx: 5 } },
+  { id: 'lower-back',    side: 'back',  shape: { type: 'rect',    x: 72,  y: 150, w: 56,  h: 21, rx: 5 } },
+  { id: 'l-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 35,  y: 75,  w: 25,  h: 55, rx: 8 } },
+  { id: 'r-upper-arm-b', side: 'back',  shape: { type: 'rect',    x: 140, y: 75,  w: 25,  h: 55, rx: 8 } },
+  { id: 'l-elbow-b',     side: 'back',  shape: { type: 'ellipse', cx: 62, cy: 131.5, rx: 10, ry: 8 } },
+  { id: 'r-elbow-b',     side: 'back',  shape: { type: 'ellipse', cx: 138,cy: 131.5, rx: 10, ry: 8 } },
+  { id: 'l-forearm-b',   side: 'back',  shape: { type: 'rect',    x: 40,  y: 135, w: 15,  h: 50, rx: 7 } },
+  { id: 'r-forearm-b',   side: 'back',  shape: { type: 'rect',    x: 145, y: 135, w: 15,  h: 50, rx: 7 } },
+  { id: 'l-hand-b',      side: 'back',  shape: { type: 'ellipse', cx: 56, cy: 194, rx: 8, ry: 12 } },
+  { id: 'r-hand-b',      side: 'back',  shape: { type: 'ellipse', cx: 145,cy: 194, rx: 8, ry: 12 } },
+  { id: 'l-buttock',     side: 'back',  shape: { type: 'rect',    x: 65,  y: 175, w: 32,  h: 32, rx: 8 } },
+  { id: 'r-buttock',     side: 'back',  shape: { type: 'rect',    x: 103, y: 175, w: 32,  h: 32, rx: 8 } },
+  { id: 'l-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 65,  y: 207, w: 30,  h: 60, rx: 8 } },
+  { id: 'r-back-thigh',  side: 'back',  shape: { type: 'rect',    x: 105, y: 207, w: 30,  h: 60, rx: 8 } },
+  { id: 'l-calf',        side: 'back',  shape: { type: 'rect',    x: 65,  y: 272, w: 25,  h: 45, rx: 6 } },
+  { id: 'r-calf',        side: 'back',  shape: { type: 'rect',    x: 110, y: 272, w: 25,  h: 45, rx: 6 } },
 ];
 
 function zoneKey(id: string): string {
+  const backSpecific = ['l-forearm-b', 'r-forearm-b', 'l-hand-b', 'r-hand-b', 'l-elbow-b', 'r-elbow-b'];
+  if (backSpecific.includes(id)) return id.replace(/-/g, '_');
   return id.replace(/-b$/, '').replace(/-/g, '_');
 }
 
@@ -87,8 +110,8 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
   gender: 'male' | 'female';
 }) {
   const isFront  = side === 'front';
-  const isFemale = gender === 'female';
   const zones    = ZONES.filter((z) => z.side === side);
+  const imgSrc = `/${gender === 'female' ? 'Female' : 'Male'}-${side}.png`;
 
   const headHit = (id: string) => {
     const sel = selectedZones.includes(id);
@@ -114,77 +137,168 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
       onClick: () => onToggle(z.id),
     };
     if (z.shape.type === 'ellipse') {
-      return <ellipse key={z.id} cx={z.shape.cx} cy={z.shape.cy} rx={z.shape.rx} ry={z.shape.ry} {...sharedProps} />;
+      let cx = z.shape.cx;
+      let cy = z.shape.cy;
+      let rx = z.shape.rx;
+      let ry = z.shape.ry;
+      if (z.id === 'l-shoulder' && gender === 'female') {
+        cx += 7;
+        cy += 7;
+      } else if (z.id === 'r-shoulder' && gender === 'female') {
+        cx -= 7;
+        cy += 7;
+      } else if (z.id === 'l-knee') {
+        if (gender === 'female') { cx += 2; cy -= 2; }
+        else if (gender === 'male') cx -= 1;
+      } else if (z.id === 'r-knee') {
+        if (gender === 'female') { cx -= 2; cy -= 2; }
+        else if (gender === 'male') cx += 1;
+      } else if (z.id === 'l-ankle') {
+        if (gender === 'female') { cx += 15; cy += 2; }
+        else if (gender === 'male') { cx += 6; cy += 2; }
+      } else if (z.id === 'r-ankle') {
+        if (gender === 'female') { cx -= 15; cy += 2; }
+        else if (gender === 'male') { cx -= 6; cy += 2; }
+      } else if (z.id === 'l-foot') {
+        if (gender === 'female') { cx += 8; cy -= 4; }
+        else if (gender === 'male') { cx += 1; cy -= 2; }
+      } else if (z.id === 'r-foot') {
+        if (gender === 'female') { cx -= 8; cy -= 4; }
+        else if (gender === 'male') { cx -= 1; cy -= 2; }
+      } else if ((z.id === 'l-trap' || z.id === 'r-trap') && gender === 'female') {
+        cy += 2;
+        if (z.id === 'l-trap') cx += 6;
+        else if (z.id === 'r-trap') cx -= 6;
+      } else if ((z.id === 'l-trap' || z.id === 'r-trap') && gender === 'male') {
+        cy -= 5;
+        if (z.id === 'l-trap') cx += 2;
+        else if (z.id === 'r-trap') cx -= 2;
+      }
+      if (gender === 'female' && z.side === 'back' && z.id !== 'head-b') {
+        rx *= 0.8;
+        ry *= 0.8;
+      }
+      return <ellipse key={z.id} cx={cx} cy={cy} rx={rx} ry={ry} {...sharedProps} />;
     }
-    return <rect key={z.id} x={z.shape.x} y={z.shape.y} width={z.shape.w} height={z.shape.h} rx={z.shape.rx ?? 0} {...sharedProps} />;
+    let y =
+      (z.id === 'neck' || z.id === 'upper-back') && gender === 'male'
+        ? z.shape.y - 5
+        : z.id === 'mid-back' && gender === 'male'
+          ? z.shape.y - 10
+          : z.id === 'lower-back' && gender === 'male'
+            ? z.shape.y - 18
+            : (z.id === 'l-back-thigh' || z.id === 'r-back-thigh') && gender === 'male'
+              ? z.shape.y - 18
+              : (z.id === 'l-calf' || z.id === 'r-calf') && gender === 'male'
+                ? z.shape.y - 10
+                : z.id === 'chest' && gender === 'female'
+                  ? z.shape.y + 4
+                  : z.shape.y;
+    let w =
+      (z.id === 'l-thigh' || z.id === 'r-thigh') && gender === 'female'
+        ? z.shape.w - 3
+        : (z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'male'
+          ? z.shape.w - 6
+          : (z.id === 'l-back-thigh' || z.id === 'r-back-thigh') && gender === 'male'
+            ? z.shape.w - 4
+            : (z.id === 'l-calf' || z.id === 'r-calf') && gender === 'male'
+              ? z.shape.w - 7
+              : z.shape.w;
+    let h = z.shape.h;
+    if ((z.id === 'l-back-thigh' || z.id === 'r-back-thigh') && gender === 'male') {
+      h -= 4;
+    } else if ((z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'male') {
+      h -= 3;
+    }
+    let x = z.shape.x;
+    if (z.id === 'l-thigh' && gender === 'female') {
+      x += 2;
+    } else if (z.id === 'l-forearm' && gender === 'male') {
+      x -= 1;
+    } else if (z.id === 'r-shin' && gender === 'male') {
+      x += 2;
+    } else if ((z.id === 'r-upper-arm' || z.id === 'r-forearm') && gender === 'male') {
+      x += 5;
+    } else if (z.id === 'l-back-thigh' && gender === 'male') {
+      x += 3;
+    } else if (z.id === 'l-calf' && gender === 'male') {
+      x += 8;
+    } else if (z.id === 'r-calf' && gender === 'male') {
+      x -= 2;
+    } else if ((z.id === 'l-forearm-b' || z.id === 'r-forearm-b')) {
+      if (z.id === 'l-forearm-b') x = z.shape.x + 7;
+      else if (z.id === 'r-forearm-b') x = z.shape.x - 7;
+    } else if ((z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'male') {
+      if (z.id === 'l-upper-arm-b') x += 15;
+      else if (z.id === 'r-upper-arm-b') x -= 10;
+    } else if ((z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'female') {
+      if (z.id === 'l-upper-arm-b') x += 16;
+      else if (z.id === 'r-upper-arm-b') x -= 16;
+    }
+    if ((z.id === 'l-upper-arm-b' || z.id === 'r-upper-arm-b') && gender === 'female') {
+      w -= 2;
+    }
+    if ((z.id === 'l-buttock' || z.id === 'r-buttock') && gender === 'male') {
+      y -= 17;
+      w -= 4;
+      h -= 4;
+      x += 2;
+      if (z.id === 'l-buttock') x += 3;
+      else if (z.id === 'r-buttock') x -= 3;
+    }
+    if (gender === 'female' && z.side === 'back' && z.id !== 'head-b') {
+      const dx = w * 0.1;
+      const dy = h * 0.1;
+      x += dx;
+      y += dy;
+      w *= 0.8;
+      h *= 0.8;
+    }
+    if (z.id === 'neck-b' && gender === 'female') {
+      y += 5;
+    }
+    if (z.id === 'mid-back' && gender === 'female') {
+      y -= 9;
+    }
+    if (z.id === 'lower-back' && gender === 'female') {
+      w += 6;
+      x -= 3;
+      y -= 16;
+    }
+    if ((z.id === 'l-buttock' || z.id === 'r-buttock') && gender === 'female') {
+      y -= 17;
+      w += 4;
+      h += 2;
+      x -= 2;
+      y -= 1;
+    }
+    if ((z.id === 'l-back-thigh' || z.id === 'r-back-thigh') && gender === 'female') {
+      y -= 21;
+      if (z.id === 'l-back-thigh') x += 5;
+      else if (z.id === 'r-back-thigh') x -= 5;
+    }
+    if ((z.id === 'l-calf' || z.id === 'r-calf') && gender === 'female') {
+      w -= 3;
+      h += 16;
+      x += 1.5;
+      y -= 21;
+      if (z.id === 'l-calf') x += 10;
+      else if (z.id === 'r-calf') x -= 10;
+    }
+    let transform: string | undefined;
+    if (z.id === 'l-forearm-b' || z.id === 'r-forearm-b') {
+      const angle = z.id === 'l-forearm-b' ? 10 : -10;
+      const pivotX = x + w / 2;
+      const pivotY = y + h;
+      transform = `rotate(${angle}, ${pivotX}, ${pivotY})`;
+    }
+    return <rect key={z.id} x={x} y={y} width={w} height={h} rx={z.shape.rx ?? 0} transform={transform} {...sharedProps} />;
   }
 
   return (
-    <svg viewBox="0 0 200 300" className="w-full max-w-[220px] mx-auto select-none">
-      {/* ── Body base outline ─────────────────────────────────────── */}
-      <g fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1">
-        <ellipse cx="100" cy="32" rx="26" ry="30" />
-        {/* Ear outlines */}
-        <ellipse cx="73"  cy="32" rx="5" ry="8" />
-        <ellipse cx="127" cy="32" rx="5" ry="8" />
-        <rect x="91" y="52" width="18" height="14" rx="4" />
-        {isFemale ? (
-          <>
-            <path d="M70 64 L130 64 Q136 112 132 155 Q116 162 100 162 Q84 162 68 155 Q64 112 70 64 Z" />
-            <path d="M70 70 L50 76 L44 148 L60 148 L65 80 Z" />
-            <path d="M130 70 L150 76 L156 148 L140 148 L135 80 Z" />
-            <path d="M66 155 Q58 164 60 280 L82 280 L90 165 Q100 170 110 165 L118 280 L140 280 Q142 164 134 155 Q116 164 100 164 Q84 164 66 155 Z" />
-          </>
-        ) : (
-          <>
-            <path d="M60 64 L140 64 L138 158 L62 158 Z" />
-            <path d="M60 70 L38 76 L32 150 L50 150 L58 80 Z" />
-            <path d="M140 70 L162 76 L168 150 L150 150 L142 80 Z" />
-            <path d="M68 158 L60 280 L82 280 L90 162 Z" />
-            <path d="M132 158 L140 280 L118 280 L110 162 Z" />
-          </>
-        )}
-        <ellipse cx="71" cy="285" rx="11" ry="7" />
-        <ellipse cx="129" cy="285" rx="11" ry="7" />
-      </g>
-
-      {/* ── Face / body decorative details (non-interactive) ─────── */}
-      {isFront ? (
-        <g style={{ pointerEvents: 'none' }}>
-          {/* Eyebrows */}
-          <path d="M84 23 Q89 19 95 22" fill="none" stroke="#7a9fae" strokeWidth="0.9" strokeLinecap="round" />
-          <path d="M105 22 Q111 19 117 23" fill="none" stroke="#7a9fae" strokeWidth="0.9" strokeLinecap="round" />
-          {/* Eyes */}
-          <circle cx="89" cy="27" r="3" fill="#7a9fae" />
-          <circle cx="111" cy="27" r="3" fill="#7a9fae" />
-          {/* Nose dots */}
-          <circle cx="99" cy="37" r="1" fill="#94a3b8" />
-          <circle cx="101" cy="37" r="1" fill="#94a3b8" />
-          {/* Smile */}
-          <path d="M92 41 Q100 47 108 41" fill="none" stroke="#7a9fae" strokeWidth="1.5" strokeLinecap="round" />
-          {/* Ear inner curves */}
-          <path d="M72 28 Q68 32 72 36" fill="none" stroke="#b0bec5" strokeWidth="0.7" strokeLinecap="round" />
-          <path d="M128 28 Q132 32 128 36" fill="none" stroke="#b0bec5" strokeWidth="0.7" strokeLinecap="round" />
-          {/* Body centerline */}
-          <line x1="100" y1="68" x2="100" y2="156" stroke="#94a3b8" strokeWidth="0.8" strokeDasharray="3,3" />
-          {isFemale && (
-            <>
-              <ellipse cx="89" cy="102" rx="9" ry="7" fill="#d1dae5" stroke="#cbd5e1" strokeWidth="0.8" />
-              <ellipse cx="111" cy="102" rx="9" ry="7" fill="#d1dae5" stroke="#cbd5e1" strokeWidth="0.8" />
-            </>
-          )}
-        </g>
-      ) : (
-        <g style={{ pointerEvents: 'none' }}>
-          <line x1="100" y1="68" x2="100" y2="156" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4,4" />
-          <ellipse cx="82" cy="92" rx="12" ry="18" fill="#d1dae5" />
-          <ellipse cx="118" cy="92" rx="12" ry="18" fill="#d1dae5" />
-          <ellipse cx="100" cy="26" rx="23" ry="14" fill="#d1dae5" />
-          {isFemale && (
-            <path d="M78 145 Q100 152 122 145" fill="none" stroke="#cbd5e1" strokeWidth="1.5" />
-          )}
-        </g>
-      )}
+    <svg viewBox="0 0 200 350" className="w-full max-w-[320px] mx-auto select-none">
+      {/* ── Real body background image ─────────────────────────────── */}
+      <image href={imgSrc} x="0" y="0" width="200" height="350" transform={gender === 'male' ? 'translate(0 2)' : undefined} />
 
       {/* ── Body zones (non-head) ─────────────────────────────────── */}
       {zones.map((z) => renderShape(z, selectedZones.includes(z.id)))}
@@ -192,19 +306,19 @@ function BodySVG({ side, selectedZones, onToggle, gender }: {
       {/* ── Front head: 6 flat hit zones directly tappable at normal scale ── */}
       {/* Render order = priority: later elements win clicks on overlap areas */}
       {isFront && (
-        <>
+        <g transform={gender === 'male' ? 'translate(0 -8)' : undefined}>
           {/* Full head ellipse — catches forehead, skull, chin (background layer) */}
-          <ellipse cx="100" cy="32" rx="26" ry="30" {...headHit('head-scalp')} />
+          <ellipse cx="100" cy="35" rx="18" ry="26" {...headHit('head-scalp')} />
           {/* Ear zones — cover ear protrusions + side edges of head */}
-          <ellipse cx="75"  cy="31" rx="11" ry="16" {...headHit('head-ear-l')} />
-          <ellipse cx="125" cy="31" rx="11" ry="16" {...headHit('head-ear-r')} />
+          <ellipse cx={gender === 'female' ? 82.5 : 82.5} cy={gender === 'female' ? 40 : 39} rx="3.5" ry="5.5" {...headHit('head-ear-l')} />
+          <ellipse cx={gender === 'female' ? 117.5 : 117.5} cy={gender === 'female' ? 40 : 39} rx="3.5" ry="5.5" {...headHit('head-ear-r')} />
           {/* Eyes band — upper horizontal strip (both eyes, overrides ear overlap) */}
-          <rect x="82" y="15" width="36" height="16" {...headHit('head-eyes')} />
+          <rect x="85" y={gender === 'female' ? 34.5 : 33} width="30" height="5" {...headHit('head-eyes')} />
           {/* Nose zone — center strip */}
-          <rect x="89" y="31" width="22" height="14" {...headHit('head-nose')} />
+          <rect x={gender === 'female' ? 94.5 : 94} y="38" width={gender === 'female' ? 11 : 12} height="9" {...headHit('head-nose')} />
           {/* Teeth/mouth zone — lower strip */}
-          <rect x="86" y="45" width="28" height="15" {...headHit('head-teeth')} />
-        </>
+          <rect x="92" y="48.5" width="16" height="8" {...headHit('head-teeth')} />
+        </g>
       )}
     </svg>
   );
@@ -247,6 +361,9 @@ export function BodyMapContent() {
   const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
   const [history, setHistory]                   = useState<PainRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [aiResult, setAiResult] = useState<AiDiagnosis | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   function getZoneLabel(id: string): string {
     return t(`zones.${zoneKey(id)}` as Parameters<typeof t>[0]);
@@ -316,10 +433,29 @@ export function BodyMapContent() {
   async function handleSubmit() {
     setSubmitting(true);
     try {
+      let diagnosis = aiResult;
+      if (!diagnosis) {
+        try {
+          diagnosis = await fetchAiDiagnosis();
+          setAiResult(diagnosis);
+        } catch (err) {
+          console.warn('[BodyMapContent] AI diagnosis failed before submit', err);
+        }
+      }
+
       const res = await fetch('/api/pain-record', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ zones, symptoms: allSymptoms, areaSymptoms, painLevel, duration, ...answers, notes }),
+        body: JSON.stringify({
+          zones,
+          symptoms: allSymptoms,
+          areaSymptoms,
+          painLevel,
+          duration,
+          ...answers,
+          notes,
+          aiDiagnosis: diagnosis ?? undefined,
+        }),
       });
       if (res.ok) { setSubmitted(true); loadHistory(); }
     } finally { setSubmitting(false); }
@@ -334,6 +470,38 @@ export function BodyMapContent() {
     } finally { setLoadingHistory(false); }
   }
 
+  async function fetchAiDiagnosis(): Promise<AiDiagnosis | null> {
+    const res = await fetch('/api/diagnose', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        zones,
+        areaSymptoms,
+        painLevel,
+        duration,
+        notes,
+        ...answers,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'AI request failed');
+    return data as AiDiagnosis;
+  }
+
+  async function getAiDiagnosis() {
+    setAiLoading(true);
+    setAiError('');
+    setAiResult(null);
+    try {
+      const result = await fetchAiDiagnosis();
+      setAiResult(result);
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'AI request failed');
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   useEffect(() => {
     loadHistory();
     fetch('/api/profile').then(r => r.json()).then(data => {
@@ -346,6 +514,7 @@ export function BodyMapContent() {
     setPainLevel(5); setDuration(''); setNotes('');
     setAnswers({ movementPain: false, nightPain: false, takingMedication: false, hasFever: false });
     setSubmitted(false); setBookStep5Open(false);
+    setAiResult(null); setAiError('');
   }
 
   const STEP_LABELS = [
@@ -357,12 +526,12 @@ export function BodyMapContent() {
     <div className="max-w-lg mx-auto">
       {submitted ? (
         <div className="text-center py-8 space-y-4">
-          <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{ background: '#d1fae5' }}>
+          <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{ background: 'rgba(34,197,94,0.18)' }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" className="w-8 h-8">
               <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">{t('success.title')}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('success.title')}</h2>
           <p className="text-sm text-gray-500">{t('success.subtitle')}</p>
           <button onClick={resetForm} className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-white text-sm font-semibold transition-opacity hover:opacity-90" style={{ background: BRAND }}>
             {t('buttons.startNew')}
@@ -376,7 +545,7 @@ export function BodyMapContent() {
                 <div className="flex flex-col items-center gap-1">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-                    style={{ background: i + 1 <= step ? BRAND : '#e5e7eb', color: i + 1 <= step ? 'white' : '#9ca3af' }}
+                    style={{ background: i + 1 <= step ? BRAND : 'var(--color-border)', color: i + 1 <= step ? 'white' : 'var(--color-muted)' }}
                   >
                     {i + 1 < step ? (
                       <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -387,7 +556,7 @@ export function BodyMapContent() {
                   <span className="text-[10px] text-gray-400 hidden sm:block">{label}</span>
                 </div>
                 {i < STEP_LABELS.length - 1 && (
-                  <div className="flex-1 h-0.5 mx-1 transition-colors" style={{ background: i + 1 < step ? BRAND : '#e5e7eb' }} />
+                  <div className="flex-1 h-0.5 mx-1 transition-colors" style={{ background: i + 1 < step ? BRAND : 'var(--color-border)' }} />
                 )}
               </div>
             ))}
@@ -395,24 +564,15 @@ export function BodyMapContent() {
 
           {step === 1 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-1">{t('step1.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('step1.heading')}</h2>
               <p className="text-sm text-gray-500 mb-4">{t('step1.subtitle')}</p>
               <div className="flex items-center justify-between mb-4">
-                <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+                <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 w-fit">
                   {(['front', 'back'] as const).map((s) => (
                     <button key={s} onClick={() => setSide(s)}
                       className="py-1.5 px-5 rounded-lg text-sm font-medium transition-colors"
-                      style={side === s ? { background: 'white', color: BRAND, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: '#6b7280' }}>
+                      style={side === s ? { background: 'var(--card-bg)', color: BRAND, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: 'var(--color-muted)' }}>
                       {s === 'front' ? t('step1.front') : t('step1.back')}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
-                  {(['male', 'female'] as const).map((g) => (
-                    <button key={g} onClick={() => setGender(g)}
-                      className="py-1.5 px-3 rounded-lg text-sm font-medium transition-colors"
-                      style={gender === g ? { background: 'white', color: BRAND, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: '#6b7280' }}>
-                      {g === 'male' ? '♂' : '♀'}
                     </button>
                   ))}
                 </div>
@@ -441,7 +601,7 @@ export function BodyMapContent() {
 
           {step === 2 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-1">{t('step2.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('step2.heading')}</h2>
               <p className="text-sm text-gray-500 mb-4">{t('step2.subtitle')}</p>
               {selectedGroups.map((group, gIdx) => (
                 <div key={group} className={gIdx > 0 ? 'mt-5' : ''}>
@@ -449,7 +609,7 @@ export function BodyMapContent() {
                     <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: BRAND }}>
                       {(tAreaSymptoms as (k: string) => string)(`${group}.label`)}
                     </span>
-                    <div className="flex-1 h-px bg-gray-100" />
+                    <div className="flex-1 h-px bg-gray-100 dark:bg-slate-700" />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {(AREA_SYMPTOM_KEYS[group] ?? []).map((symptomKey, sIdx) => {
@@ -458,7 +618,7 @@ export function BodyMapContent() {
                         <button key={symptomKey}
                           onClick={() => toggleAreaSymptom(group, symptomKey)}
                           className="relative py-3 px-4 rounded-xl border-2 text-sm font-medium text-start transition-all"
-                          style={{ borderColor: isActive ? BRAND : '#e5e7eb', background: isActive ? 'var(--tibbna-light)' : 'white', color: isActive ? '#0e7490' : '#374151' }}>
+                          style={{ borderColor: isActive ? BRAND : 'var(--color-border)', background: isActive ? 'var(--tibbna-light)' : 'white', color: isActive ? 'var(--color-primary)' : 'var(--color-heading)' }}>
                           {(tAreaSymptoms as (k: string) => string)(`${group}.${symptomKey}`)}
                           {sIdx < 3 && !isActive && (
                             <span className="absolute top-1.5 end-1.5 w-1.5 h-1.5 rounded-full" style={{ background: BRAND, opacity: 0.4 }} />
@@ -488,7 +648,7 @@ export function BodyMapContent() {
 
           {step === 3 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-1">{t('step3.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('step3.heading')}</h2>
               <p className="text-sm text-gray-500 mb-6">{t('step3.subtitle')}</p>
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
@@ -506,12 +666,12 @@ export function BodyMapContent() {
                 </div>
               </div>
               <div className="mb-2">
-                <p className="text-sm font-medium text-gray-700 mb-2">{t('step3.duration')}</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('step3.duration')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {DURATION_KEYS.map((key) => (
                     <button key={key} onClick={() => setDuration(key)}
                       className="py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition-all"
-                      style={{ borderColor: duration === key ? BRAND : '#e5e7eb', background: duration === key ? 'var(--tibbna-light)' : 'white', color: duration === key ? '#0e7490' : '#374151' }}>
+                      style={{ borderColor: duration === key ? BRAND : 'var(--color-border)', background: duration === key ? 'var(--tibbna-light)' : 'white', color: duration === key ? 'var(--color-primary)' : 'var(--color-heading)' }}>
                       {t(`durations.${key}`)}
                     </button>
                   ))}
@@ -536,23 +696,23 @@ export function BodyMapContent() {
 
           {step === 4 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-1">{t('step4.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('step4.heading')}</h2>
               <p className="text-sm text-gray-500 mb-4">{t('step4.subtitle')}</p>
               <div className="space-y-3 mb-5">
                 {QUESTION_KEYS.map((key) => {
                   const val = answers[key];
                   return (
-                    <div key={key} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50">
-                      <span className="text-sm text-gray-700 pe-4">{t(`questions.${key}`)}</span>
+                    <div key={key} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+                      <span className="text-sm text-gray-700 dark:text-gray-300 pe-4">{t(`questions.${key}`)}</span>
                       <div className="flex gap-2 shrink-0">
                         {([true, false] as const).map((v) => (
                           <button key={String(v)}
                             onClick={() => setAnswers((a) => ({ ...a, [key]: v }))}
                             className="px-3 py-1 rounded-lg text-sm font-medium border transition-all"
                             style={{
-                              borderColor: val === v ? (v ? '#22c55e' : '#ef4444') : '#e5e7eb',
-                              background: val === v ? (v ? '#f0fdf4' : '#fef2f2') : 'white',
-                              color: val === v ? (v ? '#16a34a' : '#dc2626') : '#6b7280',
+                              borderColor: val === v ? (v ? '#22c55e' : '#ef4444') : 'var(--color-border)',
+                              background: val === v ? (v ? 'rgba(34,197,94,0.14)' : 'rgba(239,68,68,0.14)') : 'white',
+                              color: val === v ? (v ? '#16a34a' : '#dc2626') : 'var(--color-muted)',
                             }}>
                             {v ? tCommon('yes') : tCommon('no')}
                           </button>
@@ -563,7 +723,7 @@ export function BodyMapContent() {
                 })}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   {t('step4.notes')} <span className="text-gray-400 font-normal">({t('step4.notesOptional')})</span>
                 </label>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)}
@@ -588,7 +748,7 @@ export function BodyMapContent() {
 
           {step === 5 && (
             <div>
-              <h2 className="font-semibold text-gray-900 mb-4">{t('step5.heading')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('step5.heading')}</h2>
               <div className="space-y-3 text-sm">
                 <SummaryRow label={t('step5.affectedAreas')}>
                   <div className="flex flex-wrap gap-1 justify-end">
@@ -625,6 +785,43 @@ export function BodyMapContent() {
                   </SummaryRow>
                 )}
               </div>
+
+              {/* AI initial diagnosis — demo only */}
+              <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={getAiDiagnosis}
+                  disabled={aiLoading}
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-white font-semibold text-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60"
+                  style={{ background: 'var(--color-primary)' }}
+                >
+                  {aiLoading ? 'Analyzing...' : 'Get AI Initial Assessment'}
+                </button>
+                {aiError && (
+                  <p className="text-sm text-red-600 mt-2">{aiError}</p>
+                )}
+                {aiResult && (
+                  <div className="mt-3 p-4 rounded-2xl border bg-amber-50 border-amber-200 text-sm">
+                    <p className="text-xs text-amber-700 font-medium mb-2 uppercase tracking-wide">
+                      AI Triage Suggestion — Not a Diagnosis
+                    </p>
+                    <div className="space-y-2 text-gray-800">
+                      <p><span className="font-semibold">Possible causes:</span> {aiResult.possibleDiagnoses.join(', ')}</p>
+                      <p><span className="font-semibold">Urgency:</span>{' '}
+                        <span
+                          className="capitalize font-semibold"
+                          style={{ color: { low: '#22c55e', medium: '#f59e0b', high: '#ef4444' }[aiResult.urgency] }}
+                        >
+                          {aiResult.urgency}
+                        </span>
+                      </p>
+                      <p><span className="font-semibold">Advice:</span> {aiResult.advice}</p>
+                    </div>
+                    <p className="text-xs text-amber-700 mt-3">{aiResult.disclaimer}</p>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-between mt-6">
                 <button onClick={() => setStep(4)} className="btn-secondary">{t('buttons.edit')}</button>
                 <button onClick={handleSubmit} disabled={submitting} className="btn-primary">
@@ -819,6 +1016,30 @@ export function BodyMapContent() {
                             <div>
                               <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-muted)' }}>{t('step5.notes')}</p>
                               <p className="text-xs" style={{ color: 'var(--color-heading)' }}>{rec.notes}</p>
+                            </div>
+                          )}
+
+                          {/* AI initial diagnosis */}
+                          {rec.aiDiagnosis && (
+                            <div className="p-3 rounded-xl border bg-amber-50 border-amber-200 text-xs">
+                              <p className="text-[10px] text-amber-700 font-semibold mb-1.5 uppercase tracking-wide">
+                                AI Triage Suggestion — Not a Diagnosis
+                              </p>
+                              <div className="space-y-1.5 text-gray-800">
+                                <p><span className="font-semibold">Possible causes:</span> {rec.aiDiagnosis.possibleDiagnoses.join(', ')}</p>
+                                <p><span className="font-semibold">Urgency:</span>{' '}
+                                  <span
+                                    className="capitalize font-semibold"
+                                    style={{ color: { low: '#22c55e', medium: '#f59e0b', high: '#ef4444' }[rec.aiDiagnosis.urgency] }}
+                                  >
+                                    {rec.aiDiagnosis.urgency}
+                                  </span>
+                                </p>
+                                <p><span className="font-semibold">Advice:</span> {rec.aiDiagnosis.advice}</p>
+                              </div>
+                              {rec.aiDiagnosis.disclaimer && (
+                                <p className="text-[10px] text-amber-700 mt-1.5">{rec.aiDiagnosis.disclaimer}</p>
+                              )}
                             </div>
                           )}
                         </div>

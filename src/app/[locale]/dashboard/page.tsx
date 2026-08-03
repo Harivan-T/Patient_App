@@ -1,10 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { AppShell } from '@/components/layout/AppShell';
-import { BodyMapContent } from '@/components/bodymap/BodyMapContent';
+import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { SkeletonCards } from '@/components/ui/Skeleton';
+import { ExternalLinkIcon } from '@/components/ui/icons';
 import type { DailyInsight } from '@/app/api/daily-insights/route';
+
+// Lazy — the body map (largest component in the app) only loads if the
+// "My Doctor" tab is actually opened.
+const BodyMapContent = dynamic(
+  () => import('@/components/bodymap/BodyMapContent').then((m) => m.BodyMapContent),
+  { ssr: false, loading: () => <PageLoader /> },
+);
 
 type Tab      = 'updates' | 'mydoctor';
 type Category = 'health' | 'food' | 'sports';
@@ -35,7 +46,7 @@ function InsightCard({
         <div className="px-5 py-4 flex flex-col gap-2">
           {item.image_url && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.image_url} alt="" className="w-full h-36 object-cover rounded-lg" />
+            <img src={item.image_url} alt="" loading="lazy" decoding="async" className="w-full h-36 object-cover rounded-lg" />
           )}
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-snug">{item.title}</p>
           {item.snippet && (
@@ -50,9 +61,7 @@ function InsightCard({
               className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
             >
               {readLabel}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <ExternalLinkIcon />
             </a>
           </div>
         </div>
@@ -83,17 +92,11 @@ function DailyInsightsWidget({ locale }: { locale: string }) {
   }, [locale]);
 
   if (loading) {
-    return (
-      <div className="flex flex-col gap-4">
-        {sections.map(({ key }) => (
-          <div key={key} className="card h-32 animate-pulse bg-gray-100 dark:bg-slate-700" />
-        ))}
-      </div>
-    );
+    return <SkeletonCards count={3} cardClassName="h-24" />;
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 stagger-children">
       {sections.map(({ key, label, emoji }) => (
         <InsightCard
           key={key}
@@ -119,21 +122,14 @@ export default function DashboardPage({ params }: { params: { locale: string } }
       <div className="max-w-2xl mx-auto">
         {/* Tab nav */}
         <div className="sticky z-30 pb-4" style={{ top: 'var(--inner-nav-top)' }}>
-          <div className="seg-toggle">
-            {(['updates', 'mydoctor'] as Tab[]).map((id) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                  tab === id
-                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                {id === 'updates' ? t('updates') : t('myDoctor')}
-              </button>
-            ))}
-          </div>
+          <SegmentedTabs
+            tabs={[
+              { id: 'updates' as Tab, label: t('updates') },
+              { id: 'mydoctor' as Tab, label: t('myDoctor') },
+            ]}
+            active={tab}
+            onChange={setTab}
+          />
         </div>
 
         {tab === 'updates' && (

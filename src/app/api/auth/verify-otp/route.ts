@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { verifyOtpCookie, signToken, buildTokenCookie, buildClearOtpCookie } from '@/lib/auth';
+import { rateLimit } from '@/lib/rateLimit';
 
 const schema = z.object({
   patientId: z.string().min(1),
@@ -18,16 +19,26 @@ export async function POST(req: NextRequest) {
 
     const { patientId, phone, otp } = parsed.data;
 
+    // 10 verify attempts per patient per 5 minutes (the OTP TTL)
+    if (!rateLimit(`verify-otp:${patientId}`, 10, 5 * 60 * 1000)) {
+      return NextResponse.json({ error: 'tooManyAttempts' }, { status: 429 });
+    }
+
     const otpToken = req.cookies.get('hp_otp')?.value;
     if (!otpToken) {
       return NextResponse.json({ error: 'otpExpired' }, { status: 401 });
     }
 
-    const result = await verifyOtpCookie(otpToken, patientId, phone, otp);
+    const { status, retryCookie } = await verifyOtpCookie(otpToken, patientId, phone, otp);
 
-    if (result === 'expired')   return NextResponse.json({ error: 'otpExpired' },      { status: 401 });
-    if (result === 'too_many')  return NextResponse.json({ error: 'tooManyAttempts' }, { status: 429 });
-    if (result === 'invalid')   return NextResponse.json({ error: 'invalidOtp' },      { status: 401 });
+    if (status === 'expired')  return NextResponse.json({ error: 'otpExpired' },      { status: 401 });
+    if (status === 'too_many') return NextResponse.json({ error: 'tooManyAttempts' }, { status: 429 });
+    if (status === 'invalid') {
+      const res = NextResponse.json({ error: 'invalidOtp' }, { status: 401 });
+      // Persist the incremented attempts counter so the 5-attempt cap holds
+      if (retryCookie) res.headers.set('Set-Cookie', retryCookie);
+      return res;
+    }
 
     const token = await signToken({ patientId, phone });
     const res = NextResponse.json({ success: true });

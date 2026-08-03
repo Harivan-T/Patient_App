@@ -10,6 +10,10 @@ const intlMiddleware = createMiddleware({
 
 const PUBLIC_PATHS = ['/login', '/splash'];
 
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production — refusing to start with the built-in dev secret.');
+}
+
 // Uses Web Crypto API (Edge Runtime compatible) instead of jose, which pulls
 // in CompressionStream — a Node.js API unavailable in Edge Runtime.
 async function isValidToken(token: string): Promise<boolean> {
